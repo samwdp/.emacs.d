@@ -44,24 +44,6 @@
 
 (require 'use-package)
 (setq use-package-always-ensure t)
-(defun +default/search-project (&optional arg)
-  "Conduct a text search in the current project root.
-	  If prefix ARG is set, prompt for a known project to search from."
-  (interactive "P")
-  (let* ((projectile-project-root nil)
-	 (disabled-command-function nil)
-	 (current-prefix-arg nil)
-	 (default-directory
-	   (if arg
-	       (if-let (projects (projectile-relevant-known-projects))
-		   (completing-read "Search project: " projects nil t)
-		 (user-error "There are no known projects"))
-	     default-directory)))
-    (call-interactively
-     (cond ((featurep! :completion ivy)  #'+ivy/project-search)
-	   ((featurep! :completion helm) #'+helm/project-search)
-	   (#'projectile-ripgrep)))))
-
 (defun +company/complete ()
   "Bring up the completion popup. If only one result, complete it."
   (interactive)
@@ -84,18 +66,6 @@
 	(pos (posframe-poshandler-frame-center info)))
     (cons (car pos)
 	  (truncate (/ (frame-pixel-height parent-frame) 2)))))
-
-(defun +company/complete ()
-  "Bring up the completion popup. If only one result, complete it."
-  (interactive)
-  (require 'company)
-  (when (ignore-errors
-	  (/= (point)
-	      (cdr (bounds-of-thing-at-point 'symbol))))
-    (save-excursion (insert " ")))
-  (when (and (company-manual-begin)
-	     (= company-candidates-length 1))
-    (company-complete-common)))
 (use-package gcmh
   :ensure t
   :init
@@ -389,28 +359,35 @@
 (use-package evil-org
   :after org
   :hook ((org-mode . evil-org-mode)
-	 (org-agenda-mode . evil-org-mode)
-	 (evil-org-mode . (lambda () (evil-org-set-key-theme '(navigation todo insert textobjects additional)))))
+         (org-agenda-mode . evil-org-mode)
+         (evil-org-mode . (lambda () (evil-org-set-key-theme '(navigation todo insert textobjects additional)))))
   :config
   (require 'evil-org-agenda)
   (evil-org-agenda-set-keys))
 
 (use-package org-superstar
-  :hook (org-mode . org-superstar-mode)
   :init
+  (add-hook 'org-mode-hook 'org-superstar-mode)
   :config
   (setq org-superstar-leading-bullet ?\s
-	org-superstar-loading-fallback ?\s
-	org-hide-leading-stars nil
-	org-superstar-todo-bullet-alist
-	'(("TODO" . 9744)
-	  ("[ ]"  . 9744)
-	  ("DONE" . 9745)
-	  ("[X]"  . 9754))))
+        org-superstar-loading-fallback ?\s
+        org-hide-leading-stars nil
+        org-superstar-todo-bullet-alist
+        '(("TODO" . 9744)
+          ("[ ]"  . 9744)
+          ("DONE" . 9745)
+          ("[X]"  . 9754))))
 
 (use-package org-fancy-priorities ; priority icons
   :hook (org-mode . org-fancy-priorities-mode)
   :config (setq org-fancy-priorities-list '("⚑" "⬆" "■")))
+
+(use-package toc-org
+  :ensure t
+  :commands toc-org-enable
+  :init (add-hook 'org-mode-hook 'toc-org-enable))
+
+(add-hook 'org-mode-hook 'org-indent-mode)
 (use-package hl-todo
   :hook (prog-mode . hl-todo-mode)
   :config
