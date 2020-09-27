@@ -25,7 +25,7 @@
 (column-number-mode)
 (global-display-line-numbers-mode t)
 (setq display-line-numbers 'relative)
-(set-face-attribute 'default nil :font "Fira Code Nerd Font" :height 120)
+(set-face-attribute 'default nil :font (font-spec :family "Fira Code Nerd Font" :size 14))
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 (global-set-key (kbd "C-;") 'comment-line)
 (require 'package)

@@ -43,7 +43,7 @@
    #+END_SRC
 *** Font
    #+BEGIN_SRC emacs-lisp
-   (set-face-attribute 'default nil :font "Fira Code Nerd Font" :height 120)
+     (set-face-attribute 'default nil :font (font-spec :family "Fira Code Nerd Font" :size 14))
    #+END_SRC
 *** Global keybinds
    #+BEGIN_SRC emacs-lisp
