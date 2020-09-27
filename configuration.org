@@ -115,13 +115,13 @@
        "Bring up the completion popup. If only one result, complete it."
        (interactive)
        (require 'company)
-       (when (ignore-errors
-	       (/= (point)
-		   (cdr (bounds-of-thing-at-point 'symbol))))
-	 (save-excursion (insert " ")))
-       (when (and (company-manual-begin)
-		  (= company-candidates-length 1))
-	 (company-complete-common)))
+       (when (ignore-errors)
+         (/= (point)
+             (cdr (bounds-of-thing-at-point 'symbol)))
+         (save-excursion (insert " ")))
+       (when (and (company-manual-begin))
+            (= company-candidates-length 1)
+         (company-complete-common)))
 
      (defun +ivy-display-at-frame-center-near-bottom-fn (str)
        "TODO"
@@ -130,9 +130,9 @@
      (defun +ivy-poshandler-frame-center-near-bottom-fn (info)
        "TODO"
        (let ((parent-frame (plist-get info :parent-frame))
-	     (pos (posframe-poshandler-frame-center info)))
-	 (cons (car pos)
-	       (truncate (/ (frame-pixel-height parent-frame) 2)))))
+             (pos (posframe-poshandler-frame-center info)))
+         (cons (car pos)
+               (truncate (/ (frame-pixel-height parent-frame) 2)))))
    #+END_SRC
 ** Packages
 *** Garbage Collection
@@ -237,8 +237,9 @@ using the package general to configure custom keybinds
    #+END_SRC
 *** Themes
    #+BEGIN_SRC emacs-lisp
+     (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
      (use-package doom-themes
-       :init (load-theme 'doom-gruvbox t))
+       :init (load-theme 'my-doom-gruvbox t))
    #+END_SRC
 *** Useful Packages
    #+BEGIN_SRC emacs-lisp

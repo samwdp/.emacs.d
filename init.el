@@ -48,12 +48,12 @@
   "Bring up the completion popup. If only one result, complete it."
   (interactive)
   (require 'company)
-  (when (ignore-errors
-	  (/= (point)
-	      (cdr (bounds-of-thing-at-point 'symbol))))
+  (when (ignore-errors)
+    (/= (point)
+        (cdr (bounds-of-thing-at-point 'symbol)))
     (save-excursion (insert " ")))
-  (when (and (company-manual-begin)
-	     (= company-candidates-length 1))
+  (when (and (company-manual-begin))
+       (= company-candidates-length 1)
     (company-complete-common)))
 
 (defun +ivy-display-at-frame-center-near-bottom-fn (str)
@@ -63,9 +63,9 @@
 (defun +ivy-poshandler-frame-center-near-bottom-fn (info)
   "TODO"
   (let ((parent-frame (plist-get info :parent-frame))
-	(pos (posframe-poshandler-frame-center info)))
+        (pos (posframe-poshandler-frame-center info)))
     (cons (car pos)
-	  (truncate (/ (frame-pixel-height parent-frame) 2)))))
+          (truncate (/ (frame-pixel-height parent-frame) 2)))))
 (use-package gcmh
   :ensure t
   :init
@@ -153,8 +153,9 @@
   :after evil
   :config
   (evil-collection-init))
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 (use-package doom-themes
-  :init (load-theme 'doom-gruvbox t))
+  :init (load-theme 'my-doom-gruvbox t))
 (use-package diminish)
 (use-package swiper)
 (use-package counsel
