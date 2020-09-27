@@ -29,32 +29,21 @@
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 (global-set-key (kbd "C-;") 'comment-line)
 (require 'package)
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-	(url-retrieve-synchronously
-	 "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-	 'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
 
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")("org" . "https://orgmode.org/elpa/")("elpa" . "https://elpa.gnu.org/packages/")))
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+			 ("org" . "https://orgmode.org/elpa/")
+			 ("elpa" . "https://elpa.gnu.org/packages/")))
 
 (package-initialize)
 (unless package-archive-contents
-(package-refresh-contents))
+ (package-refresh-contents))
 
+;; Initialize use-package on non-Linux platforms
 (unless (package-installed-p 'use-package)
-(package-install 'use-package))
+   (package-install 'use-package))
 
-(straight-use-package 'use-package)
-(setq straight-use-package-by-default t)
-;; (require 'use-package)
-;; (setq use-package-always-ensure t)
+(require 'use-package)
+(setq use-package-always-ensure t)
 (defun +default/search-project (&optional arg)
   "Conduct a text search in the current project root.
 	  If prefix ARG is set, prompt for a known project to search from."
@@ -107,6 +96,27 @@
   (when (and (company-manual-begin)
 	     (= company-candidates-length 1))
     (company-complete-common)))
+(use-package gcmh
+  :ensure t
+  :init
+  (gcmh-mode 1))
+
+(use-package system-packages
+  :ensure t
+  :custom
+  (system-packages-noconfirm t))
+
+(use-package use-package-ensure-system-package :ensure t)
+(use-package quelpa
+  :ensure t
+  :defer t
+  :custom
+  (quelpa-update-melpa-p nil "Don't update the MELPA git repo."))
+
+(use-package quelpa-use-package
+  :init
+  (setq quelpa-use-package-inhibit-loading-quelpa t)
+  :ensure t)
 (use-package general
   :config
   (general-create-definer sp/leader-keys
@@ -143,7 +153,7 @@
     ;; Files
     "ff" '(counsel-find-file :which-key "Find Files")
     "fd" '(directory-search :which-key "Find directory")
-    "fc" '((lambda() (interactive)(counsel-find-file "~/.config/emacs")) :which-key "Private config")
+    "fc" '((lambda() (interactive)(counsel-find-file "~/.emacs.d")) :which-key "Private config")
     ;; Modes
     ;; Insert
     "is" '(yas-insert-snippet :which-key "Snippet")
@@ -425,7 +435,7 @@
 	  ;; For a known bug that needs a workaround
 	  ("BUG" error bold)
 	  ;; For warning about a problematic or misguiding code
-	  ("XXX" font-lock-constant-face bold)))
+	  ("XXX" font-lock-constant-face bold))))
 (use-package csharp-mode
   :hook ((csharp-mode . rainbow-delimiters-mode))
    (csharp-mode . lsp)
@@ -437,9 +447,3 @@
   (sp-local-pair 'csharp-mode "<" ">"
 		 :when '(+csharp-sp-point-in-type-p)
 		 :post-handlers '(("| " "SPC"))))
-(use-package ob-csharp
-  :straight (ob-csharp :type git :host github :repo "samwdp/ob-csharp"))
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((csharp . t)))
-Console.WriteLine("Hello");

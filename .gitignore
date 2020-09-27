@@ -1,10 +1,11 @@
 .#*
 \#*\#
 *~
+.cache/
 url/
 elpa/
 snippets/
-straight/
+quelpa/
 saveplace
 ido.last
 ac-comphist.dat
