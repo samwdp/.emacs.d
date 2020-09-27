@@ -158,11 +158,11 @@
 (use-package diminish)
 (use-package swiper)
 (use-package counsel
-       :bind (("M-x" . counsel-M-x)
-	      ("C-x b" . counsel-ibuffer)
-	      ("C-x C-f" . counsel-find-file)
-	      :map minibuffer-local-map
-	      ("C-r" . 'counsel-minibuffer-history)))
+  :bind (("M-x" . counsel-M-x)
+         ("C-x b" . counsel-ibuffer)
+         ("C-x C-f" . counsel-find-file)
+         :map minibuffer-local-map
+         ("C-r" . 'counsel-minibuffer-history)))
 (use-package counsel-projectile
   :config (counsel-projectile-mode))
 (use-package ivy
@@ -424,3 +424,62 @@
   (sp-local-pair 'csharp-mode "<" ">"
 		 :when '(+csharp-sp-point-in-type-p)
 		 :post-handlers '(("| " "SPC"))))
+(use-package web-mode
+  :mode 
+  (("\\.phtml\\'" . web-mode)
+   ("\\.tpl\\.php\\'" . web-mode)      
+   ("\\.jsp\\'" . web-mode)            
+   ("\\.as[cp]x\\'" . web-mode)        
+   ("\\.erb\\'" . web-mode)            
+   ("\\.mustache\\'" . web-mode)       
+   ("\\.djhtml\\'" . web-mode)         
+   ("\\.jst.ejs\\'" . web-mode)        
+   ("\\.html?\\'" . web-mode))
+  :init
+  (setq web-mode-enable-block-face t)
+  (setq web-mode-enable-comment-keywords t)
+  (setq web-mode-enable-current-element-highlight t)
+  (setq web-mode-enable-current-column-highlight t)   
+  (setq web-mode-script-padding 2)
+  (setq web-mode-style-padding 2)
+  (setq web-mode-comment-style 2)
+  (setq web-mode-code-indent-offset 2)
+  (setq web-mode-markup-indent-offset 2)
+  (setq css-indent-level 2
+        css-indent-offset 2))
+(use-package js2-mode
+  :mode "\\.m?js\\'"
+  :interpreter "node"
+  :commands js2-line-break
+  :hook (js2-mode . lsp)
+  :config
+  (setq js-chain-indent t
+        ;; Don't mishighlight shebang lines
+        js2-skip-preprocessor-directives t
+        ;; let flycheck handle this
+        js2-mode-show-parse-errors nil
+        js2-mode-show-strict-warnings nil
+        ;; Flycheck provides these features, so disable them: conflicting with
+        ;; the eslint settings.
+        js2-strict-trailing-comma-warning nil
+        js2-strict-missing-semi-warning nil
+        ;; maximum fontification
+        js2-highlight-level 3
+        js2-highlight-external-variables t
+        js2-idle-timer-delay 0.1)
+
+  (add-hook 'js2-mode-hook #'rainbow-delimiters-mode)
+  ;; Indent switch-case another step
+  (setq-hook 'js2-mode-hook
+             js-switch-indent-offset js2-basic-offset
+             mode-name "JS2"))
+(use-package json-mode
+  :mode "\\.js\\(?:on\\|[hl]int\\(?:rc\\)?\\)\\'"
+  :init
+  (add-hook 'json-mode-local-vars-hook-hook 'lsp))
+(use-package yaml-mode
+  :mode "Procfile\\'"
+  :init
+  :hook (yaml-mode-local-vars-hook . lsp)
+  :config
+  (setq-hook 'yaml-mode-hook tab-width yaml-indent-offset))
