@@ -1,0 +1,558 @@
+#+TITLE: Emacs Configuration
+#+LANGUAGE: en
+#+STARTUP: inlineimages
+#+PROPERTY: header-args :tangle ./init.el :cache yes :results silent :padline no
+
+* Runemacs
+** Table of Contents :toc:
+** Configuration
+*** Startup
+    #+BEGIN_SRC emacs-lisp
+      ;; The default is 800 kilobytes.  Measured in bytes.
+      (setq gc-cons-threshold (* 50 1000 1000))
+
+      ;; Profile emacs startup
+      (add-hook 'emacs-startup-hook
+		(lambda ()
+		  (message "*** Emacs loaded in %s with %d garbage collections."
+			   (format "%.2f seconds"
+				   (float-time
+				    (time-subtract after-init-time before-init-time)))
+			   gcs-done)))
+    #+END_SRC
+
+*** Basic
+    Starting options to turn off
+   #+BEGIN_SRC emacs-lisp
+   (setq inhibit-startup-message t)
+   (setq make-backup-files nil)
+   (set-language-environment "UTF-8")
+   (set-default-coding-systems 'utf-8)
+
+   (scroll-bar-mode -1)
+   (tool-bar-mode -1)
+   (tooltip-mode -1)
+   (set-fringe-mode 10)
+   (menu-bar-mode -1)
+
+   (setq visible-bell t)
+   ;; Line numbers
+   (column-number-mode)
+   (global-display-line-numbers-mode t)
+   (setq display-line-numbers 'relative)
+   #+END_SRC
+*** Font
+   #+BEGIN_SRC emacs-lisp
+   (set-face-attribute 'default nil :font "Fira Code Nerd Font" :height 120)
+   #+END_SRC
+*** Global keybinds
+   #+BEGIN_SRC emacs-lisp
+   (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+   (global-set-key (kbd "C-;") 'comment-line)
+   #+END_SRC
+*** Package management loading
+   #+BEGIN_SRC emacs-lisp
+     (require 'package)
+     (defvar bootstrap-version)
+     (let ((bootstrap-file
+	    (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+	   (bootstrap-version 5))
+       (unless (file-exists-p bootstrap-file)
+	 (with-current-buffer
+	     (url-retrieve-synchronously
+	      "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+	      'silent 'inhibit-cookies)
+	   (goto-char (point-max))
+	   (eval-print-last-sexp)))
+       (load bootstrap-file nil 'nomessage))
+
+     (setq package-archives '(("melpa" . "https://melpa.org/packages/")("org" . "https://orgmode.org/elpa/")("elpa" . "https://elpa.gnu.org/packages/")))
+
+     (package-initialize)
+     (unless package-archive-contents
+     (package-refresh-contents))
+
+     (unless (package-installed-p 'use-package)
+     (package-install 'use-package))
+
+     (straight-use-package 'use-package)
+     (setq straight-use-package-by-default t)
+     ;; (require 'use-package)
+     ;; (setq use-package-always-ensure t)
+   #+END_SRC
+** Functions
+   #+BEGIN_SRC emacs-lisp
+     (defun +default/search-project (&optional arg)
+       "Conduct a text search in the current project root.
+	       If prefix ARG is set, prompt for a known project to search from."
+       (interactive "P")
+       (let* ((projectile-project-root nil)
+	      (disabled-command-function nil)
+	      (current-prefix-arg nil)
+	      (default-directory
+		(if arg
+		    (if-let (projects (projectile-relevant-known-projects))
+			(completing-read "Search project: " projects nil t)
+		      (user-error "There are no known projects"))
+		  default-directory)))
+	 (call-interactively
+	  (cond ((featurep! :completion ivy)  #'+ivy/project-search)
+		((featurep! :completion helm) #'+helm/project-search)
+		(#'projectile-ripgrep)))))
+
+     (defun +company/complete ()
+       "Bring up the completion popup. If only one result, complete it."
+       (interactive)
+       (require 'company)
+       (when (ignore-errors
+	       (/= (point)
+		   (cdr (bounds-of-thing-at-point 'symbol))))
+	 (save-excursion (insert " ")))
+       (when (and (company-manual-begin)
+		  (= company-candidates-length 1))
+	 (company-complete-common)))
+
+     (defun +ivy-display-at-frame-center-near-bottom-fn (str)
+       "TODO"
+       (ivy-posframe--display str #'+ivy-poshandler-frame-center-near-bottom-fn))
+
+     (defun +ivy-poshandler-frame-center-near-bottom-fn (info)
+       "TODO"
+       (let ((parent-frame (plist-get info :parent-frame))
+	     (pos (posframe-poshandler-frame-center info)))
+	 (cons (car pos)
+	       (truncate (/ (frame-pixel-height parent-frame) 2)))))
+
+     (defun +company/complete ()
+       "Bring up the completion popup. If only one result, complete it."
+       (interactive)
+       (require 'company)
+       (when (ignore-errors
+	       (/= (point)
+		   (cdr (bounds-of-thing-at-point 'symbol))))
+	 (save-excursion (insert " ")))
+       (when (and (company-manual-begin)
+		  (= company-candidates-length 1))
+	 (company-complete-common)))
+
+   #+END_SRC
+** Packages
+*** General Keybinding
+using the package general to configure custom keybinds
+   #+BEGIN_SRC emacs-lisp
+      (use-package general
+	:config
+	(general-create-definer sp/leader-keys
+	  :keymaps '(normal insert visual emacs)
+	  :prefix "SPC"
+	  :global-prefix "C-SPC")
+
+	(sp/leader-keys
+	  "SPC" '(projectile-find-file :which-key "find file")
+	  "," '(switch-to-buffer :which-key "switch buffer")
+	  "a"  '(:ignore t :which-key "applications")
+	  "b"  '(:ignore t :which-key "buffers")
+	  "f"  '(:ignore t :which-key "files")
+	  "m"  '(:ignore t :which-key "mode")
+	  "i"  '(:ignore t :which-key "insert")
+	  "s"  '(:ignore t :which-key "search")
+	  "t"  '(:ignore t :which-key "toggles")
+	  ;; Applicaitons
+	  "bj" '(switch-to-next-buffer :which-key "switch to next buffer")
+	  "bk" '(switch-to-prev-buffer :which-key "switch to previous buffer")
+	  "bd" '(kill-current-buffer :which-key "Kill buffer")
+	  "bi" '(ibuffer :which-key "ibuffer")
+	  "bk" '(kill-current-buffer :which-key "Kill buffer")
+	  "bl" '(evil-switch-to-windows-last-buffer :which-key "Switch to last buffer")
+	  "bm" '(bookmark-set :which-key "Set bookmark")
+	  "bM" '(bookmark-delete :which-key "Delete bookmark")
+	  "bn" '(next-buffer :which-key "Next buffer")
+	  "bN" '(evil-buffer-new :which-key "New empty buffer")
+	  "bp" '(previous-buffer :which-key "Previous buffer")
+	  "br" '(revert-buffer :which-key "Revert buffer")
+	  "bs" '(basic-save-buffer :which-key "Save buffer")
+	  "bS" '(evil-write-all :which-key "Save all buffers")
+	  "bz" '(bury-buffer :which-key "Bury buffer")
+	  ;; Files
+	  "ff" '(counsel-find-file :which-key "Find Files")
+	  "fd" '(directory-search :which-key "Find directory")
+	  "fc" '((lambda() (interactive)(counsel-find-file "~/.config/emacs")) :which-key "Private config")
+	  ;; Modes
+	  ;; Insert
+	  "is" '(yas-insert-snippet :which-key "Snippet")
+	  ;; Search
+	  "sp" '(counsel-rg :which-key "search pattern")
+	  ;; Toggles
+	  "tp" '(parinfer-toggle-mode :which-key "Parinfer")))
+   #+END_SRC
+*** Evil
+   #+BEGIN_SRC emacs-lisp
+     (use-package evil
+       :init
+       (setq evil-want-integration t)
+       (setq evil-want-keybinding nil)
+       (setq evil-want-C-u-scroll t)
+       (setq evil-want-C-i-jump nil)
+       :config
+       (evil-mode 1)
+       (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+       (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+
+       ;; Use visual line motions even outside of visual-line-mode buffers
+       (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+       (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+
+       (evil-set-initial-state 'messages-buffer-mode 'normal)
+       (evil-set-initial-state 'dashboard-mode 'normal))
+
+     (use-package evil-collection
+       :after evil
+       :config
+       (evil-collection-init))
+   #+END_SRC
+*** Themes
+   #+BEGIN_SRC emacs-lisp
+     (use-package doom-themes
+       :init (load-theme 'doom-gruvbox t))
+   #+END_SRC
+*** Useful Packages
+   #+BEGIN_SRC emacs-lisp
+     (use-package diminish)
+     (use-package swiper)
+   #+END_SRC
+*** Counsel
+   #+BEGIN_SRC emacs-lisp
+	  (use-package counsel
+	    :bind (("M-x" . counsel-M-x)
+		   ("C-x b" . counsel-ibuffer)
+		   ("C-x C-f" . counsel-find-file)
+		   :map minibuffer-local-map
+		   ("C-r" . 'counsel-minibuffer-history)))
+     (use-package counsel-projectile
+       :config (counsel-projectile-mode))
+   #+END_SRC
+*** Ivy
+   #+BEGIN_SRC emacs-lisp
+     (use-package ivy
+       :diminish
+       :bind (("C-s" . swiper)
+	   :map ivy-minibuffer-map
+	   ("TAB" . ivy-alt-done)
+	   ("C-l" . ivy-alt-done)
+	   ("C-j" . ivy-next-line)
+	   ("C-k" . ivy-previous-line)
+	   :map ivy-switch-buffer-map
+	   ("C-k" . ivy-previous-line)
+	   ("C-l" . ivy-done)
+	   ("C-d" . ivy-switch-buffer-kill)
+	   :map ivy-reverse-i-search-map
+	   ("C-k" . ivy-previous-line)
+	   ("C-d" . ivy-reverse-i-search-kill))
+       :config
+       (ivy-mode 1))
+
+     (use-package ivy-posframe
+       :after ivy
+       :ensure t
+       :diminish
+       :config
+       (setq ivy-fixed-height-minibuffer nil
+	     ivy-posframe-border-width 10
+	     ivy-posframe-parameters
+	     `((min-width . 90)
+	       (min-height . ,ivy-height)))
+       (setf (alist-get t ivy-posframe-display-functions-alist)
+	     #'+ivy-display-at-frame-center-near-bottom-fn)
+
+       (ivy-posframe-mode 1))
+
+     (use-package ivy-rich
+       :init
+       (ivy-rich-mode 1))
+   #+END_SRC
+*** Icons
+   #+BEGIN_SRC emacs-lisp
+     (use-package all-the-icons)
+
+     (use-package all-the-icons-ivy
+       :after (all-the-icons ivy)
+       :config
+       (all-the-icons-ivy-setup))
+   #+END_SRC
+*** Modeline
+   #+BEGIN_SRC emacs-lisp
+     (use-package doom-modeline
+       :ensure t
+       :hook (doom-modeline-mode . size-indication-mode) ; filesize in modeline
+       :init (doom-modeline-mode 1))
+   #+END_SRC
+*** Whichkey
+   #+BEGIN_SRC emacs-lisp
+     (use-package which-key
+       :init (which-key-mode)
+       :diminish which-key-mode
+       :config
+       (setq which-key-idle-delay 0.))
+   #+END_SRC
+*** RAINBOWS!
+   #+BEGIN_SRC emacs-lisp
+     (use-package rainbow-delimiters
+       :hook (prog-mode . rainbow-delimiters-mode))
+     (use-package rainbow-mode
+       :defer t
+       :hook (org-mode
+	      emacs-lisp-mode
+	      web-mode
+	      typescript-mode
+	      js2-mode))
+   #+END_SRC
+*** Helpful
+   #+BEGIN_SRC emacs-lisp
+     (use-package helpful
+       :custom
+       (counsel-describe-function-function #'helpful-callable)
+       (counsel-describe-variable-function #'helpful-variable)
+       :bind
+       ([remap describe-function] . counsel-describe-function)
+       ([remap describe-command] . helpful-command)
+       ([remap describe-variable] . counsel-describe-variable)
+       ([remap describe-key] . helpful-key))
+   #+END_SRC
+*** Company
+   #+BEGIN_SRC emacs-lisp
+     (use-package company
+       :ensure t
+       :commands company-complete-common company-manual-begin company-grab-line
+       :defer t
+       :init (global-company-mode)
+       :config
+       (global-set-key (kbd "C-.") '+company/complete)
+       (define-key company-active-map (kbd "RET") 'company-complete-selection)
+       (define-key company-active-map (kbd "<return>") 'company-complete-selection)
+       (define-key company-active-map (kbd "TAB") 'company-select-next)
+       (define-key company-active-map (kbd "<tab>") 'company-select-next)
+       (define-key company-active-map (kbd "<backtab>") 'company-select-previous)
+       (setq company-idle-delay 0.1)
+       company-minimum-prefix-length 2
+       company-tooltip-limit 14
+       company-tooltip-align-annotations t
+       company-require-match 'never
+       company-global-modes '(not erc-mode message-mode help-mode gud-mode)
+       company-frontends '(company-pseudo-tooltip-frontend
+			   company-echo-metadata-frontend)
+
+       ;; Buffer-local backends will be computed when loading a major mode, so
+       ;; only specify a global default here.
+       company-backends '(company-capf)
+
+       ;; These auto-complete the current selection when
+       ;; `company-auto-complete-chars' is typed. This is too magical. We
+       ;; already have the much more explicit RET and TAB.
+       company-auto-complete nil
+       company-auto-complete-chars nil
+
+       ;; Only search the current buffer for `company-dabbrev' (a backend that
+       ;; suggests text your open buffers). This prevents Company from causing
+       ;; lag once you have a lot of buffers open.
+       company-dabbrev-other-buffers nil
+       ;; Make `company-dabbrev' fully case-sensitive, to improve UX with
+       ;; domain-specific words with particular casing.
+       company-dabbrev-ignore-case nil
+       company-dabbrev-downcase nil
+       (progn
+	 ;; Use Company for completion
+	 (bind-key [remap completion-at-point] #'company-complete company-mode-map)
+
+	 (setq company-tooltip-align-annotations t
+	       ;; Easy navigation to candidates with M-<n>
+	       company-show-numbers t)
+	 (setq company-dabbrev-downcase nil))
+       :diminish company-mode
+       :hook (company-mode-hook . evil-normalize-keymaps))
+   #+END_SRC
+*** Hail Hydra
+   #+BEGIN_SRC emacs-lisp
+     (use-package hydra)
+
+     (defhydra hydra-text-scale (:timeout 4)
+       "scale text"
+       ("j" text-scale-increase "in")
+       ("k" text-scale-decrease "out")
+       ("f" nil "finished" :exit t))
+
+     (sp/leader-keys
+       "ts" '(hydra-text-scale/body :which-key "scale text"))
+   #+END_SRC
+*** Projectile
+   #+BEGIN_SRC emacs-lisp
+     (use-package projectile
+       :diminish projectile-mode
+       :config (projectile-mode)
+       :custom ((projectile-completion-system 'ivy))
+       :bind-keymap
+       ("C-c p" . projectile-command-map)
+       :init
+       ;; NOTE: Set this to the folder where you keep your Git repos!
+       (when (file-directory-p "~/Projects/Code")
+	 (setq projectile-project-search-path '("~/Projects/Code")))
+       (setq projectile-switch-project-action #'projectile-dired))
+   #+END_SRC
+*** Magit
+   #+BEGIN_SRC emacs-lisp
+     (use-package magit
+       :custom
+       (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+
+     (use-package evil-magit
+       :after magit)
+   #+END_SRC
+*** Forge
+   #+BEGIN_SRC emacs-lisp
+     (use-package forge)
+   #+END_SRC
+*** Parinfer
+   #+BEGIN_SRC emacs-lisp
+     (use-package parinfer
+       :hook ((emacs-lisp-mode
+	       clojure-mode
+	       scheme-mode
+	       lisp-mode
+	       racket-mode
+	       hy-mode) . parinfer-mode)
+       :ensure t
+       :init
+       (setq parinfer-extensions
+	     '(defaults
+		pretty-parens
+		smart-tab
+		smart-yank))
+       :config
+       (define-key parinfer-mode-map (kbd "\"") nil))
+   #+END_SRC
+*** LSP
+   #+BEGIN_SRC emacs-lisp
+     (use-package lsp-mode
+       :hook ((lsp-mode . lsp-enable-which-key-integration))
+       :bind (:map lsp-mode-map
+		   ("TAB" . completion-at-point))
+       :commands lsp)
+     (use-package lsp-ui :commands lsp-ui-mode)
+     (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+     (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+   #+END_SRC
+*** Yasnippet
+   #+BEGIN_SRC emacs-lisp
+     (use-package yasnippet
+       :hook ((text-mode-hook . yas-minor-mode-on)
+	      (prog-mode-hook . yas-minor-mode-on)
+	      (conf-mode-hook . yas-minor-mode-on)
+	      (snippet-mode-hook . yas-minor-mode-on))
+       :defer (eldoc easymenu help-mode)
+       :commands (yas-minor-mode-on
+		  yas-expand
+		  yas-expand-snippet
+		  yas-lookup-snippet
+		  yas-insert-snippet
+		  yas-new-snippet
+		  yas-visit-snippet-file)
+       :init
+       (yas-global-mode 1)
+       ;; Remove default ~/.emacs.d/snippets
+       (defvar yas-snippet-dirs nil))
+
+     (use-package yasnippet-snippets)
+   #+END_SRC
+*** Smartparens
+   #+BEGIN_SRC emacs-lisp
+     (use-package smartparens
+       :hook (prog-mode . smartparens-mode))
+   #+END_SRC
+*** Org
+   #+BEGIN_SRC emacs-lisp
+     (use-package evil-org
+       :after org
+       :hook ((org-mode . evil-org-mode)
+	      (org-agenda-mode . evil-org-mode)
+	      (evil-org-mode . (lambda () (evil-org-set-key-theme '(navigation todo insert textobjects additional)))))
+       :config
+       (require 'evil-org-agenda)
+       (evil-org-agenda-set-keys))
+
+     (use-package org-superstar
+       :hook (org-mode . org-superstar-mode)
+       :init
+       :config
+       (setq org-superstar-leading-bullet ?\s
+	     org-superstar-loading-fallback ?\s
+	     org-hide-leading-stars nil
+	     org-superstar-todo-bullet-alist
+	     '(("TODO" . 9744)
+	       ("[ ]"  . 9744)
+	       ("DONE" . 9745)
+	       ("[X]"  . 9754))))
+
+     (use-package org-fancy-priorities ; priority icons
+       :hook (org-mode . org-fancy-priorities-mode)
+       :config (setq org-fancy-priorities-list '("⚑" "⬆" "■")))
+    #+END_SRC
+*** Higlight TODO
+   #+BEGIN_SRC emacs-lisp
+     (use-package hl-todo
+       :hook (prog-mode . hl-todo-mode)
+       :config
+       (setq hl-todo-highlight-punctuation ":"
+	     hl-todo-keyword-faces
+	     `(;; For things that need to be done, just not today.
+	       ("TODO" warning bold)
+	       ;; For problems that will become bigger problems later if not
+	       ;; fixed ASAP.
+	       ("FIXME" error bold)
+	       ;; For tidbits that are unconventional and not intended uses of the
+	       ;; constituent parts, and may break in a future update.
+	       ("HACK" font-lock-constant-face bold)
+	       ;; For things that were done hastily and/or hasn't been thoroughly
+	       ;; tested. It may not even be necessary!
+	       ("REVIEW" font-lock-keyword-face bold)
+	       ;; For especially important gotchas with a given implementation,
+	       ;; directed at another user other than the author.
+	       ("NOTE" success bold)
+	       ;; For things that just gotta go and will soon be gone.
+	       ("DEPRECATED" font-lock-doc-face bold)
+	       ;; For a known bug that needs a workaround
+	       ("BUG" error bold)
+	       ;; For warning about a problematic or misguiding code
+	       ("XXX" font-lock-constant-face bold)))
+   #+END_SRC
+** Languages
+*** csharp
+**** csharp language
+   #+BEGIN_SRC emacs-lisp
+     (use-package csharp-mode
+       :hook ((csharp-mode . rainbow-delimiters-mode))
+	(csharp-mode . lsp)
+       :config
+       (set-electric! 'csharp-mode :chars '(?\n ?\}))
+       (set-rotate-patterns! 'csharp-mode
+	 :symbols '(("public" "protected" "private")
+		    ("class" "struct")))
+       (sp-local-pair 'csharp-mode "<" ">"
+		      :when '(+csharp-sp-point-in-type-p)
+		      :post-handlers '(("| " "SPC"))))
+
+   #+END_SRC
+**** babel
+     #+BEGIN_SRC emacs-lisp
+       (use-package ob-csharp
+	 :straight (ob-csharp :type git :host github :repo "samwdp/ob-csharp"))
+     #+END_SRC
+#+BEGIN_SRC csharp 
+  Console.WriteLine("Hello");
+#+END_SRC
+
+
+* Org-babel
+     #+BEGIN_SRC emacs-lisp
+       (org-babel-do-load-languages
+	'org-babel-load-languages
+	'((csharp . t)))
+     #+END_SRC
