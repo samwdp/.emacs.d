@@ -4,12 +4,42 @@
 #+PROPERTY: header-args :tangle ./init.el :cache yes :results silent :padline no
 
 * Runemacs
-** Table of Contents :toc:
+** Table of Contents :TOC_3:
 - [[#runemacs][Runemacs]]
   - [[#configuration][Configuration]]
+    - [[#startup][Startup]]
+    - [[#basic][Basic]]
+    - [[#font][Font]]
+    - [[#global-keybinds][Global keybinds]]
+    - [[#package-management-loading][Package management loading]]
   - [[#functions][Functions]]
   - [[#packages][Packages]]
+    - [[#garbage-collection][Garbage Collection]]
+    - [[#quelpa][Quelpa]]
+    - [[#general-keybinding][General Keybinding]]
+    - [[#evil][Evil]]
+    - [[#themes][Themes]]
+    - [[#useful-packages][Useful Packages]]
+    - [[#counsel][Counsel]]
+    - [[#ivy][Ivy]]
+    - [[#icons][Icons]]
+    - [[#modeline][Modeline]]
+    - [[#whichkey][Whichkey]]
+    - [[#rainbows][RAINBOWS!]]
+    - [[#helpful][Helpful]]
+    - [[#company][Company]]
+    - [[#hail-hydra][Hail Hydra]]
+    - [[#projectile][Projectile]]
+    - [[#magit][Magit]]
+    - [[#forge][Forge]]
+    - [[#parinfer][Parinfer]]
+    - [[#lsp][LSP]]
+    - [[#yasnippet][Yasnippet]]
+    - [[#smartparens][Smartparens]]
+    - [[#org][Org]]
+    - [[#higlight-todo][Higlight TODO]]
   - [[#languages][Languages]]
+    - [[#csharp][csharp]]
 
 ** Configuration
 *** Startup
