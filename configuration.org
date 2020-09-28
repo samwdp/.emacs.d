@@ -86,8 +86,8 @@
    #+END_SRC
 *** Global keybinds
    #+BEGIN_SRC emacs-lisp
-   (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-   (global-set-key (kbd "C-;") 'comment-line)
+     (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+     (global-set-key (kbd "C-;") 'comment-line)
    #+END_SRC
 *** Package management loading
    #+BEGIN_SRC emacs-lisp
@@ -361,11 +361,11 @@ using the package general to configure custom keybinds
        :defer t
        :init (global-company-mode)
        :config
-       (global-set-key (kbd "C-.") '+company/complete)
+       (global-set-key (kbd "C-.") 'company-complete-common)
        (define-key company-active-map (kbd "RET") 'company-complete-selection)
        (define-key company-active-map (kbd "<return>") 'company-complete-selection)
-       (define-key company-active-map (kbd "TAB") 'company-select-next)
-       (define-key company-active-map (kbd "<tab>") 'company-select-next)
+       (define-key company-active-map (kbd "TAB") 'company-complete-common-or-cycle)
+       (define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
        (define-key company-active-map (kbd "<backtab>") 'company-select-previous)
        (setq company-idle-delay 0.1)
        company-minimum-prefix-length 2
@@ -374,7 +374,7 @@ using the package general to configure custom keybinds
        company-require-match 'never
        company-global-modes '(not erc-mode message-mode help-mode gud-mode)
        company-frontends '(company-pseudo-tooltip-frontend
-			   company-echo-metadata-frontend)
+                           company-echo-metadata-frontend)
 
        ;; Buffer-local backends will be computed when loading a major mode, so
        ;; only specify a global default here.
@@ -395,13 +395,13 @@ using the package general to configure custom keybinds
        company-dabbrev-ignore-case nil
        company-dabbrev-downcase nil
        (progn
-	 ;; Use Company for completion
-	 (bind-key [remap completion-at-point] #'company-complete company-mode-map)
+         ;; Use Company for completion
+         (bind-key [remap completion-at-point] #'company-complete company-mode-map)
 
-	 (setq company-tooltip-align-annotations t
-	       ;; Easy navigation to candidates with M-<n>
-	       company-show-numbers t)
-	 (setq company-dabbrev-downcase nil))
+         (setq company-tooltip-align-annotations t
+               ;; Easy navigation to candidates with M-<n>
+               company-show-numbers t)
+         (setq company-dabbrev-downcase nil))
        :diminish company-mode
        :hook (company-mode-hook . evil-normalize-keymaps))
    #+END_SRC
@@ -643,9 +643,7 @@ using the package general to configure custom keybinds
   (use-package yaml-mode
     :mode "Procfile\\'"
     :init
-    :hook (yaml-mode-local-vars-hook . lsp)
-    :config
-    (setq-hook 'yaml-mode-hook tab-width yaml-indent-offset))
+    :hook (yaml-mode-local-vars-hook . lsp))
 #+END_SRC
 
 

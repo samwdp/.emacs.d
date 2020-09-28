@@ -250,11 +250,11 @@
   :defer t
   :init (global-company-mode)
   :config
-  (global-set-key (kbd "C-.") '+company/complete)
+  (global-set-key (kbd "C-.") 'company-complete-common)
   (define-key company-active-map (kbd "RET") 'company-complete-selection)
   (define-key company-active-map (kbd "<return>") 'company-complete-selection)
-  (define-key company-active-map (kbd "TAB") 'company-select-next)
-  (define-key company-active-map (kbd "<tab>") 'company-select-next)
+  (define-key company-active-map (kbd "TAB") 'company-complete-common-or-cycle)
+  (define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
   (define-key company-active-map (kbd "<backtab>") 'company-select-previous)
   (setq company-idle-delay 0.1)
   company-minimum-prefix-length 2
@@ -263,7 +263,7 @@
   company-require-match 'never
   company-global-modes '(not erc-mode message-mode help-mode gud-mode)
   company-frontends '(company-pseudo-tooltip-frontend
-		      company-echo-metadata-frontend)
+                      company-echo-metadata-frontend)
 
   ;; Buffer-local backends will be computed when loading a major mode, so
   ;; only specify a global default here.
@@ -288,8 +288,8 @@
     (bind-key [remap completion-at-point] #'company-complete company-mode-map)
 
     (setq company-tooltip-align-annotations t
-	  ;; Easy navigation to candidates with M-<n>
-	  company-show-numbers t)
+          ;; Easy navigation to candidates with M-<n>
+          company-show-numbers t)
     (setq company-dabbrev-downcase nil))
   :diminish company-mode
   :hook (company-mode-hook . evil-normalize-keymaps))
@@ -484,6 +484,4 @@
 (use-package yaml-mode
   :mode "Procfile\\'"
   :init
-  :hook (yaml-mode-local-vars-hook . lsp)
-  :config
-  (setq-hook 'yaml-mode-hook tab-width yaml-indent-offset))
+  :hook (yaml-mode-local-vars-hook . lsp))
