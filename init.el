@@ -15,6 +15,7 @@
 (set-default-coding-systems 'utf-8)
 
 (scroll-bar-mode -1)
+(toggle-frame-maximized)
 (tool-bar-mode -1)
 (tooltip-mode -1)
 (set-fringe-mode 10)
@@ -87,6 +88,11 @@
   :init
   (setq quelpa-use-package-inhibit-loading-quelpa t)
   :ensure t)
+(use-package fnhh
+  :quelpa
+  (fnhh :repo "a13/fnhh" :fetcher github)
+  :config
+  (fnhh-mode 1))
 (use-package general
   :config
   (general-create-definer sp/leader-keys
@@ -165,8 +171,10 @@
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 (use-package doom-themes
   :init (load-theme 'my-doom-gruvbox t))
-(use-package diminish)
-(use-package swiper)
+(use-package diminish
+  :defer t)
+(use-package swiper
+  :defer t)
 (use-package counsel
   :bind (("M-x" . counsel-M-x)
          ("C-x b" . counsel-ibuffer)
@@ -174,6 +182,7 @@
          :map minibuffer-local-map
          ("C-r" . 'counsel-minibuffer-history)))
 (use-package counsel-projectile
+  :defer t 
   :config (counsel-projectile-mode))
 (use-package ivy
   :diminish
@@ -211,30 +220,35 @@
 (use-package ivy-rich
   :init
   (ivy-rich-mode 1))
-(use-package all-the-icons)
+(use-package all-the-icons
+  :defer t)
 
 (use-package all-the-icons-ivy
   :after (all-the-icons ivy)
+  :defer t
   :config
   (all-the-icons-ivy-setup))
 (use-package doom-modeline
   :ensure t
+  :defer t
   :hook (doom-modeline-mode . size-indication-mode) ; filesize in modeline
   :init (doom-modeline-mode 1))
 (use-package which-key
   :init (which-key-mode)
   :diminish which-key-mode
+  :defer t
   :config
   (setq which-key-idle-delay 0.))
 (use-package rainbow-delimiters
+  :defer t
   :hook (prog-mode . rainbow-delimiters-mode))
 (use-package rainbow-mode
   :defer t
   :hook (org-mode
-	 emacs-lisp-mode
-	 web-mode
-	 typescript-mode
-	 js2-mode))
+         emacs-lisp-mode
+         web-mode
+         typescript-mode
+         js2-mode))
 (use-package helpful
   :custom
   (counsel-describe-function-function #'helpful-callable)
@@ -423,11 +437,15 @@
 	  ("BUG" error bold)
 	  ;; For warning about a problematic or misguiding code
 	  ("XXX" font-lock-constant-face bold))))
+(use-package package-lint
+  :hook (emacs-lisp-mode . packge-lint))
 (use-package csharp-mode
   :hook ((csharp-mode . rainbow-delimiters-mode))
   (csharp-mode . lsp)
   :config
   )
+(use-package ob-csharp
+  :quelpa (ob-csharp :repo "samwdp/ob-csharp" :fetcher github))
 (use-package web-mode
   :mode 
   (("\\.phtml\\'" . web-mode)

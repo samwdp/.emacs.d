@@ -16,6 +16,7 @@
   - [[#packages][Packages]]
     - [[#garbage-collection][Garbage Collection]]
     - [[#quelpa][Quelpa]]
+    - [[#startup-1][Startup]]
     - [[#general-keybinding][General Keybinding]]
     - [[#evil][Evil]]
     - [[#themes][Themes]]
@@ -38,6 +39,7 @@
     - [[#smartparens][Smartparens]]
     - [[#org][Org]]
     - [[#higlight-todo][Higlight TODO]]
+    - [[#package-linting][Package linting]]
   - [[#languages][Languages]]
     - [[#csharp][csharp]]
     - [[#web-mode][web-mode]]
@@ -63,22 +65,23 @@
 *** Basic
     Starting options to turn off
    #+BEGIN_SRC emacs-lisp
-   (setq inhibit-startup-message t)
-   (setq make-backup-files nil)
-   (set-language-environment "UTF-8")
-   (set-default-coding-systems 'utf-8)
+     (setq inhibit-startup-message t)
+     (setq make-backup-files nil)
+     (set-language-environment "UTF-8")
+     (set-default-coding-systems 'utf-8)
 
-   (scroll-bar-mode -1)
-   (tool-bar-mode -1)
-   (tooltip-mode -1)
-   (set-fringe-mode 10)
-   (menu-bar-mode -1)
+     (scroll-bar-mode -1)
+     (toggle-frame-maximized)
+     (tool-bar-mode -1)
+     (tooltip-mode -1)
+     (set-fringe-mode 10)
+     (menu-bar-mode -1)
 
-   (setq visible-bell t)
-   ;; Line numbers
-   (column-number-mode)
-   (global-display-line-numbers-mode t)
-   (setq display-line-numbers 'relative)
+     (setq visible-bell t)
+     ;; Line numbers
+     (column-number-mode)
+     (global-display-line-numbers-mode t)
+     (setq display-line-numbers 'relative)
    #+END_SRC
 *** Font
    #+BEGIN_SRC emacs-lisp
@@ -152,16 +155,24 @@
 *** Quelpa
     #+BEGIN_SRC emacs-lisp
       (use-package quelpa
-	:ensure t
-	:defer t
-	:custom
-	(quelpa-update-melpa-p nil "Don't update the MELPA git repo."))
+        :ensure t
+        :defer t
+        :custom
+        (quelpa-update-melpa-p nil "Don't update the MELPA git repo."))
 
       (use-package quelpa-use-package
-	:init
-	(setq quelpa-use-package-inhibit-loading-quelpa t)
-	:ensure t)
+        :init
+        (setq quelpa-use-package-inhibit-loading-quelpa t)
+        :ensure t)
     #+END_SRC
+*** Startup
+#+BEGIN_SRC emacs-lisp
+  (use-package fnhh
+    :quelpa
+    (fnhh :repo "a13/fnhh" :fetcher github)
+    :config
+    (fnhh-mode 1))
+#+END_SRC
 *** General Keybinding
 using the package general to configure custom keybinds
    #+BEGIN_SRC emacs-lisp
@@ -252,8 +263,10 @@ using the package general to configure custom keybinds
    #+END_SRC
 *** Useful Packages
    #+BEGIN_SRC emacs-lisp
-     (use-package diminish)
-     (use-package swiper)
+     (use-package diminish
+       :defer t)
+     (use-package swiper
+       :defer t)
    #+END_SRC
 *** Counsel
    #+BEGIN_SRC emacs-lisp
@@ -264,6 +277,7 @@ using the package general to configure custom keybinds
               :map minibuffer-local-map
               ("C-r" . 'counsel-minibuffer-history)))
      (use-package counsel-projectile
+       :defer t 
        :config (counsel-projectile-mode))
    #+END_SRC
 *** Ivy
@@ -307,10 +321,12 @@ using the package general to configure custom keybinds
    #+END_SRC
 *** Icons
    #+BEGIN_SRC emacs-lisp
-     (use-package all-the-icons)
+     (use-package all-the-icons
+       :defer t)
 
      (use-package all-the-icons-ivy
        :after (all-the-icons ivy)
+       :defer t
        :config
        (all-the-icons-ivy-setup))
    #+END_SRC
@@ -318,6 +334,7 @@ using the package general to configure custom keybinds
    #+BEGIN_SRC emacs-lisp
      (use-package doom-modeline
        :ensure t
+       :defer t
        :hook (doom-modeline-mode . size-indication-mode) ; filesize in modeline
        :init (doom-modeline-mode 1))
    #+END_SRC
@@ -326,20 +343,22 @@ using the package general to configure custom keybinds
      (use-package which-key
        :init (which-key-mode)
        :diminish which-key-mode
+       :defer t
        :config
        (setq which-key-idle-delay 0.))
    #+END_SRC
 *** RAINBOWS!
    #+BEGIN_SRC emacs-lisp
      (use-package rainbow-delimiters
+       :defer t
        :hook (prog-mode . rainbow-delimiters-mode))
      (use-package rainbow-mode
        :defer t
        :hook (org-mode
-	      emacs-lisp-mode
-	      web-mode
-	      typescript-mode
-	      js2-mode))
+              emacs-lisp-mode
+              web-mode
+              typescript-mode
+              js2-mode))
    #+END_SRC
 *** Helpful
    #+BEGIN_SRC emacs-lisp
@@ -565,6 +584,12 @@ using the package general to configure custom keybinds
 	       ;; For warning about a problematic or misguiding code
 	       ("XXX" font-lock-constant-face bold))))
    #+END_SRC
+*** Package linting
+#+BEGIN_SRC emacs-lisp
+  (use-package package-lint
+    :hook (emacs-lisp-mode . packge-lint))
+#+END_SRC
+
 ** Languages
 *** csharp
 **** csharp language
@@ -575,6 +600,11 @@ using the package general to configure custom keybinds
        :config
        )
    #+END_SRC
+**** babel
+#+BEGIN_SRC emacs-lisp
+  (use-package ob-csharp
+    :quelpa (ob-csharp :repo "samwdp/ob-csharp" :fetcher github))
+#+END_SRC
 *** web-mode
 **** HTML
 #+BEGIN_SRC emacs-lisp
