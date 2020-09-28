@@ -2,6 +2,7 @@
 \#*\#
 *~
 .cache/
+.lsp*
 url/
 elpa/
 snippets/
