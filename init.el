@@ -424,8 +424,8 @@
 	  ;; For warning about a problematic or misguiding code
 	  ("XXX" font-lock-constant-face bold))))
 (use-package csharp-mode
-  :hook ((csharp-mode . rainbow-delimiters-mode)
-         (csharp-mode . lsp))
+  :hook ((csharp-mode . rainbow-delimiters-mode))
+  (csharp-mode . lsp)
   :config
   )
 (use-package web-mode

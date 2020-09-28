@@ -570,8 +570,8 @@ using the package general to configure custom keybinds
 **** csharp language
    #+BEGIN_SRC emacs-lisp
      (use-package csharp-mode
-       :hook ((csharp-mode . rainbow-delimiters-mode)
-              (csharp-mode . lsp))
+       :hook ((csharp-mode . rainbow-delimiters-mode))
+       (csharp-mode . lsp)
        :config
        )
    #+END_SRC
