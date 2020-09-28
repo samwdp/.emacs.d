@@ -95,15 +95,18 @@
     :global-prefix "C-SPC")
 
   (sp/leader-keys
+    "r" '((lambda() (interactive)(load-file "~/.emacs.d/init.el")) :which-key "reload config")
     "SPC" '(projectile-find-file :which-key "find file")
     "," '(switch-to-buffer :which-key "switch buffer")
     "a"  '(:ignore t :which-key "applications")
     "b"  '(:ignore t :which-key "buffers")
     "f"  '(:ignore t :which-key "files")
     "m"  '(:ignore t :which-key "mode")
+    "p"  '(:ignore t :which-key "project")
     "i"  '(:ignore t :which-key "insert")
     "s"  '(:ignore t :which-key "search")
     "t"  '(:ignore t :which-key "toggles")
+    "u"  '(:ignore t :which-key "ui")
     ;; Applicaitons
     "bj" '(switch-to-next-buffer :which-key "switch to next buffer")
     "bk" '(switch-to-prev-buffer :which-key "switch to previous buffer")
@@ -125,12 +128,18 @@
     "fd" '(directory-search :which-key "Find directory")
     "fc" '((lambda() (interactive)(counsel-find-file "~/.emacs.d")) :which-key "Private config")
     ;; Modes
+    ;; Project
+    "pp" '(projectile-switch-project :which-key "switch project")
+    "pc" '(counsel-projectile-switch-project-action-compile :which-key "compile")
+    "pd" '(counsel-projectile-switch-project-action-find-dir :which-key "jump to directory")
     ;; Insert
     "is" '(yas-insert-snippet :which-key "Snippet")
     ;; Search
     "sp" '(counsel-rg :which-key "search pattern")
     ;; Toggles
-    "tp" '(parinfer-toggle-mode :which-key "Parinfer")))
+    "tp" '(parinfer-toggle-mode :which-key "Parinfer")
+    ;; UI
+    "ut" '(text-scale-adjust :which-key "text scale")))
 (use-package evil
   :init
   (setq evil-want-integration t)
@@ -314,18 +323,18 @@
 (use-package forge)
 (use-package parinfer
   :hook ((emacs-lisp-mode
-	  clojure-mode
-	  scheme-mode
-	  lisp-mode
-	  racket-mode
-	  hy-mode) . parinfer-mode)
+          clojure-mode
+          scheme-mode
+          lisp-mode
+          racket-mode
+          hy-mode) . parinfer-mode)
   :ensure t
   :init
   (setq parinfer-extensions
-	'(defaults
-	   pretty-parens
-	   smart-tab
-	   smart-yank))
+        '(defaults
+           pretty-parens
+           smart-tab
+           smart-yank))
   :config
   (define-key parinfer-mode-map (kbd "\"") nil))
 (use-package lsp-mode

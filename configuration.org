@@ -165,50 +165,59 @@
 *** General Keybinding
 using the package general to configure custom keybinds
    #+BEGIN_SRC emacs-lisp
-      (use-package general
-	:config
-	(general-create-definer sp/leader-keys
-	  :keymaps '(normal insert visual emacs)
-	  :prefix "SPC"
-	  :global-prefix "C-SPC")
+     (use-package general
+       :config
+       (general-create-definer sp/leader-keys
+         :keymaps '(normal insert visual emacs)
+         :prefix "SPC"
+         :global-prefix "C-SPC")
 
-	(sp/leader-keys
-	  "SPC" '(projectile-find-file :which-key "find file")
-	  "," '(switch-to-buffer :which-key "switch buffer")
-	  "a"  '(:ignore t :which-key "applications")
-	  "b"  '(:ignore t :which-key "buffers")
-	  "f"  '(:ignore t :which-key "files")
-	  "m"  '(:ignore t :which-key "mode")
-	  "i"  '(:ignore t :which-key "insert")
-	  "s"  '(:ignore t :which-key "search")
-	  "t"  '(:ignore t :which-key "toggles")
-	  ;; Applicaitons
-	  "bj" '(switch-to-next-buffer :which-key "switch to next buffer")
-	  "bk" '(switch-to-prev-buffer :which-key "switch to previous buffer")
-	  "bd" '(kill-current-buffer :which-key "Kill buffer")
-	  "bi" '(ibuffer :which-key "ibuffer")
-	  "bk" '(kill-current-buffer :which-key "Kill buffer")
-	  "bl" '(evil-switch-to-windows-last-buffer :which-key "Switch to last buffer")
-	  "bm" '(bookmark-set :which-key "Set bookmark")
-	  "bM" '(bookmark-delete :which-key "Delete bookmark")
-	  "bn" '(next-buffer :which-key "Next buffer")
-	  "bN" '(evil-buffer-new :which-key "New empty buffer")
-	  "bp" '(previous-buffer :which-key "Previous buffer")
-	  "br" '(revert-buffer :which-key "Revert buffer")
-	  "bs" '(basic-save-buffer :which-key "Save buffer")
-	  "bS" '(evil-write-all :which-key "Save all buffers")
-	  "bz" '(bury-buffer :which-key "Bury buffer")
-	  ;; Files
-	  "ff" '(counsel-find-file :which-key "Find Files")
-	  "fd" '(directory-search :which-key "Find directory")
-	  "fc" '((lambda() (interactive)(counsel-find-file "~/.emacs.d")) :which-key "Private config")
-	  ;; Modes
-	  ;; Insert
-	  "is" '(yas-insert-snippet :which-key "Snippet")
-	  ;; Search
-	  "sp" '(counsel-rg :which-key "search pattern")
-	  ;; Toggles
-	  "tp" '(parinfer-toggle-mode :which-key "Parinfer")))
+       (sp/leader-keys
+         "r" '((lambda() (interactive)(load-file "~/.emacs.d/init.el")) :which-key "reload config")
+         "SPC" '(projectile-find-file :which-key "find file")
+         "," '(switch-to-buffer :which-key "switch buffer")
+         "a"  '(:ignore t :which-key "applications")
+         "b"  '(:ignore t :which-key "buffers")
+         "f"  '(:ignore t :which-key "files")
+         "m"  '(:ignore t :which-key "mode")
+         "p"  '(:ignore t :which-key "project")
+         "i"  '(:ignore t :which-key "insert")
+         "s"  '(:ignore t :which-key "search")
+         "t"  '(:ignore t :which-key "toggles")
+         "u"  '(:ignore t :which-key "ui")
+         ;; Applicaitons
+         "bj" '(switch-to-next-buffer :which-key "switch to next buffer")
+         "bk" '(switch-to-prev-buffer :which-key "switch to previous buffer")
+         "bd" '(kill-current-buffer :which-key "Kill buffer")
+         "bi" '(ibuffer :which-key "ibuffer")
+         "bk" '(kill-current-buffer :which-key "Kill buffer")
+         "bl" '(evil-switch-to-windows-last-buffer :which-key "Switch to last buffer")
+         "bm" '(bookmark-set :which-key "Set bookmark")
+         "bM" '(bookmark-delete :which-key "Delete bookmark")
+         "bn" '(next-buffer :which-key "Next buffer")
+         "bN" '(evil-buffer-new :which-key "New empty buffer")
+         "bp" '(previous-buffer :which-key "Previous buffer")
+         "br" '(revert-buffer :which-key "Revert buffer")
+         "bs" '(basic-save-buffer :which-key "Save buffer")
+         "bS" '(evil-write-all :which-key "Save all buffers")
+         "bz" '(bury-buffer :which-key "Bury buffer")
+         ;; Files
+         "ff" '(counsel-find-file :which-key "Find Files")
+         "fd" '(directory-search :which-key "Find directory")
+         "fc" '((lambda() (interactive)(counsel-find-file "~/.emacs.d")) :which-key "Private config")
+         ;; Modes
+         ;; Project
+         "pp" '(projectile-switch-project :which-key "switch project")
+         "pc" '(counsel-projectile-switch-project-action-compile :which-key "compile")
+         "pd" '(counsel-projectile-switch-project-action-find-dir :which-key "jump to directory")
+         ;; Insert
+         "is" '(yas-insert-snippet :which-key "Snippet")
+         ;; Search
+         "sp" '(counsel-rg :which-key "search pattern")
+         ;; Toggles
+         "tp" '(parinfer-toggle-mode :which-key "Parinfer")
+         ;; UI
+         "ut" '(text-scale-adjust :which-key "text scale")))
    #+END_SRC
 *** Evil
    #+BEGIN_SRC emacs-lisp
@@ -440,18 +449,18 @@ using the package general to configure custom keybinds
    #+BEGIN_SRC emacs-lisp
      (use-package parinfer
        :hook ((emacs-lisp-mode
-	       clojure-mode
-	       scheme-mode
-	       lisp-mode
-	       racket-mode
-	       hy-mode) . parinfer-mode)
+               clojure-mode
+               scheme-mode
+               lisp-mode
+               racket-mode
+               hy-mode) . parinfer-mode)
        :ensure t
        :init
        (setq parinfer-extensions
-	     '(defaults
-		pretty-parens
-		smart-tab
-		smart-yank))
+             '(defaults
+                pretty-parens
+                smart-tab
+                smart-yank))
        :config
        (define-key parinfer-mode-map (kbd "\"") nil))
    #+END_SRC
