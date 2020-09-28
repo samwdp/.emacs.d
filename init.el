@@ -424,16 +424,10 @@
 	  ;; For warning about a problematic or misguiding code
 	  ("XXX" font-lock-constant-face bold))))
 (use-package csharp-mode
-  :hook ((csharp-mode . rainbow-delimiters-mode))
-   (csharp-mode . lsp)
+  :hook ((csharp-mode . rainbow-delimiters-mode)
+         (csharp-mode . lsp))
   :config
-  (set-electric! 'csharp-mode :chars '(?\n ?\}))
-  (set-rotate-patterns! 'csharp-mode
-    :symbols '(("public" "protected" "private")
-	       ("class" "struct")))
-  (sp-local-pair 'csharp-mode "<" ">"
-		 :when '(+csharp-sp-point-in-type-p)
-		 :post-handlers '(("| " "SPC"))))
+  )
 (use-package web-mode
   :mode 
   (("\\.phtml\\'" . web-mode)
