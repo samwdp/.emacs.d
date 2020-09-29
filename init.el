@@ -361,23 +361,29 @@
 (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
 (use-package yasnippet
   :hook ((text-mode-hook . yas-minor-mode-on)
-	 (prog-mode-hook . yas-minor-mode-on)
-	 (conf-mode-hook . yas-minor-mode-on)
-	 (snippet-mode-hook . yas-minor-mode-on))
+         (prog-mode-hook . yas-minor-mode-on)
+         (conf-mode-hook . yas-minor-mode-on)
+         (snippet-mode-hook . yas-minor-mode-on))
   :defer (eldoc easymenu help-mode)
   :commands (yas-minor-mode-on
-	     yas-expand
-	     yas-expand-snippet
-	     yas-lookup-snippet
-	     yas-insert-snippet
-	     yas-new-snippet
-	     yas-visit-snippet-file)
+             yas-expand
+             yas-expand-snippet
+             yas-lookup-snippet
+             yas-insert-snippet
+             yas-new-snippet
+             yas-visit-snippet-file)
   :init
   (yas-global-mode 1)
   ;; Remove default ~/.emacs.d/snippets
   (defvar yas-snippet-dirs nil))
 
-(use-package yasnippet-snippets)
+(use-package doom-snippets
+  :quelpa
+  (doom-snippets
+   :repo "hlissner/doom-snippets"
+   :fetcher github
+   :files ("*" (:exclude ".*" "README.md")))
+  :after yasnippet)
 (use-package smartparens
   :hook (prog-mode . smartparens-mode))
 (use-package evil-org
@@ -438,7 +444,7 @@
 	  ;; For warning about a problematic or misguiding code
 	  ("XXX" font-lock-constant-face bold))))
 (use-package package-lint
-  :hook (emacs-lisp-mode . packge-lint))
+  :defer t)
 (use-package csharp-mode
   :hook ((csharp-mode . rainbow-delimiters-mode))
   (csharp-mode . lsp)
@@ -503,3 +509,20 @@
   :mode "Procfile\\'"
   :init
   :hook (yaml-mode-local-vars-hook . lsp))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(file-name-handler-alist
+   '(("\\.gpg\\(~\\|\\.~[0-9]+~\\)?\\'" . epa-file-handler)
+     ("\\(?:\\.tzst\\|\\.zst\\|\\.dz\\|\\.txz\\|\\.xz\\|\\.lzma\\|\\.lz\\|\\.g?z\\|\\.\\(?:tgz\\|svgz\\|sifz\\)\\|\\.tbz2?\\|\\.bz2\\|\\.Z\\)\\(?:~\\|\\.~[-[:alnum:]:#@^._]+\\(?:~[[:digit:]]+\\)?~\\)?\\'" . jka-compr-handler)
+     ("\\`/:" . file-name-non-special)) t)
+ '(package-selected-packages
+   '(doom-snippets yasnippet-snippets yaml-mode which-key web-mode use-package-ensure-system-package toc-org smartparens rainbow-mode rainbow-delimiters quelpa-use-package parinfer package-lint org-superstar org-fancy-priorities ob-csharp lsp-ui lsp-treemacs lsp-ivy json-mode js2-mode ivy-rich ivy-posframe hl-todo helpful general gcmh forge fnhh evil-org evil-magit evil-collection doom-themes doom-modeline diminish csharp-mode counsel-projectile company bug-hunter all-the-icons-ivy)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

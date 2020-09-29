@@ -498,23 +498,29 @@ using the package general to configure custom keybinds
    #+BEGIN_SRC emacs-lisp
      (use-package yasnippet
        :hook ((text-mode-hook . yas-minor-mode-on)
-	      (prog-mode-hook . yas-minor-mode-on)
-	      (conf-mode-hook . yas-minor-mode-on)
-	      (snippet-mode-hook . yas-minor-mode-on))
+              (prog-mode-hook . yas-minor-mode-on)
+              (conf-mode-hook . yas-minor-mode-on)
+              (snippet-mode-hook . yas-minor-mode-on))
        :defer (eldoc easymenu help-mode)
        :commands (yas-minor-mode-on
-		  yas-expand
-		  yas-expand-snippet
-		  yas-lookup-snippet
-		  yas-insert-snippet
-		  yas-new-snippet
-		  yas-visit-snippet-file)
+                  yas-expand
+                  yas-expand-snippet
+                  yas-lookup-snippet
+                  yas-insert-snippet
+                  yas-new-snippet
+                  yas-visit-snippet-file)
        :init
        (yas-global-mode 1)
        ;; Remove default ~/.emacs.d/snippets
        (defvar yas-snippet-dirs nil))
 
-     (use-package yasnippet-snippets)
+     (use-package doom-snippets
+       :quelpa
+       (doom-snippets
+        :repo "hlissner/doom-snippets"
+        :fetcher github
+        :files ("*" (:exclude ".*" "README.md")))
+       :after yasnippet)
    #+END_SRC
 *** Smartparens
    #+BEGIN_SRC emacs-lisp
@@ -587,7 +593,7 @@ using the package general to configure custom keybinds
 *** Package linting
 #+BEGIN_SRC emacs-lisp
   (use-package package-lint
-    :hook (emacs-lisp-mode . packge-lint))
+    :defer t)
 #+END_SRC
 
 ** Languages
