@@ -9,6 +9,7 @@
   - [[#configuration][Configuration]]
     - [[#startup][Startup]]
     - [[#basic][Basic]]
+    - [[#scratch][Scratch]]
     - [[#font][Font]]
     - [[#global-keybinds][Global keybinds]]
     - [[#package-management-loading][Package management loading]]
@@ -71,7 +72,6 @@
      (set-default-coding-systems 'utf-8)
 
      (scroll-bar-mode -1)
-     (toggle-frame-maximized)
      (tool-bar-mode -1)
      (tooltip-mode -1)
      (set-fringe-mode 10)
@@ -83,6 +83,20 @@
      (global-display-line-numbers-mode t)
      (setq display-line-numbers 'relative)
    #+END_SRC
+*** Scratch 
+#+BEGIN_SRC emacs-lisp
+  (setq initial-major-mode 'org-mode)
+  (setq initial-scratch-message "\
+  ,* Emacs scratch
+  ,#+BEGIN_SRC emacs-lisp
+
+  ,#+END_SRC
+  ,* Csharp scratch
+  ,#+BEGIN_SRC csharp
+
+  ,#+END_SRC
+  ")
+#+END_SRC
 *** Font
    #+BEGIN_SRC emacs-lisp
      (set-face-attribute 'default nil :font (font-spec :family "Fira Code Nerd Font" :size 14))
@@ -196,38 +210,40 @@ using the package general to configure custom keybinds
          "s"  '(:ignore t :which-key "search")
          "t"  '(:ignore t :which-key "toggles")
          "u"  '(:ignore t :which-key "ui")
-         ;; Applicaitons
+         ;; applicaitons
+         "ae" '(eshell :which-key "eshell")
+         ;; buffer
          "bj" '(switch-to-next-buffer :which-key "switch to next buffer")
          "bk" '(switch-to-prev-buffer :which-key "switch to previous buffer")
-         "bd" '(kill-current-buffer :which-key "Kill buffer")
+         "bd" '(kill-current-buffer :which-key "kill buffer")
          "bi" '(ibuffer :which-key "ibuffer")
-         "bk" '(kill-current-buffer :which-key "Kill buffer")
-         "bl" '(evil-switch-to-windows-last-buffer :which-key "Switch to last buffer")
-         "bm" '(bookmark-set :which-key "Set bookmark")
-         "bM" '(bookmark-delete :which-key "Delete bookmark")
-         "bn" '(next-buffer :which-key "Next buffer")
-         "bN" '(evil-buffer-new :which-key "New empty buffer")
-         "bp" '(previous-buffer :which-key "Previous buffer")
-         "br" '(revert-buffer :which-key "Revert buffer")
-         "bs" '(basic-save-buffer :which-key "Save buffer")
-         "bS" '(evil-write-all :which-key "Save all buffers")
-         "bz" '(bury-buffer :which-key "Bury buffer")
-         ;; Files
-         "ff" '(counsel-find-file :which-key "Find Files")
-         "fd" '(directory-search :which-key "Find directory")
-         "fc" '((lambda() (interactive)(counsel-find-file "~/.emacs.d")) :which-key "Private config")
-         ;; Modes
-         ;; Project
+         "bk" '(kill-current-buffer :which-key "kill buffer")
+         "bl" '(evil-switch-to-windows-last-buffer :which-key "switch to last buffer")
+         "bm" '(bookmark-set :which-key "set bookmark")
+         "bm" '(bookmark-delete :which-key "delete bookmark")
+         "bn" '(next-buffer :which-key "next buffer")
+         "bn" '(evil-buffer-new :which-key "new empty buffer")
+         "bp" '(previous-buffer :which-key "previous buffer")
+         "br" '(revert-buffer :which-key "revert buffer")
+         "bs" '(basic-save-buffer :which-key "save buffer")
+         "bs" '(evil-write-all :which-key "save all buffers")
+         "bz" '(bury-buffer :which-key "bury buffer")
+         ;; files
+         "ff" '(counsel-find-file :which-key "find files")
+         "fd" '(directory-search :which-key "find directory")
+         "fc" '((lambda() (interactive)(counsel-find-file "~/.emacs.d")) :which-key "private config")
+         ;; modes
+         ;; project
          "pp" '(projectile-switch-project :which-key "switch project")
          "pc" '(counsel-projectile-switch-project-action-compile :which-key "compile")
          "pd" '(counsel-projectile-switch-project-action-find-dir :which-key "jump to directory")
-         ;; Insert
-         "is" '(yas-insert-snippet :which-key "Snippet")
-         ;; Search
+         ;; insert
+         "is" '(yas-insert-snippet :which-key "snippet")
+         ;; search
          "sp" '(counsel-rg :which-key "search pattern")
-         ;; Toggles
-         "tp" '(parinfer-toggle-mode :which-key "Parinfer")
-         ;; UI
+         ;; toggles
+         "tp" '(parinfer-toggle-mode :which-key "parinfer")
+         ;; ui
          "ut" '(text-scale-adjust :which-key "text scale")))
    #+END_SRC
 *** Evil

@@ -15,7 +15,6 @@
 (set-default-coding-systems 'utf-8)
 
 (scroll-bar-mode -1)
-(toggle-frame-maximized)
 (tool-bar-mode -1)
 (tooltip-mode -1)
 (set-fringe-mode 10)
@@ -26,6 +25,17 @@
 (column-number-mode)
 (global-display-line-numbers-mode t)
 (setq display-line-numbers 'relative)
+(setq initial-major-mode 'org-mode)
+(setq initial-scratch-message "\
+* Emacs scratch
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC
+* Csharp scratch
+#+BEGIN_SRC csharp
+
+#+END_SRC
+")
 (set-face-attribute 'default nil :font (font-spec :family "Fira Code Nerd Font" :size 14))
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 (global-set-key (kbd "C-;") 'comment-line)
@@ -113,38 +123,40 @@
     "s"  '(:ignore t :which-key "search")
     "t"  '(:ignore t :which-key "toggles")
     "u"  '(:ignore t :which-key "ui")
-    ;; Applicaitons
+    ;; applicaitons
+    "ae" '(eshell :which-key "eshell")
+    ;; buffer
     "bj" '(switch-to-next-buffer :which-key "switch to next buffer")
     "bk" '(switch-to-prev-buffer :which-key "switch to previous buffer")
-    "bd" '(kill-current-buffer :which-key "Kill buffer")
+    "bd" '(kill-current-buffer :which-key "kill buffer")
     "bi" '(ibuffer :which-key "ibuffer")
-    "bk" '(kill-current-buffer :which-key "Kill buffer")
-    "bl" '(evil-switch-to-windows-last-buffer :which-key "Switch to last buffer")
-    "bm" '(bookmark-set :which-key "Set bookmark")
-    "bM" '(bookmark-delete :which-key "Delete bookmark")
-    "bn" '(next-buffer :which-key "Next buffer")
-    "bN" '(evil-buffer-new :which-key "New empty buffer")
-    "bp" '(previous-buffer :which-key "Previous buffer")
-    "br" '(revert-buffer :which-key "Revert buffer")
-    "bs" '(basic-save-buffer :which-key "Save buffer")
-    "bS" '(evil-write-all :which-key "Save all buffers")
-    "bz" '(bury-buffer :which-key "Bury buffer")
-    ;; Files
-    "ff" '(counsel-find-file :which-key "Find Files")
-    "fd" '(directory-search :which-key "Find directory")
-    "fc" '((lambda() (interactive)(counsel-find-file "~/.emacs.d")) :which-key "Private config")
-    ;; Modes
-    ;; Project
+    "bk" '(kill-current-buffer :which-key "kill buffer")
+    "bl" '(evil-switch-to-windows-last-buffer :which-key "switch to last buffer")
+    "bm" '(bookmark-set :which-key "set bookmark")
+    "bm" '(bookmark-delete :which-key "delete bookmark")
+    "bn" '(next-buffer :which-key "next buffer")
+    "bn" '(evil-buffer-new :which-key "new empty buffer")
+    "bp" '(previous-buffer :which-key "previous buffer")
+    "br" '(revert-buffer :which-key "revert buffer")
+    "bs" '(basic-save-buffer :which-key "save buffer")
+    "bs" '(evil-write-all :which-key "save all buffers")
+    "bz" '(bury-buffer :which-key "bury buffer")
+    ;; files
+    "ff" '(counsel-find-file :which-key "find files")
+    "fd" '(directory-search :which-key "find directory")
+    "fc" '((lambda() (interactive)(counsel-find-file "~/.emacs.d")) :which-key "private config")
+    ;; modes
+    ;; project
     "pp" '(projectile-switch-project :which-key "switch project")
     "pc" '(counsel-projectile-switch-project-action-compile :which-key "compile")
     "pd" '(counsel-projectile-switch-project-action-find-dir :which-key "jump to directory")
-    ;; Insert
-    "is" '(yas-insert-snippet :which-key "Snippet")
-    ;; Search
+    ;; insert
+    "is" '(yas-insert-snippet :which-key "snippet")
+    ;; search
     "sp" '(counsel-rg :which-key "search pattern")
-    ;; Toggles
-    "tp" '(parinfer-toggle-mode :which-key "Parinfer")
-    ;; UI
+    ;; toggles
+    "tp" '(parinfer-toggle-mode :which-key "parinfer")
+    ;; ui
     "ut" '(text-scale-adjust :which-key "text scale")))
 (use-package evil
   :init
@@ -509,20 +521,3 @@
   :mode "Procfile\\'"
   :init
   :hook (yaml-mode-local-vars-hook . lsp))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(file-name-handler-alist
-   '(("\\.gpg\\(~\\|\\.~[0-9]+~\\)?\\'" . epa-file-handler)
-     ("\\(?:\\.tzst\\|\\.zst\\|\\.dz\\|\\.txz\\|\\.xz\\|\\.lzma\\|\\.lz\\|\\.g?z\\|\\.\\(?:tgz\\|svgz\\|sifz\\)\\|\\.tbz2?\\|\\.bz2\\|\\.Z\\)\\(?:~\\|\\.~[-[:alnum:]:#@^._]+\\(?:~[[:digit:]]+\\)?~\\)?\\'" . jka-compr-handler)
-     ("\\`/:" . file-name-non-special)) t)
- '(package-selected-packages
-   '(doom-snippets yasnippet-snippets yaml-mode which-key web-mode use-package-ensure-system-package toc-org smartparens rainbow-mode rainbow-delimiters quelpa-use-package parinfer package-lint org-superstar org-fancy-priorities ob-csharp lsp-ui lsp-treemacs lsp-ivy json-mode js2-mode ivy-rich ivy-posframe hl-todo helpful general gcmh forge fnhh evil-org evil-magit evil-collection doom-themes doom-modeline diminish csharp-mode counsel-projectile company bug-hunter all-the-icons-ivy)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
