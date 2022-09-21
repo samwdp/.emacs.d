@@ -1,0 +1,307 @@
+* Garbage Collection
+#+begin_src emacs-lisp
+  (setq gc-cons-thershold 100000000)
+  (setq read-process-output-max (* 1024 1024)) ;; 1mb
+
+  (defun sp/defer-garbage-collection-h ()
+    (setq gc-cons-threshold most-positive-fixnum))
+
+  (defun sp/restore-garbage-collection-h ()
+    ;; Defer it so that commands launched immediately after will enjoy the
+    ;; benefits.
+    (run-at-time
+     1 nil (lambda () (setq gc-cons-threshold 16777216))))
+  (add-hook 'minibuffer-setup-hook #'sp/defer-garbage-collection-h)
+  (add-hook 'minibuffer-exit-hook #'sp/restore-garbage-collection-h)
+#+end_src
+
+* Custom constants
+#+begin_src emacs-lisp
+  (defconst NATIVECOMP (if (fboundp 'native-comp-available-p) (native-comp-available-p)))
+  (defconst IS-MAC     (eq system-type 'darwin))
+  (defconst IS-LINUX   (eq system-type 'gnu/linux))
+  (defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
+
+  (add-to-list 'load-path "~/.emacs.d/custom/")
+#+end_src
+
+* Startup
+#+begin_src emacs-lisp
+  ;; (server-start)
+  (defun efs/display-startup-time ()
+    (message "Emacs loaded in %s with %d garbage collections."
+             (format "%.2f seconds"
+                     (float-time
+                       (time-subtract after-init-time before-init-time)))
+             gcs-done))
+
+  (when NATIVECOMP
+    (setq native-comp-async-report-warnings-errors nil)
+    (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" "~/.emacs.cache")))
+#+end_src
+
+* Straight
+#+begin_src emacs-lisp
+  (unless (featurep 'straight)
+    ;; Bootstrap straight.el
+   (defvar bootstrap-version)
+    (let ((bootstrap-file
+           (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+          (bootstrap-version 5))
+      (unless (file-exists-p bootstrap-file)
+        (with-current-buffer
+            (url-retrieve-synchronously
+             "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+             'silent 'inhibit-cookies)
+          (goto-char (point-max))
+          (eval-print-last-sexp)))
+      (load bootstrap-file nil 'nomessage)))
+
+  ;; Use straight.el for use-package expressions
+  (straight-use-package 'use-package)
+
+  (use-package straight
+    :custom (straight-use-package-by-default t))
+#+end_src
+
+* Set some stuff
+#+begin_src emacs-lisp
+  (blink-cursor-mode 0)
+  (pixel-scroll-mode 1)
+  (display-time-mode 1)
+  (scroll-bar-mode -1)        ; Disable visible scrollbar
+  (tool-bar-mode -1)          ; Disable the toolbar
+  (tooltip-mode -1)           ; Disable tooltips
+  (set-fringe-mode 10)        ; Give some breathing room
+  (global-visual-line-mode)
+  (menu-bar-mode -1)            ; Disable the menu bar
+  (setq scroll-margin 8
+        visible-bell t
+        create-lockfiles nil
+        ring-bell-function nil
+        make-backup-files t
+        backup-by-copying t
+        inhibit-startup-message t
+        inhibit-compacting-font-caches t
+        delete-old-versions t
+        kept-new-versions 6
+        kept-old-versions 2
+        version-control t
+        set-language-environment "UTF-8")
+  (defvar sp/text-height 17)
+  (defvar sp/text-height-variable 20)
+  (defvar sp/font-string "LiterationMono Nerd Font")
+
+  (defun sp/new-frame ()
+    (set-face-attribute 'default nil :font (font-spec :family sp/font-string :size sp/text-height))
+    (set-face-attribute 'fixed-pitch nil :font (font-spec :family sp/font-string :size sp/text-height))
+    (set-face-attribute 'fixed-pitch-serif nil :font (font-spec :family sp/font-string :size sp/text-height))
+    (set-face-attribute 'variable-pitch nil :font (font-spec :family sp/font-string :size sp/text-height-variable))
+    (toggle-frame-maximized))
+
+  (defun unicode-fonts-setup-h (frame)
+    "Run unicode-fonts-setup, then remove the hook."
+    (when (and frame (display-graphic-p frame))
+      (with-selected-frame frame
+        (require 'unicode-fonts)
+        (sp/new-frame)
+        (unicode-fonts-setup))))
+
+  (if (display-graphic-p)
+     (unicode-fonts-setup-h (selected-frame))
+   (add-hook 'after-make-frame-functions 'unicode-fonts-setup-h))
+
+  (setq-default indent-tabs-mode nil
+                tab-width 4)
+  (setq-default tab-always-indent nil)
+
+  (defconst emacs-tmp-dir (expand-file-name "temp/" "~/.emacs.cache"))
+  (setq backup-directory-alist
+        `((".*" . emacs-tmp-dir)))
+
+  (global-set-key (kbd "C-h") 'windmove-left)
+  (global-set-key (kbd "C-j") 'windmove-down)
+  (global-set-key (kbd "C-k") 'windmove-up)
+  (global-set-key (kbd "C-l") 'windmove-right)
+  (global-set-key (kbd "C-l") 'windmove-right)
+  ;; (global-set-key (kbd "C-/") 'comment-line)
+#+end_src
+
+* Display
+#+begin_src emacs-lisp
+    (use-package unicode-fonts
+      :straight (unicode-fonts :type git :host github :repo "yurikhan/unicode-fonts" :branch "fix-daemon-startup"))
+
+    (use-package fancy-battery
+      :hook (after-init . fancy-battery-mode))
+
+    (use-package no-littering
+      :config
+       (setq auto-save-file-name-transforms
+        `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
+        )
+
+    (setq custom-theme-directory (concat user-emacs-directory "themes/"))
+    (use-package doom-themes
+      :init (load-theme 'gruvbox t))
+
+    (use-package doom-modeline
+      :hook (doom-modeline-mode . size-indication-mode)
+      :hook (doom-modeline-mode . column-number-mode)
+      :config
+      (setq doom-modeline-bar-width 3
+            doom-modeline-github nil
+            doom-modeline-mu4e nil
+            doom-modeline-persp-name nil
+            doom-modeline-workspace-name nil
+            doom-modeline-minor-modes nil
+            doom-modeline-major-mode-icon nil
+            doom-modeline-buffer-file-name-style 'truncate-all
+            ;; Only show file encoding if it's non-UTF-8 and different line endings
+            ;; than the current OSes preference
+            doom-modeline-buffer-encoding 'nondefault
+            doom-modeline-default-eol-type
+
+
+(cond (IS-MAC 2)
+                  (IS-WINDOWS 1)
+                  (0)))
+      :init
+      (doom-modeline-mode))
+
+    (use-package which-key
+      :defer 0
+      :diminish which-key-mode
+      :init (which-key-mode)
+      :config
+
+
+  (setq which-key-idle-delay 0.3))
+
+    (use-package gcmh
+      :config
+      (gcmh-mode 1))
+#+end_src
+
+* Keybindings
+#+begin_src emacs-lisp
+  (use-package meow
+    :config
+    (setq meow-cheatsheet-physical-layout meow-cheatsheet-physical-layout-iso)
+    (defun meow-setup ()
+      (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+      (meow-motion-overwrite-define-key
+       '("j" . meow-next)
+       '("k" . meow-prev)
+       '("<escape>" . ignore))
+      (meow-leader-define-key
+       ;; SPC j/k will run the original command in MOTION state.
+       '("j" . "H-j")
+       '("k" . "H-k")
+       ;; Use SPC (0-9) for digit arguments.
+       '("1" . meow-digit-argument)
+       '("2" . meow-digit-argument)
+       '("3" . meow-digit-argument)
+       '("4" . meow-digit-argument)
+       '("5" . meow-digit-argument)
+       '("6" . meow-digit-argument)
+       '("7" . meow-digit-argument)
+       '("8" . meow-digit-argument)
+       '("9" . meow-digit-argument)
+       '("0" . meow-digit-argument)
+       '("." . find-file)
+       '("/" . meow-keypad-describe-key)
+       '("?" . meow-cheatsheet)
+       '("SPC" . consult-projectile-find-file)
+       '("TAB" . persp-switch)
+       '("t" . treemacs-select-window)
+       '("ac" . quick-calc)
+       '("bb" . consult-projectile-switch-to-buffer)
+       '("bB" . consult-buffer)
+       '("bd" . kill-this-buffer)
+       '("cc" . projectile-compile-project)
+       '("pp" . projectile-switch-project)
+       '("op" . +treemacs/toggle)
+       '("fs" . save-buffer)
+       '("fde" . (lambda ()
+                   (interactive)
+                   (find-file (expand-file-name (concat user-emacs-directory "init.el")))))
+       '("sp" . consult-ripgrep)
+       '("ss" . consult-line)
+       )
+      (meow-normal-define-key
+       '("0" . meow-expand-0)
+       '("9" . meow-expand-9)
+       '("8" . meow-expand-8)
+       '("7" . meow-expand-7)
+       '("6" . meow-expand-6)
+       '("5" . meow-expand-5)
+       '("4" . meow-expand-4)
+       '("3" . meow-expand-3)
+       '("2" . meow-expand-2)
+       '("1" . meow-expand-1)
+       '("-" . negative-argument)
+       '(";" . meow-reverse)
+       '("," . meow-inner-of-thing)
+       '("." . meow-bounds-of-thing)
+       '("#" . comment-line)
+       '("/" . meow-visit)
+       '("?" . meow-comment)
+       '("[" . meow-beginning-of-thing)
+       '("]" . meow-end-of-thing)
+       '("a" . meow-append)
+       '("A" . meow-open-below)
+       '("b" . meow-back-word)
+       '("B" . meow-back-symbol)
+       '("c" . meow-change)
+       '("d" . meow-delete)
+       '("D" . meow-backward-delete)
+       '("w" . meow-next-word)
+       '("W" . meow-next-symbol)
+       '("f" . meow-find)
+       '("g" . meow-cancel-selection)
+       '("G" . meow-grab)
+       '("h" . meow-left)
+       '("H" . meow-left-expand)
+       '("i" . meow-insert)
+       '("I" . meow-open-above)
+       '("j" . meow-next)
+       '("J" . meow-next-expand)
+       '("k" . meow-prev)
+       '("K" . meow-prev-expand)
+       '("l" . meow-right)
+       '("L" . meow-right-expand)
+       '("m" . meow-join)
+       '("n" . meow-search)
+       '("o" . meow-block)
+       '("O" . meow-to-block)
+       '("p" . yank)
+       '("q" . meow-quit)
+       '("Q" . meow-goto-line)
+       '("r" . meow-replace)
+       '("R" . meow-swap-grab)
+       '("s" . meow-kill)
+       '("t" . meow-till)
+       '("u" . meow-undo)
+       '("U" . meow-undo-in-selection)
+       '("v" . meow-visit)
+       '("e" . meow-mark-word)
+       '("E" . meow-mark-symbol)
+       '("x" . meow-line)
+       '("X" . meow-goto-line)
+       '("y" . meow-save)
+       '("Y" . meow-sync-grab)
+       '("z" . meow-pop-selection)
+       '("'" . repeat)
+       '("<escape>" . ignore)))
+    (meow-setup)
+    :init
+    (meow-global-mode 1))
+
+  (use-package multiple-cursors)
+#+end_src
+
+
+
+
+

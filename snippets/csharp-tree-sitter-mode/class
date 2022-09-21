@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: class 
+# key: \class
+# --
+namespace $1;
+$2 class `(file-name-sans-extension (file-name-nondirectory buffer-file-name))`
+{
+    $0
+}

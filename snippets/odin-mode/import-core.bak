@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: import 
+# key: /ic 
+# --
+import $2 \"core:${1:fmt}\"
+$0
