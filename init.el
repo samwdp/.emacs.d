@@ -14,12 +14,12 @@
 (add-hook 'minibuffer-exit-hook #'sp/restore-garbage-collection-h)
 
 (setq emacs-version-short  (replace-regexp-in-string
-                                            "\\([0-9]+\\)\\.\\([0-9]+\\).*"
-                                            "\\1_\\2" emacs-version))
+                            "\\([0-9]+\\)\\.\\([0-9]+\\).*"
+                            "\\1_\\2" emacs-version))
 
 (setq custom-file (expand-file-name
-                    (concat "custom_" emacs-version-short ".el")
-                    user-emacs-directory))
+                   (concat "custom_" emacs-version-short ".el")
+                   user-emacs-directory))
 
 (defconst NATIVECOMP (if (fboundp 'native-comp-available-p) (native-comp-available-p)))
 (defconst IS-MAC     (eq system-type 'darwin))
@@ -33,7 +33,7 @@
   (message "Emacs loaded in %s with %d garbage collections."
            (format "%.2f seconds"
                    (float-time
-                     (time-subtract after-init-time before-init-time)))
+                    (time-subtract after-init-time before-init-time)))
            gcs-done))
 
 (when NATIVECOMP
@@ -42,7 +42,7 @@
 
 (unless (featurep 'straight)
   ;; Bootstrap straight.el
- (defvar bootstrap-version)
+  (defvar bootstrap-version)
   (let ((bootstrap-file
          (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
         (bootstrap-version 5))
@@ -83,6 +83,7 @@
 (setq scroll-margin 8
       visible-bell t
       create-lockfiles nil
+      use-short-answers t
       ring-bell-function nil
       make-backup-files t
       backup-by-copying t
@@ -115,8 +116,8 @@
       (unicode-fonts-setup))))
 
 (if (display-graphic-p)
-   (unicode-fonts-setup-h (selected-frame))
- (add-hook 'after-make-frame-functions 'unicode-fonts-setup-h))
+    (unicode-fonts-setup-h (selected-frame))
+  (add-hook 'after-make-frame-functions 'unicode-fonts-setup-h))
 
 (setq-default indent-tabs-mode nil
               tab-width 4)
@@ -130,13 +131,14 @@
 (global-set-key (kbd "C-j") 'windmove-down)
 (global-set-key (kbd "C-k") 'windmove-up)
 (global-set-key (kbd "C-l") 'windmove-right)
-(global-set-key (kbd "C-l") 'windmove-right)
+(global-set-key (kbd "C-SPC") 'company-complete)
+(global-set-key (kbd "C-.") 'lsp-execute-code-action)
 
 (use-package no-littering
   :config
-   (setq auto-save-file-name-transforms
-	`((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
-	)
+  (setq auto-save-file-name-transforms
+	    `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
+  )
 
 (setq custom-theme-directory (concat user-emacs-directory "themes/"))
 (use-package doom-themes
@@ -153,6 +155,7 @@
         doom-modeline-workspace-name nil
         doom-modeline-minor-modes nil
         doom-modeline-major-mode-icon nil
+        doom-modeline-vcs-max-length 50
         doom-modeline-buffer-file-name-style 'truncate-all
         ;; Only show file encoding if it's non-UTF-8 and different line endings
         ;; than the current OSes preference
@@ -173,6 +176,7 @@
 
 (use-package meow
   :config
+  (setq meow-use-clipboard t)
   (setq meow-cheatsheet-physical-layout meow-cheatsheet-physical-layout-iso)
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
@@ -202,6 +206,7 @@
      '("TAB" . persp-switch)
      '("ac" . quick-calc)
      '("bb" . consult-projectile-switch-to-buffer)
+     '("bd" . kill-this-buffer)
      '("bB" . consult-buffer)
      '("cc" . projectile-compile-project)
      '("og" . magit-status)
@@ -354,7 +359,7 @@
 
 (use-package company
   :bind (:map company-active-map
-         ("<tab>" . company-complete-selection))
+              ("<tab>" . company-complete-selection))
   :init
   (global-company-mode 1)
   :config
@@ -397,9 +402,9 @@
   :after vertico
   :config
   (setq vertico-posframe-parameters
-      '((left-fringe . 5)
-        (right-fringe . 5)
-        (min-height . ,vertico-count)))
+        '((left-fringe . 5)
+          (right-fringe . 5)
+          (min-height . ,vertico-count)))
   (setq vertico-posframe-border-width 2)
   (setq vertico-posframe-poshandler #'posframe-poshandler-frame-bottom-center)
   :init
@@ -427,7 +432,7 @@
    :preview-key (kbd "M-."))
   (setq consult-narrow-key "<"))
 
-(use-package embark-consult 
+(use-package embark-consult
   :after (embark consult))
 
 (use-package consult-dir)
@@ -435,36 +440,36 @@
 (use-package consult-flycheck)
 
 (use-package consult-projectile
- :straight (consult-projectile :type git :host gitlab :repo "OlMon/consult-projectile" :branch "master"))
+  :straight (consult-projectile :type git :host gitlab :repo "OlMon/consult-projectile" :branch "master"))
 
 (use-package flycheck
- :commands flycheck-list-errors flycheck-buffer
- :config
-   (setq flycheck-emacs-lisp-load-path 'inherit)
-   (delq 'new-line flycheck-check-syntax-automatically)
-   (setq flycheck-idle-change-delay 1.0)
-   (setq flycheck-buffer-switch-check-intermediate-buffers t)
-   (setq flycheck-display-errors-delay 0.25))
+  :commands flycheck-list-errors flycheck-buffer
+  :config
+  (setq flycheck-emacs-lisp-load-path 'inherit)
+  (delq 'new-line flycheck-check-syntax-automatically)
+  (setq flycheck-idle-change-delay 1.0)
+  (setq flycheck-buffer-switch-check-intermediate-buffers t)
+  (setq flycheck-display-errors-delay 0.25))
 
 (use-package projectile
- :defer t
- :config
- (setq projectile-indexing-method 'hybrid)
- (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
- (projectile-mode +1)
- :init
- (setq projectile-enable-caching t)
- (setq projectile-project-search-path '("W:/"
-                                        "W:/personal/angular/src"
-                                        "W:/personal/c/src"
-                                        "W:/personal/cpp/src"
-                                        "W:/personal/csharp/src"
-                                        "W:/personal/emacs/src"
-                                        "W:/personal/odin/src"
-                                        "W:/personal/go/src"
-                                        "W:/personal/rust/src"
-                                        "W:/personal/odin/src"
-                                        "W:/foresolutions")))
+  :defer t
+  :config
+  (setq projectile-indexing-method 'hybrid)
+  (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
+  (projectile-mode +1)
+  :init
+  (setq projectile-enable-caching t)
+  (setq projectile-project-search-path '("W:/"
+                                         "W:/personal/angular/src"
+                                         "W:/personal/c/src"
+                                         "W:/personal/cpp/src"
+                                         "W:/personal/csharp/src"
+                                         "W:/personal/emacs/src"
+                                         "W:/personal/odin/src"
+                                         "W:/personal/go/src"
+                                         "W:/personal/rust/src"
+                                         "W:/personal/odin/src"
+                                         "W:/foresolutions")))
 
 (use-package persp-projectile)
 
@@ -481,7 +486,7 @@
   :defer t
   :init
   (setq treemacs-follow-after-init t
-        treemacs-is-never-other-window t
+        treemacs-is-never-other-window nil
         treemacs-width 50
         treemacs-position 'right
         treemacs-sorting 'alphabetic-case-insensitive-asc)
@@ -557,6 +562,12 @@ Returns nil if not in a project."
       (gcmh-set-high-threshold)
       (setq +lsp--optimization-init-p t))))
 
+(defvar +lsp-company-backends
+  '(company-tabnine :separate company-capf company-yasnippet)
+  "The backends to prepend to `company-backends' in `lsp-mode' buffers.
+Can be a list of backends; accepts any value `company-backends' accepts.")
+
+;; (require 'init-tabnine-capf)
 (use-package lsp-mode
   :hook ((csharp-tree-sitter-mode
           web-mode
@@ -565,12 +576,13 @@ Returns nil if not in a project."
           json-mode
           yaml-mode
           css-mode
-          csproj-mode
+          ;; csproj-mode
           sass-mode
           go-mode
           pwsh-mode
           cc-mode
           c-mode
+          sql-mode
           rust-mode
           dockerfile-mode) . #'lsp)
   :hook (lsp-mode . +lsp-optimization-mode)
@@ -582,29 +594,37 @@ Returns nil if not in a project."
         lsp-modeline-diagnostics-enable nil
         lsp-modeline-code-actions-enable nil
         lsp-lens-enable nil
+        lsp-enable-file-watchers nil
         lsp-enable-folding nil
         lsp-enable-text-document-color nil
         lsp-enable-on-type-formatting nil)
   :config
+
+  (add-hook 'lsp-completion-mode-hook
+            (defun +lsp-init-company-backends-h ()
+              (when lsp-completion-mode
+                (set (make-local-variable 'company-backends)
+                     (cons +lsp-company-backends
+                           (remove +lsp-company-backends
+                                   (remq 'company-capf company-backends)))))))
+  
   (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols)
 
   (add-to-list 'lsp-language-id-configuration '(odin-mode . "odin"))
-  (add-to-list 'lsp-language-id-configuration '(web-mode . "razor"))
-  (add-to-list 'lsp-language-id-configuration '(csproj-mode . "csharp"))
+  (add-to-list 'lsp-language-id-configuration '(sql-mode . "sql"))
+  ;; (add-to-list 'lsp-language-id-configuration '(csproj-mode . "csharp"))
 
   (lsp-register-client
-    (make-lsp-client :new-connection (lsp-stdio-connection "ols")
-                      :major-modes '(odin-mode)
-                      :server-id 'ols
-                      :multi-root t))
+   (make-lsp-client :new-connection (lsp-stdio-connection "ols")
+                    :major-modes '(odin-mode)
+                    :server-id 'ols
+                    :multi-root t))
   (lsp-register-client
-    (make-lsp-client :new-connection (lsp-stdio-connection "c:/tools/rzls/rzls.exe")
-                      :major-modes '(web-mode)
-                      :notification-handlers (ht ("razor/updateHtmlBuffer" 'ignore)
-                                                 ("razor/provideCodeActions" 'ignore)
-                                                 ("razor/updateCSharpBuffer" 'ignore))
-                      :server-id 'rzls
-                      :multi-root t))
+   (make-lsp-client :new-connection (lsp-stdio-connection "c:/tools/sqls/sqls.exe")
+                    :major-modes '(sql-mode)
+                    :server-id 'sql
+                    :multi-root t))
+
   (add-hook 'before-save-hook 'lsp-format-buffer)
   (lsp-enable-which-key-integration t))
 
@@ -651,6 +671,9 @@ Returns nil if not in a project."
 
 (use-package cheat-sh)
 
+;; (use-package lsp-mssql
+;;   :hook (sql-mode . #'lsp))
+
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 
@@ -668,13 +691,13 @@ Returns nil if not in a project."
   :defer t)
 
 (use-package csharp-mode
-   :mode (("\\.cs\\'" . csharp-tree-sitter-mode)
-          ("\\.csx\\'" . csharp-tree-sitter-mode))
-   :config
-   (require 'dap-netcore))
+  :mode (("\\.cs\\'" . csharp-tree-sitter-mode)
+         ("\\.csx\\'" . csharp-tree-sitter-mode))
+  :config
+  (require 'dap-netcore))
 
 (use-package sharper
-   :bind ("C-c n" . sharper-main-transient))
+  :bind ("C-c n" . sharper-main-transient))
 
 (use-package sln-mode :mode "\\.sln\\'")
 
@@ -683,38 +706,46 @@ Returns nil if not in a project."
   :mode "\\.csproj\\'")
 
 (use-package odin-mode
-   :straight (odin-mode :type git :host github :repo "mattt-b/odin-mode")
-   :mode "\\.odin\\'")
+  :straight (odin-mode :type git :host github :repo "mattt-b/odin-mode")
+  :mode "\\.odin\\'")
 
 (use-package typescript-mode
-   :mode "\\.ts\\'"
-   :mode "\\.tsx\\'"
-   :config
-   (require 'dap-node)
-   (require 'dap-chrome)
-   (setq typescript-indent-level 2))
+  :mode "\\.ts\\'"
+  :mode "\\.tsx\\'"
+  :config
+  (require 'dap-node)
+  (require 'dap-chrome)
+  (setq typescript-indent-level 2))
 
 (use-package web-mode
-   :mode "\\.razor\\'"
-   :mode "\\.cshtml\\'")
+  :mode "\\.html?\\'"
+  :mode "\\.razor?\\'"
+  :mode "\\.cshtml?\\'"
+  :config
+  (setq web-mode-engines-alist
+	    '(("razor"    . "\\.cshtml\\'")
+	      ("blade"  . "\\.blade\\.")
+	      ("svelte" . "\\.svelte\\.")
+          ))
+  )
 
 (use-package sass-mode
-   :mode "\\.sass\\'")
+  :mode "\\.sass\\'")
 
 (use-package css-mode
-   :mode "\\.css\\'")
+  :mode "\\.css\\'")
 
 (use-package scss-mode
-   :mode "\\.scss\\'")
+  :mode "\\.scss\\'")
 
 (use-package go-mode
-   :mode "\\.go\\'")
+  :mode "\\.go\\'")
 
 (use-package json-mode
-   :mode "\\.js\\(?:on\\|[hl]int\\(?:rc\\)?\\)\\'")
+  :mode "\\.js\\(?:on\\|[hl]int\\(?:rc\\)?\\)\\'")
 
 (use-package yaml-mode
-   :mode "Procfile\\'")
+  :mode "Procfile\\'")
 
 (use-package cc-mode)
 
@@ -728,10 +759,10 @@ Returns nil if not in a project."
 (use-package dockerfile-mode)
 
 (use-package docker
-   :defer t)
+  :defer t)
 
 (use-package ahk-mode
-   :hook (ahk-mode . rainbow-delimiters-mode))
+  :hook (ahk-mode . rainbow-delimiters-mode))
 
 ;; (use-package
 ;;   :straight (lsp-tailwindcss :type git :host github :repo "merrickluo/lsp-tailwindcss"))
@@ -739,8 +770,8 @@ Returns nil if not in a project."
 (use-package format-all)
 
 (use-package magit
-   :defer t
-   :commands (magit-status magit-get-current-branch))
+  :defer t
+  :commands (magit-status magit-get-current-branch))
 
 (defun +plantuml-org-babel-execute:plantuml-a (body params)
   "Execute a block of plantuml code with org-babel.
@@ -804,58 +835,57 @@ This function is called by `org-babel-execute-src-block'."
       out-file)))
 ;; (require 'ob-plantuml)
 (with-eval-after-load 'org
-   (advice-add #'org-babel-execute:plantuml
+  (advice-add #'org-babel-execute:plantuml
               :override #'+plantuml-org-babel-execute:plantuml-a)
 
-(org-babel-do-load-languages 'org-babel-load-languages '((ruby . t)
-                                                         (plantuml . t)
-                                                         (csharp . t)
-                                                         (emacs-lisp . t))))
+  (org-babel-do-load-languages 'org-babel-load-languages '((ruby . t)
+                                                           (plantuml . t)
+                                                           (emacs-lisp . t))))
 (use-package org-mode
- :hook ((org-mode . org-fancy-priorities-mode))
- :config
- ;; (add-to-list 'org-src-lang-modes '("plantuml" . plantuml))
- ;; (org-babel-do-load-languages
- ;; 'org-babel-load-languages
- ;; '((plantuml . t)))
- ;; (org-babel-do-load-languages 'org-babel-load-languages '((plantuml . t)
- ;;                                                          (emacs-lisp . t)))
- (setq org-plantuml-jar-path "c:/tools/plantuml/plantuml.jar")
- (setq org-return-follows-link t)
- (setq org-superstar-special-todo-items t)
- (setq org-ellipsis " ▼")
- (setq org-todo-keywords
-       '((sequence
-          "TODO(t)"  ; A task that needs doing & is ready to do
-          "PROJ(p)"  ; A project, which usually contains other tasks
-          "LOOP(r)"  ; A recurring task
-          "STRT(s)"  ; A task that is in progress
-          "WAIT(w)"  ; Something external is holding up this task
-          "HOLD(h)"  ; This task is paused/on hold because of me
-          "IDEA(i)"  ; An unconfirmed and unapproved task or notion
-          "|"
-          "DONE(d)"  ; Task successfully completed
-          "KILL(k)") ; Task was cancelled, aborted or is no longer applicable
-         (sequence
-          "[ ](T)"   ; A task that needs doing
-          "[-](S)"   ; Task is in progress
-          "[?](W)"   ; Task is being held up or paused
-          "|"
-          "[X](D)")  ; Task was completed
-         (sequence
-          "|"
-          "OKAY(o)"
-          "YES(y)"
-          "NO(n)"))
-       org-todo-keyword-faces
-       '(("[-]"  . +org-todo-active)
-         ("STRT" . +org-todo-active)
-         ("[?]"  . +org-todo-onhold)
-         ("WAIT" . +org-todo-onhold)
-         ("HOLD" . +org-todo-onhold)
-         ("PROJ" . +org-todo-project)
-         ("NO"   . +org-todo-cancel)
-         ("KILL" . +org-todo-cancel))))
+  :hook ((org-mode . org-fancy-priorities-mode))
+  :config
+  ;; (add-to-list 'org-src-lang-modes '("plantuml" . plantuml))
+  ;; (org-babel-do-load-languages
+  ;; 'org-babel-load-languages
+  ;; '((plantuml . t)))
+  ;; (org-babel-do-load-languages 'org-babel-load-languages '((plantuml . t)
+  ;;                                                          (emacs-lisp . t)))
+  (setq org-plantuml-jar-path "c:/tools/plantuml/plantuml.jar")
+  (setq org-return-follows-link t)
+  (setq org-superstar-special-todo-items t)
+  (setq org-ellipsis " ▼")
+  (setq org-todo-keywords
+        '((sequence
+           "TODO(t)"  ; A task that needs doing & is ready to do
+           "PROJ(p)"  ; A project, which usually contains other tasks
+           "LOOP(r)"  ; A recurring task
+           "STRT(s)"  ; A task that is in progress
+           "WAIT(w)"  ; Something external is holding up this task
+           "HOLD(h)"  ; This task is paused/on hold because of me
+           "IDEA(i)"  ; An unconfirmed and unapproved task or notion
+           "|"
+           "DONE(d)"  ; Task successfully completed
+           "KILL(k)") ; Task was cancelled, aborted or is no longer applicable
+          (sequence
+           "[ ](T)"   ; A task that needs doing
+           "[-](S)"   ; Task is in progress
+           "[?](W)"   ; Task is being held up or paused
+           "|"
+           "[X](D)")  ; Task was completed
+          (sequence
+           "|"
+           "OKAY(o)"
+           "YES(y)"
+           "NO(n)"))
+        org-todo-keyword-faces
+        '(("[-]"  . +org-todo-active)
+          ("STRT" . +org-todo-active)
+          ("[?]"  . +org-todo-onhold)
+          ("WAIT" . +org-todo-onhold)
+          ("HOLD" . +org-todo-onhold)
+          ("PROJ" . +org-todo-project)
+          ("NO"   . +org-todo-cancel)
+          ("KILL" . +org-todo-cancel))))
 
 ;;;###autoload
 (defun +org/table-previous-row ()
@@ -949,12 +979,12 @@ re-align the table if necessary. (Necessary because org-mode has a
   :hook ((org-mode . org-superstar-mode))
   :init
   (setq org-superstar-todo-bullet-alist
-          '(("TODO" "☐　")
-            ("NEXT" "✒　")
-            ("PROG" "✰　")
-            ("WAIT" "☕　")
-            ("FAIL" "✘　")
-            ("DONE" "✔　")))
+        '(("TODO" "☐　")
+          ("NEXT" "✒　")
+          ("PROG" "✰　")
+          ("WAIT" "☕　")
+          ("FAIL" "✘　")
+          ("DONE" "✔　")))
   (setq org-superstar-leading-bullet ?\s
         org-superstar-leading-fallback ?\s
         ;; org-superstar-remove-leading-stars t
@@ -1023,33 +1053,33 @@ re-align the table if necessary. (Necessary because org-mode has a
 (use-package yasnippet
   :defer t
   :config
-   (defun check-expansion ()
-      (save-excursion
-        (if (looking-at "\\_>") t
+  (defun check-expansion ()
+    (save-excursion
+      (if (looking-at "\\_>") t
+        (backward-char 1)
+        (if (looking-at "\\.") t
           (backward-char 1)
-          (if (looking-at "\\.") t
-            (backward-char 1)
-            (if (looking-at "->") t nil)))))
+          (if (looking-at "->") t nil)))))
 
-   (defun do-yas-expand ()
-     (let ((yas/fallback-behavior 'return-nil))
-       (yas/expand)))
+  (defun do-yas-expand ()
+    (let ((yas/fallback-behavior 'return-nil))
+      (yas/expand)))
 
-   (defun tab-indent-or-complete ()
-     (interactive)
-     (if (minibufferp)
-         (minibuffer-complete)
-       (if (or (not yas/minor-mode)
-               (null (do-yas-expand)))
-           (if (check-expansion)
-               (company-complete-common)
-             (indent-for-tab-command)))))
+  (defun tab-indent-or-complete ()
+    (interactive)
+    (if (minibufferp)
+        (minibuffer-complete)
+      (if (or (not yas/minor-mode)
+              (null (do-yas-expand)))
+          (if (check-expansion)
+              (company-complete-common)
+            (indent-for-tab-command)))))
 
-   (global-set-key (kbd "C-<return>") 'tab-indent-or-complete)
+  (global-set-key (kbd "C-<return>") 'tab-indent-or-complete)
   :init
-   (defvar user-snippets (concat user-emacs-directory "snippets/"))
-   (setq yas-snippet-dirs '(user-snippets))
-   (yas-global-mode 1))
+  (defvar user-snippets (concat user-emacs-directory "snippets/"))
+  (setq yas-snippet-dirs '(user-snippets))
+  (yas-global-mode 1))
 
 (use-package yasnippet-snippets
   :after yasnippet)
@@ -1060,7 +1090,7 @@ re-align the table if necessary. (Necessary because org-mode has a
 (use-package yatemplate
   :defer t
   :config
-    (yatemplate-fill-alist)
-    (auto-insert-mode +1))
+  (yatemplate-fill-alist)
+  (auto-insert-mode +1))
 
 (setq gc-cons-thershold (* 2 1000 1000))
