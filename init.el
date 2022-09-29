@@ -212,6 +212,7 @@
      '("og" . magit-status)
      '("pp" . projectile-switch-project)
      '("op" . +treemacs/toggle)
+     '("ot" . shell)
      '("fs" . write-file)
      '("fde" . (lambda ()
                  (interactive)
@@ -359,7 +360,9 @@
 
 (use-package company
   :bind (:map company-active-map
-              ("<tab>" . company-complete-selection))
+              ("<tab>" . company-complete-selection)
+              ("RET" . nil)
+              ("<return>" . nil))
   :init
   (global-company-mode 1)
   :config
@@ -494,10 +497,9 @@
   (treemacs-follow-mode -1))
 
 (use-package treemacs-magit
-  :after treemacs magit)
-
-(use-package lsp-treemacs
-  :after (treemacs lsp))
+  :after treemacs magit
+  :bind (:map magit-status-mode-map
+              ("K" . magit-discard)))
 
 (use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
   :after (treemacs persp-mode) ;;or perspective vs. persp-mode
@@ -534,6 +536,7 @@ Returns nil if not in a project."
 (defvar +lsp--default-gcmh-high-cons-threshold nil)
 (defvar +lsp--optimization-init-p nil)
 
+
 (define-minor-mode +lsp-optimization-mode
   "Deploys universal GC and IPC optimizations for `lsp-mode' and `eglot'."
   :global t
@@ -562,8 +565,13 @@ Returns nil if not in a project."
       (gcmh-set-high-threshold)
       (setq +lsp--optimization-init-p t))))
 
+;; use lsp
+
+(use-package lsp-treemacs
+  :after (treemacs lsp))
+
 (defvar +lsp-company-backends
-  '(company-tabnine :separate company-capf company-yasnippet)
+  '(:separate company-capf company-yasnippet)
   "The backends to prepend to `company-backends' in `lsp-mode' buffers.
 Can be a list of backends; accepts any value `company-backends' accepts.")
 
@@ -586,27 +594,30 @@ Can be a list of backends; accepts any value `company-backends' accepts.")
           rust-mode
           dockerfile-mode) . #'lsp)
   :hook (lsp-mode . +lsp-optimization-mode)
+  :hook (lsp-mode . lsp-signature-mode)
   :commands (lsp lsp-deferred)
   :init
   (setq lsp-keymap-prefix "C-c l")
   (setq lsp-headerline-breadcrumb-enable t
+        lsp-headerline-breadcrumb-icons-enable t
         lsp-keep-workspace-alive nil
         lsp-modeline-diagnostics-enable nil
         lsp-modeline-code-actions-enable nil
         lsp-lens-enable nil
+        lsp-enable-which-key-integration t
         lsp-enable-file-watchers nil
         lsp-enable-folding nil
         lsp-enable-text-document-color nil
         lsp-enable-on-type-formatting nil)
   :config
 
-  (add-hook 'lsp-completion-mode-hook
-            (defun +lsp-init-company-backends-h ()
-              (when lsp-completion-mode
-                (set (make-local-variable 'company-backends)
-                     (cons +lsp-company-backends
-                           (remove +lsp-company-backends
-                                   (remq 'company-capf company-backends)))))))
+  ;; (add-hook 'lsp-completion-mode-hook
+  ;;           (defun +lsp-init-company-backends-h ()
+  ;;             (when lsp-completion-mode
+  ;;               (set (make-local-variable 'company-backends)
+  ;;                    (cons +lsp-company-backends
+  ;;                          (remove +lsp-company-backends
+  ;;                                  (remq 'company-capf company-backends)))))))
   
   (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols)
 
@@ -635,14 +646,18 @@ Can be a list of backends; accepts any value `company-backends' accepts.")
         lsp-ui-doc-max-width 72
         lsp-ui-doc-show-with-cursor t
         lsp-ui-doc-show-with-mouse nil
-        lsp-ui-sideline-show-hover nil
-        lsp-ui-sideline-actions-icon lsp-ui-sideline-actions-icon-default
         lsp-ui-doc-include-signature t
         lsp-ui-doc-delay 0.75
-        lsp-ui-sideline-ignore-duplicate t
         lsp-ui-doc-alignment 'window
-        lsp-ui-doc-position 'at-point
-        lsp-ui-doc-use-webkit t)
+        lsp-ui-doc-position 'top-right-corner
+        lsp-ui-doc-use-webkit t
+        lsp-signature-auto-activate t
+        lsp-signature-render-documentation t
+        lsp-ui-sideline-show-code-actions nil
+        lsp-ui-sideline-ignore-duplicate t
+        lsp-ui-sideline-show-hover t
+        lsp-ui-sideline-show-diagnostics t
+        lsp-ui-sideline-actions-icon lsp-ui-sideline-actions-icon-default)
   (define-key lsp-ui-peek-mode-map (kbd "j") #'lsp-ui-peek--select-next)
   (define-key lsp-ui-peek-mode-map (kbd "k") #'lsp-ui-peek--select-prev)
   (define-key lsp-ui-peek-mode-map (kbd "M-j") #'lsp-ui-peek--select-next-file)
@@ -669,10 +684,18 @@ Can be a list of backends; accepts any value `company-backends' accepts.")
   :hook (dap-mode . dap-ui-mode)
   :hook (dap-ui-mode . dap-ui-controls-mode))
 
-(use-package cheat-sh)
+;; use eglot
 
-;; (use-package lsp-mssql
-;;   :hook (sql-mode . #'lsp))
+;; (use-package eglot
+;;   :commands eglot eglot-ensure
+;;   :config
+;;   (add-to-list 'eglot-server-programs '(csharp-tree-sitter-mode . ("omnisharp" "-lsp")))
+;;   (add-to-list 'eglot-server-programs '(odin-mode . ("ols")))
+;;   )
+
+;; use realgud
+
+(use-package cheat-sh)
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
@@ -692,9 +715,7 @@ Can be a list of backends; accepts any value `company-backends' accepts.")
 
 (use-package csharp-mode
   :mode (("\\.cs\\'" . csharp-tree-sitter-mode)
-         ("\\.csx\\'" . csharp-tree-sitter-mode))
-  :config
-  (require 'dap-netcore))
+         ("\\.csx\\'" . csharp-tree-sitter-mode)))
 
 (use-package sharper
   :bind ("C-c n" . sharper-main-transient))
@@ -713,8 +734,6 @@ Can be a list of backends; accepts any value `company-backends' accepts.")
   :mode "\\.ts\\'"
   :mode "\\.tsx\\'"
   :config
-  (require 'dap-node)
-  (require 'dap-chrome)
   (setq typescript-indent-level 2))
 
 (use-package web-mode
@@ -763,9 +782,6 @@ Can be a list of backends; accepts any value `company-backends' accepts.")
 
 (use-package ahk-mode
   :hook (ahk-mode . rainbow-delimiters-mode))
-
-;; (use-package
-;;   :straight (lsp-tailwindcss :type git :host github :repo "merrickluo/lsp-tailwindcss"))
 
 (use-package format-all)
 
