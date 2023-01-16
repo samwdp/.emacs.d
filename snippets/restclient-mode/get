@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: get
+# key: \g
+# --
+
+GET $0

@@ -1,5 +1,9 @@
 (setq gc-cons-thershold 100000000)
 (setq read-process-output-max (* 1024 1024)) ;; 1mb
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("org" . "https://orgmode.org/elpa/")
+                         ("elpa" . "https://elpa.gnu.org/packages/")))
+(setq package-check-signature nil)
 
 (defun sp/defer-garbage-collection-h ()
   (setq gc-cons-threshold most-positive-fixnum))
@@ -10,6 +14,10 @@
   (run-at-time
    1 nil (lambda () (setq gc-cons-threshold 16777216))))
 
+(defun transparency (value)
+   "Sets the transparency of the frame window. 0=transparent/100=opaque"
+   (interactive "nTransparency Value 0 - 100 opaque:")
+   (set-frame-parameter (selected-frame) 'alpha value))
 (add-hook 'minibuffer-setup-hook #'sp/defer-garbage-collection-h)
 (add-hook 'minibuffer-exit-hook #'sp/restore-garbage-collection-h)
 
@@ -81,6 +89,7 @@
 (global-visual-line-mode)
 (menu-bar-mode -1)            ; Disable the menu bar
 (setq scroll-margin 8
+      idle-update-delay 0.05
       visible-bell t
       create-lockfiles nil
       use-short-answers t
@@ -93,19 +102,20 @@
       kept-new-versions 6
       kept-old-versions 2
       version-control t
+      mode-line-end-spaces nil
       set-language-environment "UTF-8")
 
-(defvar sp/text-height 17)
+(defvar sp/text-height 18)
 ;; (defvar sp/text-height 28)
 (defvar sp/text-height-variable 20)
-(defvar sp/font-string "LiterationMono Nerd Font")
+(defvar sp/font-string "FiraCode Nerd Font")
 
 (defun sp/new-frame ()
   (set-face-attribute 'default nil :font (font-spec :family sp/font-string :size sp/text-height))
   (set-face-attribute 'fixed-pitch nil :font (font-spec :family sp/font-string :size sp/text-height))
   (set-face-attribute 'fixed-pitch-serif nil :font (font-spec :family sp/font-string :size sp/text-height))
   (set-face-attribute 'variable-pitch nil :font (font-spec :family sp/font-string :size sp/text-height-variable))
-  (toggle-frame-maximized))
+  (transparency 85))
 
 (defun unicode-fonts-setup-h (frame)
   "Run unicode-fonts-setup, then remove the hook."
@@ -120,8 +130,13 @@
   (add-hook 'after-make-frame-functions 'unicode-fonts-setup-h))
 
 (setq-default indent-tabs-mode nil
-              tab-width 4)
+              tab-width 4
+              fill-column 80)
+(global-display-fill-column-indicator-mode)
 (setq-default tab-always-indent nil)
+(setq-default display-line-numbers-type 'relative)
+
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
 
 (defconst emacs-tmp-dir (expand-file-name "temp/" "~/.emacs.cache"))
 (setq backup-directory-alist
@@ -131,18 +146,22 @@
 (global-set-key (kbd "C-j") 'windmove-down)
 (global-set-key (kbd "C-k") 'windmove-up)
 (global-set-key (kbd "C-l") 'windmove-right)
-(global-set-key (kbd "C-SPC") 'company-complete)
-(global-set-key (kbd "C-.") 'lsp-execute-code-action)
+(global-set-key (kbd "C-SPC") 'completion-at-point)
+;; (global-set-key (kbd "C-.") lsp-execute-code-action)
+(global-set-key (kbd "C--") 'text-scale-decrease)
+(global-set-key (kbd "C-=") 'text-scale-increase)
+(global-set-key (kbd "M-RET") 'harpoon-add-file)
+
 
 (use-package no-littering
   :config
   (setq auto-save-file-name-transforms
-	    `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
-  )
+	    `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
 
 (setq custom-theme-directory (concat user-emacs-directory "themes/"))
+
 (use-package doom-themes
-  :init (load-theme 'gruvbox t))
+  :init (load-theme 'gruvbox-sp t))
 
 (use-package doom-modeline
   :hook (doom-modeline-mode . size-indication-mode)
@@ -152,6 +171,7 @@
         doom-modeline-github nil
         doom-modeline-mu4e nil
         doom-modeline-persp-name t
+        doom-modeline-buffer-encoding nil
         doom-modeline-workspace-name nil
         doom-modeline-minor-modes nil
         doom-modeline-major-mode-icon nil
@@ -159,7 +179,6 @@
         doom-modeline-buffer-file-name-style 'truncate-all
         ;; Only show file encoding if it's non-UTF-8 and different line endings
         ;; than the current OSes preference
-        doom-modeline-buffer-encoding 'nondefault
         doom-modeline-default-eol-type
         (cond (IS-MAC 2)
               (IS-WINDOWS 1)
@@ -186,8 +205,6 @@
      '("<escape>" . ignore))
     (meow-leader-define-key
      ;; SPC j/k will run the original command in MOTION state.
-     '("j" . "H-j")
-     '("k" . "H-k")
      ;; Use SPC (0-9) for digit arguments.
      '("1" . meow-digit-argument)
      '("2" . meow-digit-argument)
@@ -209,11 +226,19 @@
      '("bd" . kill-this-buffer)
      '("bB" . consult-buffer)
      '("cc" . projectile-compile-project)
+     '("db" . killthis-buffer)
+     '("dp" . persp-kill)
+     '("is" . consult-yasnippet)
      '("og" . magit-status)
      '("pp" . projectile-switch-project)
+     '("pd" . persp-kill)
      '("op" . +treemacs/toggle)
-     '("ot" . shell)
+     
+     (if IS-LINUX
+         '("ot" . vterm)
+       '("ot" . shell))
      '("fs" . write-file)
+     '("ff" . format-all-buffer)
      '("fde" . (lambda ()
                  (interactive)
                  (find-file (expand-file-name (concat user-emacs-directory "init.el")))))
@@ -275,7 +300,9 @@
      '("t" . meow-till)
      '("u" . meow-undo)
      '("U" . meow-undo-in-selection)
-     '("v" . meow-visit)
+     '("v d" . xref-find-definitions)
+     '("v r" . xref-find-references)
+     '("v i" . lsp-ui-peek-find-implementation)
      '("e" . meow-mark-word)
      '("E" . meow-mark-symbol)
      '("x" . meow-line)
@@ -289,7 +316,14 @@
   :init
   (meow-global-mode 1))
 
-(use-package multiple-cursors)
+(when IS-LINUX
+  (use-package vterm
+    :config
+    (define-key vterm-mode-map (kbd "C-l") 'windmove-right)
+    (define-key vterm-mode-map (kbd "C-j") 'windmove-down)
+    (define-key vterm-mode-map (kbd "C-k") 'windmove-up)
+    (define-key vterm-mode-map (kbd "C-h") 'windmove-left)
+    ))
 
 (use-package all-the-icons)
 
@@ -325,6 +359,18 @@
 
 (use-package dtrt-indent)
 
+(use-package harpoon
+  :config
+  (global-set-key (kbd "C-c h RET") 'harpoon-add-file)
+  (global-set-key (kbd "C-c h f") 'harpoon-toggle-file)
+  (global-set-key (kbd "C-c h h") 'harpoon-toggle-quick-menu)
+  (global-set-key (kbd "C-c h c") 'harpoon-clear)
+  (global-set-key (kbd "M-n") 'harpoon-go-to-1)
+  (global-set-key (kbd "M-o") 'harpoon-go-to-3)
+  (global-set-key (kbd "M-e") 'harpoon-go-to-2)
+  (global-set-key (kbd "M-i") 'harpoon-go-to-4)
+  )
+
 (use-package adaptive-wrap)
 
 ;; (use-package topsy
@@ -332,7 +378,10 @@
 ;;   :hook (prog-mode . topsy-mode))
 
 (require 'word-wrap)
+(require 'razor-mode)
 (+global-word-wrap-mode 1)
+(add-hook 'fundamental-mode-hook #'+word-wrap-mode)
+
 (use-package drag-stuff
   :defer t
   :config
@@ -358,30 +407,53 @@
 
 (use-package prescient)
 
-(use-package company
-  :bind (:map company-active-map
-              ("<tab>" . company-complete-selection)
+(use-package corfu
+  :straight (:files (:defaults "extensions/*"))
+  :hook (lsp-completion-mode . corfu-lsp-setup)
+  :bind (:map corfu-map
               ("RET" . nil)
-              ("<return>" . nil))
+              ("TAB" . corfu-insert))
+  :custom
+  (tab-always-indent 'complete-tag)
+  (corfu-separator ?\s)
+  (corfu-cycle t)
+  (corfu-auto t)
+  (corfu-auto-prefix 2)
+  (corfu-auto-delay 0.0)
   :init
-  (global-company-mode 1)
+  (global-corfu-mode)
+  (corfu-popupinfo-mode))
+
+(use-package cape
+  :init
+  (defun my/eglot-capf ()
+    (setq-local completion-at-point-functions
+                (list (cape-super-capf
+                       #'eglot-completion-at-point
+                       (cape-company-to-capf #'company-yasnippet)))))
+  
+  (add-hook 'eglot-managed-mode-hook #'my/eglot-capf)
+  (add-to-list 'completion-at-point-functions #'cape-file))
+
+(use-package kind-icon
+  :after corfu
+  :custom
+  (kind-icon-use-icons t)
+  (kind-icon-default-face 'corfu-default) ; Have background color be the same as `corfu' face background
+  (kind-icon-blend-background nil)  ; Use midpoint color between foreground and background colors ("blended")?
+  (kind-icon-blend-frac 0.08)
+
+  ;; NOTE 2022-02-05: `kind-icon' depends `svg-lib' which creates a cache
+  ;; directory that defaults to the `user-emacs-directory'. Here, I change that
+  ;; directory to a location appropriate to `no-littering' conventions, a
+  ;; package which moves directories of other packages to sane locations.
+  (svg-lib-icons-dir (no-littering-expand-var-file-name "svg-lib/cache/")) ; Change cache dir
   :config
-  (add-to-list 'company-backends #'company-files)
-  (setq company-minimum-prefix-length 2
-        company-idle-delay 0.0
-        company-tooltip-limit 50))
-
-(use-package company-box
-  :hook (company-mode . company-box-mode))
-
-(use-package company-shell
-  :config (add-to-list 'company-backends #'company-shell))
-
-(use-package company-tabnine)
-
-(use-package company-prescient)
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
 (use-package vertico
+  :straight (:files (:defaults "extensions/*"))
+  :hook (vertico-mode . vertico-posframe-mode)
   :config
   (setq vertico-resize nil
         vertico-count 17
@@ -401,13 +473,13 @@
   (completion-styles '(orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
 
+;; when in a gui frame
 (use-package vertico-posframe
   :after vertico
   :config
   (setq vertico-posframe-parameters
         '((left-fringe . 5)
-          (right-fringe . 5)
-          (min-height . ,vertico-count)))
+          (right-fringe . 5)))
   (setq vertico-posframe-border-width 2)
   (setq vertico-posframe-poshandler #'posframe-poshandler-frame-bottom-center)
   :init
@@ -462,17 +534,22 @@
   (projectile-mode +1)
   :init
   (setq projectile-enable-caching t)
-  (setq projectile-project-search-path '("W:/"
-                                         "W:/personal/angular/src"
-                                         "W:/personal/c/src"
-                                         "W:/personal/cpp/src"
-                                         "W:/personal/csharp/src"
-                                         "W:/personal/emacs/src"
-                                         "W:/personal/odin/src"
-                                         "W:/personal/go/src"
-                                         "W:/personal/rust/src"
-                                         "W:/personal/odin/src"
-                                         "W:/foresolutions")))
+  (when IS-WINDOWS
+    (setq projectile-project-search-path '("W:/"
+                                           "W:/personal/angular/src"
+                                           "W:/personal/c/src"
+                                           "W:/personal/cpp/src"
+                                           "W:/personal/csharp/src"
+                                           "W:/personal/emacs/src"
+                                           "W:/personal/odin/src"
+                                           "W:/personal/go/src"
+                                           "W:/personal/rust/src"
+                                           "W:/personal/odin/src"
+                                           "W:/foresolutions")))
+
+  (when IS-LINUX
+    (setq projectile-project-search-path '("~/programming/"
+                                           "~/programming/odin"))))
 
 (use-package persp-projectile)
 
@@ -501,8 +578,8 @@
   :bind (:map magit-status-mode-map
               ("K" . magit-discard)))
 
-(use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
-  :after (treemacs persp-mode) ;;or perspective vs. persp-mode
+(use-package treemacs-perspective ;;treemacs-perspective if you use perspective.el vs. persp-mode
+  :after (treemacs perspective) ;;or perspective vs. persp-mode
   :ensure t
   :config (treemacs-set-scope-type 'Perspectives))
 
@@ -536,7 +613,6 @@ Returns nil if not in a project."
 (defvar +lsp--default-gcmh-high-cons-threshold nil)
 (defvar +lsp--optimization-init-p nil)
 
-
 (define-minor-mode +lsp-optimization-mode
   "Deploys universal GC and IPC optimizations for `lsp-mode' and `eglot'."
   :global t
@@ -567,24 +643,36 @@ Returns nil if not in a project."
 
 ;; use lsp
 
+(use-package eglot
+  :straight nil
+  :bind (:map eglot-mode-map
+              ("C-." . 'eglot-code-actions))
+  :config
+  (setq eglot-connect-timeout 90)
+  (add-to-list 'eglot-server-programs '(odin-mode "ols"))
+)
+
 (use-package lsp-treemacs
   :after (treemacs lsp))
 
-(defvar +lsp-company-backends
-  '(:separate company-capf company-yasnippet)
-  "The backends to prepend to `company-backends' in `lsp-mode' buffers.
-Can be a list of backends; accepts any value `company-backends' accepts.")
+(use-package lsp-tailwindcss
+    :straight (lsp-tailwindcss :type git :host github :repo "merrickluo/lsp-tailwindcss"))
+
+
+(defun corfu-lsp-setup ()
+  (setq-local completion-styles '(orderless)
+              completion-category-defaults nil))
 
 ;; (require 'init-tabnine-capf)
 (use-package lsp-mode
+  :bind (:map lsp-mode-map
+              ("C-." . 'lsp-execute-code-action))
   :hook ((csharp-tree-sitter-mode
           web-mode
-          odin-mode
-          typescript-mode
           json-mode
           yaml-mode
           css-mode
-          ;; csproj-mode
+          powershell-mode
           sass-mode
           go-mode
           pwsh-mode
@@ -594,12 +682,14 @@ Can be a list of backends; accepts any value `company-backends' accepts.")
           rust-mode
           dockerfile-mode) . #'lsp)
   :hook (lsp-mode . +lsp-optimization-mode)
-  :hook (lsp-mode . lsp-signature-mode)
+  :hook (lsp-mode . lsp-signature-mode) 
+  :hook (before-save . lsp-format-buffer)
   :commands (lsp lsp-deferred)
   :init
+  (setq lsp-completion-provider nil)
   (setq lsp-keymap-prefix "C-c l")
   (setq lsp-headerline-breadcrumb-enable t
-        lsp-headerline-breadcrumb-icons-enable t
+        lsp-headerline-breadcrumb-icons-enable nil
         lsp-keep-workspace-alive nil
         lsp-modeline-diagnostics-enable nil
         lsp-modeline-code-actions-enable nil
@@ -610,19 +700,17 @@ Can be a list of backends; accepts any value `company-backends' accepts.")
         lsp-enable-text-document-color nil
         lsp-enable-on-type-formatting nil)
   :config
-
-  ;; (add-hook 'lsp-completion-mode-hook
-  ;;           (defun +lsp-init-company-backends-h ()
-  ;;             (when lsp-completion-mode
-  ;;               (set (make-local-variable 'company-backends)
-  ;;                    (cons +lsp-company-backends
-  ;;                          (remove +lsp-company-backends
-  ;;                                  (remq 'company-capf company-backends)))))))
-  
+  (define-key lsp-mode-map [remap format-all-buffer] #'lsp-format-buffer)
+  (define-key lsp-mode-map [remap format-all-region] #'lsp-format-region)
   (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols)
 
   (add-to-list 'lsp-language-id-configuration '(odin-mode . "odin"))
   (add-to-list 'lsp-language-id-configuration '(sql-mode . "sql"))
+  (add-to-list 'lsp-language-id-configuration '(web-mode . "tailwindcss"))
+  (add-to-list 'lsp-language-id-configuration '(razor-mode . "rzls"))
+  (add-to-list 'lsp-language-id-configuration '(razor-mode . "html"))
+  (add-to-list 'lsp-language-id-configuration '(razor-mode . "tailwindcss"))
+  (add-to-list 'lsp-language-id-configuration '(web-mode . "html"))
   ;; (add-to-list 'lsp-language-id-configuration '(csproj-mode . "csharp"))
 
   (lsp-register-client
@@ -630,34 +718,36 @@ Can be a list of backends; accepts any value `company-backends' accepts.")
                     :major-modes '(odin-mode)
                     :server-id 'ols
                     :multi-root t))
+    (lsp-register-client
+     (make-lsp-client :new-connection (lsp-stdio-connection "c:/tools/rzls/rzls.exe")
+                    :major-modes '(razor-mode)
+                    :server-id 'rzls
+                    :multi-root t))
+
   (lsp-register-client
    (make-lsp-client :new-connection (lsp-stdio-connection "c:/tools/sqls/sqls.exe")
                     :major-modes '(sql-mode)
                     :server-id 'sql
                     :multi-root t))
 
-  (add-hook 'before-save-hook 'lsp-format-buffer)
   (lsp-enable-which-key-integration t))
 
 (use-package lsp-ui
   :hook (lsp-mode . lsp-ui-mode)
   :config
-  (setq lsp-ui-doc-max-height 8
-        lsp-ui-doc-max-width 72
-        lsp-ui-doc-show-with-cursor t
-        lsp-ui-doc-show-with-mouse nil
-        lsp-ui-doc-include-signature t
-        lsp-ui-doc-delay 0.75
-        lsp-ui-doc-alignment 'window
-        lsp-ui-doc-position 'top-right-corner
-        lsp-ui-doc-use-webkit t
-        lsp-signature-auto-activate t
-        lsp-signature-render-documentation t
-        lsp-ui-sideline-show-code-actions nil
-        lsp-ui-sideline-ignore-duplicate t
-        lsp-ui-sideline-show-hover t
-        lsp-ui-sideline-show-diagnostics t
-        lsp-ui-sideline-actions-icon lsp-ui-sideline-actions-icon-default)
+  (setq
+   lsp-ui-doc-enable nil
+   lsp-signature-auto-activate t
+   lsp-signature-render-documentation t
+   lsp-headerline-breadcrumb-segments '(symbols)
+   lsp-ui-sideline-show-code-actions nil
+   lsp-ui-sideline-ignore-duplicate t
+   lsp-ui-sideline-show-hover t
+   lsp-ui-sideline-show-diagnostics t
+   lsp-ui-sideline-actions-icon lsp-ui-sideline-actions-icon-default)
+  (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
+  (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references)
+
   (define-key lsp-ui-peek-mode-map (kbd "j") #'lsp-ui-peek--select-next)
   (define-key lsp-ui-peek-mode-map (kbd "k") #'lsp-ui-peek--select-prev)
   (define-key lsp-ui-peek-mode-map (kbd "M-j") #'lsp-ui-peek--select-next-file)
@@ -687,66 +777,89 @@ Can be a list of backends; accepts any value `company-backends' accepts.")
 ;; use eglot
 
 ;; (use-package eglot
-;;   :commands eglot eglot-ensure
+;;   :ensure t
+;;   :commands (eglot eglot-ensure)
+;;   :hook ((swift-mode . eglot-ensure)
+;;          (rust-mode . eglot-ensure)
+;;          (c-mode . eglot-ensure)
+;;          (c++-mode . eglot-ensure)
+;;          (csharp-tree-sitter-mode . eglot-ensure)
+;;          (typescript-mode . eglot-ensure)
+;;          (obc-c-mode . eglot-ensure))
 ;;   :config
-;;   (add-to-list 'eglot-server-programs '(csharp-tree-sitter-mode . ("omnisharp" "-lsp")))
-;;   (add-to-list 'eglot-server-programs '(odin-mode . ("ols")))
-;;   )
+;;   (setq eglot-strict-mode nil)
+;;   (setq eglot-confirm-server-initiated-edits nil)
 
-;; use realgud
+;;   (add-to-list 'eglot-server-programs '((csharp-mode csharp-tree-sitter-mode) "omnisharp" "-lsp"))
+;;   (add-to-list 'eglot-server-programs '((odin-mode) "ols"))
+;;   (add-to-list 'eglot-server-programs '((swift-mode) "sourcekit-lsp"))
+;;   (add-to-list 'eglot-server-programs '((c-mode c++-mode obj-c-mode) "clangd"))
+;;   (add-to-list 'eglot-server-programs '(rust-mode "rust-analyzer")))
+
+(use-package consult-eglot
+  :ensure t
+  :defer t)
 
 (use-package cheat-sh)
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 
-(use-package tree-sitter
-  :defer t
-  :config
-  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
-  :init
-  (global-tree-sitter-mode))
+;; (use-package tree-sitter
+;;   :defer t
+;;   :config
+;;   (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
+;;   :init
+;;   (global-tree-sitter-mode))
 
-(use-package tree-sitter-langs
-  :defer t)
+;; (use-package tree-sitter-langs
+;;   :defer t)
 
-(use-package tree-sitter-indent
-  :defer t)
+;; (use-package tree-sitter-indent
+;;   :defer t)
+
+;; languages
+
+(use-package csv-mode
+  :mode "\\.csv\\'"
+  :hook (csv-mode . csv-align-mode))
 
 (use-package csharp-mode
-  :mode (("\\.cs\\'" . csharp-tree-sitter-mode)
-         ("\\.csx\\'" . csharp-tree-sitter-mode)))
+  :mode (("\\.cs\\'" . csharp-ts-mode))
+  :hook (csharp-ts-mode . eglot-ensure)
+  :straight nil)
+
+;; (use-package razor-mode
+;;   :straight (razor-mode :type git :host github :repo "samwdp/razor-mode")
+;;   :hook "\\.razor\\'"
+;;   :hook "\\.cshtml\\'")
 
 (use-package sharper
   :bind ("C-c n" . sharper-main-transient))
 
 (use-package sln-mode :mode "\\.sln\\'")
 
+(use-package powershell)
+
 (use-package csproj-mode
   :straight (csproj-mode :type git :host github :repo "omajid/csproj-mode")
   :mode "\\.csproj\\'")
 
 (use-package odin-mode
+  :hook (odin-mode . eglot-ensure)
   :straight (odin-mode :type git :host github :repo "mattt-b/odin-mode")
   :mode "\\.odin\\'")
 
 (use-package typescript-mode
-  :mode "\\.ts\\'"
-  :mode "\\.tsx\\'"
+  :hook (typescript-ts-mode . eglot-ensure)
+  :straight nil
+  :mode (("\\.ts\\'" . typescript-ts-mode)
+         ("\\.tsx\\'". typescript-ts-mode))
   :config
   (setq typescript-indent-level 2))
 
 (use-package web-mode
-  :mode "\\.html?\\'"
-  :mode "\\.razor?\\'"
-  :mode "\\.cshtml?\\'"
-  :config
-  (setq web-mode-engines-alist
-	    '(("razor"    . "\\.cshtml\\'")
-	      ("blade"  . "\\.blade\\.")
-	      ("svelte" . "\\.svelte\\.")
-          ))
-  )
+  :mode "\\.html?\\'")
 
 (use-package sass-mode
   :mode "\\.sass\\'")
@@ -758,7 +871,8 @@ Can be a list of backends; accepts any value `company-backends' accepts.")
   :mode "\\.scss\\'")
 
 (use-package go-mode
-  :mode "\\.go\\'")
+  :straight nil
+  :mode (("\\.go\\'" . go-ts-mode)))
 
 (use-package json-mode
   :mode "\\.js\\(?:on\\|[hl]int\\(?:rc\\)?\\)\\'")
@@ -766,22 +880,34 @@ Can be a list of backends; accepts any value `company-backends' accepts.")
 (use-package yaml-mode
   :mode "Procfile\\'")
 
-(use-package cc-mode)
+(use-package cc-mode
+  :straight nil
+  :mode (("\\.c\\'" . c-ts-mode)))
 
-(use-package rust-mode)
+(use-package rust-mode
+  :straight nil
+  :mode (("\\.rs\\'" . rust-ts-mode)))
 
 (use-package plantuml-mode
   :config
   (setq plantuml-jar-path "c:/tools/plantuml/plantuml.jar")
   (setq plantuml-default-exec-mode 'jar))
 
-(use-package dockerfile-mode)
+(use-package dockerfile-mode
+  :straight nil
+  :mode (("\\.docker\\'" . dockerfile-ts-mode)))
 
 (use-package docker
   :defer t)
 
 (use-package ahk-mode
   :hook (ahk-mode . rainbow-delimiters-mode))
+
+(use-package restclient
+  :mode ("\\.http\\'" . restclient-mode))
+
+
+;; (use-package ob-restclient)
 
 (use-package format-all)
 
@@ -857,6 +983,7 @@ This function is called by `org-babel-execute-src-block'."
   (org-babel-do-load-languages 'org-babel-load-languages '((ruby . t)
                                                            (plantuml . t)
                                                            (emacs-lisp . t))))
+                                                           ;; (restclient . t))))
 (use-package org-mode
   :hook ((org-mode . org-fancy-priorities-mode))
   :config
@@ -867,8 +994,10 @@ This function is called by `org-babel-execute-src-block'."
   ;; (org-babel-do-load-languages 'org-babel-load-languages '((plantuml . t)
   ;;                                                          (emacs-lisp . t)))
   (setq org-plantuml-jar-path "c:/tools/plantuml/plantuml.jar")
-  (setq org-return-follows-link t)
+  (setq org-return-follows-link nil)
+  (setq org-startup-with-inline-images t)
   (setq org-superstar-special-todo-items t)
+  (setq org-display-inline-images t)
   (setq org-ellipsis " ▼")
   (setq org-todo-keywords
         '((sequence
@@ -991,20 +1120,24 @@ re-align the table if necessary. (Necessary because org-mode has a
   (when (eq major-mode 'org-mode)
     (+org-realign-table-maybe-h)))
 
-(use-package org-superstar
-  :hook ((org-mode . org-superstar-mode))
-  :init
-  (setq org-superstar-todo-bullet-alist
-        '(("TODO" "☐　")
-          ("NEXT" "✒　")
-          ("PROG" "✰　")
-          ("WAIT" "☕　")
-          ("FAIL" "✘　")
-          ("DONE" "✔　")))
-  (setq org-superstar-leading-bullet ?\s
-        org-superstar-leading-fallback ?\s
-        ;; org-superstar-remove-leading-stars t
-        org-hide-leading-stars nil))
+;; (use-package org-superstar
+;;   :hook ((org-mode . org-superstar-mode))
+;;   :init
+;;   (setq org-superstar-todo-bullet-alist
+;;         '(("TODO" "☐　")
+;;           ("NEXT" "✒　")
+;;           ("PROG" "✰　")
+;;           ("WAIT" "☕　")
+;;           ("FAIL" "✘　")
+;;           ("DONE" "✔　")))
+;;   (setq org-superstar-leading-bullet ?\s
+;;         org-superstar-leading-fallback ?\s
+;;         ;; org-superstar-remove-leading-stars t
+;;         org-hide-leading-stars nil))
+
+(use-package org-modern
+  :hook((org-mode . org-modern-mode)
+        (org-agenda-finilize . org-modern-agenda)))
 
 (use-package toc-org
   :hook (org-mode . toc-org-mode))
@@ -1069,8 +1202,8 @@ re-align the table if necessary. (Necessary because org-mode has a
 (use-package yasnippet
   :defer t
   :config
-  (defun check-expansion ()
-    (save-excursion
+  (defun check-save ()
+    (expansion-excursion
       (if (looking-at "\\_>") t
         (backward-char 1)
         (if (looking-at "\\.") t
@@ -1081,15 +1214,6 @@ re-align the table if necessary. (Necessary because org-mode has a
     (let ((yas/fallback-behavior 'return-nil))
       (yas/expand)))
 
-  (defun tab-indent-or-complete ()
-    (interactive)
-    (if (minibufferp)
-        (minibuffer-complete)
-      (if (or (not yas/minor-mode)
-              (null (do-yas-expand)))
-          (if (check-expansion)
-              (company-complete-common)
-            (indent-for-tab-command)))))
 
   (global-set-key (kbd "C-<return>") 'tab-indent-or-complete)
   :init
@@ -1097,11 +1221,15 @@ re-align the table if necessary. (Necessary because org-mode has a
   (setq yas-snippet-dirs '(user-snippets))
   (yas-global-mode 1))
 
+(use-package company)
+
 (use-package yasnippet-snippets
   :after yasnippet)
 
 (use-package auto-yasnippet
   :defer t)
+
+(use-package consult-yasnippet)
 
 (use-package yatemplate
   :defer t

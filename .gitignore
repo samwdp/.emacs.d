@@ -5,3 +5,7 @@
 /server/
 /auto-save-list/
 /workspaces/
+/tree-sitter/
+/elpa/
+/eln-cache/
+custom*
