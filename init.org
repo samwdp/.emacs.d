@@ -1,3 +1,13 @@
+#+title: Init
+* Table of Contents :TOC_3:noexport:
+- [[#garbage-collection][Garbage Collection]]
+- [[#custom-constants][Custom constants]]
+- [[#startup][Startup]]
+- [[#straight][Straight]]
+- [[#set-some-stuff][Set some stuff]]
+- [[#display][Display]]
+- [[#keybindings][Keybindings]]
+
 * Garbage Collection
 #+begin_src emacs-lisp
   (setq gc-cons-thershold 100000000)

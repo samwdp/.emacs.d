@@ -193,6 +193,16 @@
   :config
   (setq which-key-idle-delay 0.3))
 
+
+(defun lookup-definition ())
+(defun lookup-reference ())
+(defun lookup-implementation ())
+(defun lookup-declaration ())
+(defun lookup-type-definition ())
+(global-set-key [remap lookup-definition] #'xref-find-definitions)
+(global-set-key [remap lookup-reference] #'xref-find-references)
+
+
 (use-package meow
   :config
   (setq meow-use-clipboard t)
@@ -300,9 +310,11 @@
      '("t" . meow-till)
      '("u" . meow-undo)
      '("U" . meow-undo-in-selection)
-     '("v d" . xref-find-definitions)
-     '("v r" . xref-find-references)
-     '("v i" . lsp-ui-peek-find-implementation)
+     '("v d" . lookup-definition)
+     '("v r" . lookup-reference)
+     '("v i" . lookup-implementation)
+     '("v e" . lookup-declaration)
+     '("v t" . lookup-type-definition)
      '("e" . meow-mark-word)
      '("E" . meow-mark-symbol)
      '("x" . meow-line)
@@ -369,6 +381,8 @@
   (global-set-key (kbd "M-o") 'harpoon-go-to-3)
   (global-set-key (kbd "M-e") 'harpoon-go-to-2)
   (global-set-key (kbd "M-i") 'harpoon-go-to-4)
+  (setq harpoon-project-package  'projectile
+        harpoon-separate-by-branch t)
   )
 
 (use-package adaptive-wrap)
@@ -412,7 +426,8 @@
   :hook (lsp-completion-mode . corfu-lsp-setup)
   :bind (:map corfu-map
               ("RET" . nil)
-              ("TAB" . corfu-insert))
+              ("TAB" . corfu-insert)
+              ("C-<return>" . yas/expand))
   :custom
   (tab-always-indent 'complete-tag)
   (corfu-separator ?\s)
@@ -420,6 +435,7 @@
   (corfu-auto t)
   (corfu-auto-prefix 2)
   (corfu-auto-delay 0.0)
+  (corfu-popupinfo-delay 0.5)
   :init
   (global-corfu-mode)
   (corfu-popupinfo-mode))
@@ -648,16 +664,25 @@ Returns nil if not in a project."
   :bind (:map eglot-mode-map
               ("C-." . 'eglot-code-actions))
   :config
+  (define-key eglot-mode-map [remap lookup-definition] #'xref-find-definitions)
+  (define-key eglot-mode-map [remap lookup-reference] #'xref-find-references)
+  (define-key eglot-mode-map [remap lookup-implementation] #'eglot-find-implementation)
+  (define-key eglot-mode-map [remap lookup-declaration] #'eglot-find-declaration)
+  (define-key eglot-mode-map [remap lookup-type-definition] #'eglot-find-typeDefinition)
   (setq eglot-connect-timeout 90)
   (add-to-list 'eglot-server-programs '(odin-mode "ols"))
-)
+  ;; (add-to-list 'eglot-server-programs '(html-mode "tailwindcss-language-server"))
+  ;; (add-to-list 'eglot-server-programs '((web-mode :language-id "html") . ("tailwindcss-language-server")))
+  (add-to-list 'eglot-server-programs '(web-mode "vscode-html-language-server" "--stdio"))
+  (add-to-list 'eglot-server-programs '(razor-mode "vscode-html-language-server" "--stdio"))
+  (add-to-list 'eglot-server-programs '(razor-mode "tailwindcss-language-server"))
+  )
 
 (use-package lsp-treemacs
   :after (treemacs lsp))
 
 (use-package lsp-tailwindcss
     :straight (lsp-tailwindcss :type git :host github :repo "merrickluo/lsp-tailwindcss"))
-
 
 (defun corfu-lsp-setup ()
   (setq-local completion-styles '(orderless)
@@ -667,20 +692,6 @@ Returns nil if not in a project."
 (use-package lsp-mode
   :bind (:map lsp-mode-map
               ("C-." . 'lsp-execute-code-action))
-  :hook ((csharp-tree-sitter-mode
-          web-mode
-          json-mode
-          yaml-mode
-          css-mode
-          powershell-mode
-          sass-mode
-          go-mode
-          pwsh-mode
-          cc-mode
-          c-mode
-          sql-mode
-          rust-mode
-          dockerfile-mode) . #'lsp)
   :hook (lsp-mode . +lsp-optimization-mode)
   :hook (lsp-mode . lsp-signature-mode) 
   :hook (before-save . lsp-format-buffer)
@@ -703,6 +714,10 @@ Returns nil if not in a project."
   (define-key lsp-mode-map [remap format-all-buffer] #'lsp-format-buffer)
   (define-key lsp-mode-map [remap format-all-region] #'lsp-format-region)
   (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols)
+  (define-key lsp-mode-map [remap lookup-implementation] #'lsp-goto-implementation)
+  (define-key lsp-mode-map [remap lookup-reference] #'lsp-find-references)
+  (define-key lsp-mode-map [remap lookup-definition] #'lsp-find-definition)
+  (define-key lsp-mode-map [remap lookup-type-definition] #'lsp-goto-type-definition)
 
   (add-to-list 'lsp-language-id-configuration '(odin-mode . "odin"))
   (add-to-list 'lsp-language-id-configuration '(sql-mode . "sql"))
@@ -805,6 +820,43 @@ Returns nil if not in a project."
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 
+(use-package treesit
+  :straight nil
+  :commands (treesit-install-language-grammar nf/treesit-install-all-languages)
+  :init
+  (setq treesit-font-lock-level 4)
+  (setq treesit-language-source-alist
+   '((bash . ("https://github.com/tree-sitter/tree-sitter-bash"))
+     (c . ("https://github.com/tree-sitter/tree-sitter-c"))
+     (c-sharp . ("https://github.com/tree-sitter/tree-sitter-c-sharp"))
+     (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+     (css . ("https://github.com/tree-sitter/tree-sitter-css"))
+     (go . ("https://github.com/tree-sitter/tree-sitter-go"))
+     (html . ("https://github.com/tree-sitter/tree-sitter-html"))
+     (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
+     
+     (json . ("https://github.com/tree-sitter/tree-sitter-json"))
+     (lua . ("https://github.com/Azganoth/tree-sitter-lua"))
+     (make . ("https://github.com/alemuller/tree-sitter-make"))
+     (ocaml . ("https://github.com/tree-sitter/tree-sitter-ocaml" "master" "ocaml/src"))
+     (python . ("https://github.com/tree-sitter/tree-sitter-python"))
+     (php . ("https://github.com/tree-sitter/tree-sitter-php"))
+     (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src"))
+     (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src"))
+     (ruby . ("https://github.com/tree-sitter/tree-sitter-ruby"))
+     (rust . ("https://github.com/tree-sitter/tree-sitter-rust"))
+     (sql . ("https://github.com/m-novikov/tree-sitter-sql"))
+     (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
+     (zig . ("https://github.com/GrayJack/tree-sitter-zig"))))
+  :config
+  (defun nf/treesit-install-all-languages ()
+    "Install all languages specified by `treesit-language-source-alist'."
+    (interactive)
+    (let ((languages (mapcar 'car treesit-language-source-alist)))
+      (dolist (lang languages)
+	      (treesit-install-language-grammar lang)
+	      (message "`%s' parser was installed." lang)
+	      (sit-for 0.75)))))
 ;; (use-package tree-sitter
 ;;   :defer t
 ;;   :config
@@ -829,12 +881,20 @@ Returns nil if not in a project."
   :hook (csharp-ts-mode . eglot-ensure)
   :straight nil)
 
+(use-package html-mode
+  :straight nil
+  :mode (("\\.html\\'" . html-ts-mode)))
+
 ;; (use-package razor-mode
 ;;   :straight (razor-mode :type git :host github :repo "samwdp/razor-mode")
 ;;   :hook "\\.razor\\'"
 ;;   :hook "\\.cshtml\\'")
 
 (use-package sharper
+  :hook ((sharper--project-packages-mode
+          sharper--project-references-mode
+          sharper--nuget-results-mode
+          sharper--solution-management-mode) . +word-wrap-mode)
   :bind ("C-c n" . sharper-main-transient))
 
 (use-package sln-mode :mode "\\.sln\\'")
@@ -865,7 +925,7 @@ Returns nil if not in a project."
   :mode "\\.sass\\'")
 
 (use-package css-mode
-  :mode "\\.css\\'")
+  :mode (("\\.css\\'" . css-ts-mode)))
 
 (use-package scss-mode
   :mode "\\.scss\\'")
@@ -875,16 +935,23 @@ Returns nil if not in a project."
   :mode (("\\.go\\'" . go-ts-mode)))
 
 (use-package json-mode
-  :mode "\\.js\\(?:on\\|[hl]int\\(?:rc\\)?\\)\\'")
+  :straight nil
+  :mode (("\\.json\\'" . json-ts-mode))
+  )
 
 (use-package yaml-mode
+  :straight nil
+  :mode (("\\.yaml" . yaml-ts-mode))
   :mode "Procfile\\'")
 
 (use-package cc-mode
+  :hook (c-ts-mode . eglot-ensure)
   :straight nil
-  :mode (("\\.c\\'" . c-ts-mode)))
+  :mode (("\\.c\\'" . c-ts-mode)
+         ("\\.h\\'" . c-ts-mode)))
 
 (use-package rust-mode
+  :hook (rust-ts-mode . eglot-ensure)
   :straight nil
   :mode (("\\.rs\\'" . rust-ts-mode)))
 
@@ -906,8 +973,13 @@ Returns nil if not in a project."
 (use-package restclient
   :mode ("\\.http\\'" . restclient-mode))
 
-
 ;; (use-package ob-restclient)
+
+(use-package ob-csharp
+  :straight (ob-csharp :type git :host github :repo "samwdp/ob-csharp")
+  :config
+  (org-babel-do-load-languages 'org-babel-load-languages '((csharp . t)))
+)
 
 (use-package format-all)
 
@@ -1213,8 +1285,6 @@ re-align the table if necessary. (Necessary because org-mode has a
   (defun do-yas-expand ()
     (let ((yas/fallback-behavior 'return-nil))
       (yas/expand)))
-
-
   (global-set-key (kbd "C-<return>") 'tab-indent-or-complete)
   :init
   (defvar user-snippets (concat user-emacs-directory "snippets/"))
@@ -1226,15 +1296,13 @@ re-align the table if necessary. (Necessary because org-mode has a
 (use-package yasnippet-snippets
   :after yasnippet)
 
+(use-package doom-snippets
+  :after yasnippet
+  :straight (doom-snippets :type git :host github :repo "hlissner/doom-snippets" :files ("*.el" "*")))
+
 (use-package auto-yasnippet
   :defer t)
 
 (use-package consult-yasnippet)
-
-(use-package yatemplate
-  :defer t
-  :config
-  (yatemplate-fill-alist)
-  (auto-insert-mode +1))
 
 (setq gc-cons-thershold (* 2 1000 1000))
