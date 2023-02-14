@@ -3,81 +3,6 @@
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
                          ("org" . "https://orgmode.org/elpa/")
                          ("elpa" . "https://elpa.gnu.org/packages/")))
-(setq package-check-signature nil)
-
-(defun sp/defer-garbage-collection-h ()
-  (setq gc-cons-threshold most-positive-fixnum))
-
-(defun sp/restore-garbage-collection-h ()
-  ;; Defer it so that commands launched immediately after will enjoy the
-  ;; benefits.
-  (run-at-time
-   1 nil (lambda () (setq gc-cons-threshold 16777216))))
-
-(defun transparency (value)
-   "Sets the transparency of the frame window. 0=transparent/100=opaque"
-   (interactive "nTransparency Value 0 - 100 opaque:")
-   (set-frame-parameter (selected-frame) 'alpha value))
-(add-hook 'minibuffer-setup-hook #'sp/defer-garbage-collection-h)
-(add-hook 'minibuffer-exit-hook #'sp/restore-garbage-collection-h)
-
-(setq emacs-version-short  (replace-regexp-in-string
-                            "\\([0-9]+\\)\\.\\([0-9]+\\).*"
-                            "\\1_\\2" emacs-version))
-
-(setq custom-file (expand-file-name
-                   (concat "custom_" emacs-version-short ".el")
-                   user-emacs-directory))
-
-(defconst NATIVECOMP (if (fboundp 'native-comp-available-p) (native-comp-available-p)))
-(defconst IS-MAC     (eq system-type 'darwin))
-(defconst IS-LINUX   (eq system-type 'gnu/linux))
-(defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
-
-(add-to-list 'load-path "~/.emacs.d/custom/")
-
-;; (server-start)
-(defun efs/display-startup-time ()
-  (message "Emacs loaded in %s with %d garbage collections."
-           (format "%.2f seconds"
-                   (float-time
-                    (time-subtract after-init-time before-init-time)))
-           gcs-done))
-
-(when NATIVECOMP
-  (setq native-comp-async-report-warnings-errors nil)
-  (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" "~/.emacs.cache")))
-
-(unless (featurep 'straight)
-  ;; Bootstrap straight.el
-  (defvar bootstrap-version)
-  (let ((bootstrap-file
-         (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-        (bootstrap-version 5))
-    (unless (file-exists-p bootstrap-file)
-      (with-current-buffer
-          (url-retrieve-synchronously
-           "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-           'silent 'inhibit-cookies)
-        (goto-char (point-max))
-        (eval-print-last-sexp)))
-    (load bootstrap-file nil 'nomessage)))
-
-;; Use straight.el for use-package expressions
-(straight-use-package 'use-package)
-
-(use-package straight
-  :custom (straight-use-package-by-default t))
-
-(use-package gcmh
-  :config
-  (gcmh-mode 1))
-
-(use-package unicode-fonts
-  :straight (unicode-fonts :type git :host github :repo "yurikhan/unicode-fonts" :branch "fix-daemon-startup"))
-
-(use-package fancy-battery
-  :hook (after-init . fancy-battery-mode))
 
 (blink-cursor-mode 0)
 (pixel-scroll-mode 1)
@@ -105,17 +30,95 @@
       mode-line-end-spaces nil
       set-language-environment "UTF-8")
 
+(package-initialize)
+(unless package-archive-contents
+  (package-refresh-contents))
+
+(cl-defun slot/vc-install (&key (fetcher "github") repo name rev backend)
+  "Install a package from a remote if it's not already installed.
+This is a thin wrapper around `package-vc-install' in order to
+make non-interactive usage more ergonomic.  Takes the following
+named arguments:
+
+- FETCHER the remote where to get the package (e.g., \"gitlab\").
+  If omitted, this defaults to \"github\".
+
+- REPO should be the name of the repository (e.g.,
+  \"slotThe/arXiv-citation\".
+
+- NAME, REV, and BACKEND are as in `package-vc-install' (which
+  see)."
+  (let* ((url (format "https://www.%s.com/%s" fetcher repo))
+         (iname (when name (intern name)))
+         (pac-name (or iname (intern (file-name-base repo)))))
+    (unless (package-installed-p pac-name)
+      (package-vc-install url iname rev backend))))
+
+(defun sp/defer-garbage-collection-h ()
+  (setq gc-cons-threshold most-positive-fixnum))
+
+(defun sp/restore-garbage-collection-h ()
+  ;; Defer it so that commands launched immediately after will enjoy the
+  ;; benefits.
+  (run-at-time
+   1 nil (lambda () (setq gc-cons-threshold 16777216))))
+
+(add-hook 'minibuffer-setup-hook #'sp/defer-garbage-collection-h)
+(add-hook 'minibuffer-exit-hook #'sp/restore-garbage-collection-h)
+
+(setq emacs-version-short  (replace-regexp-in-string
+                            "\\([0-9]+\\)\\.\\([0-9]+\\).*"
+                            "\\1_\\2" emacs-version))
+
+(setq custom-file (expand-file-name
+                   (concat "custom_" emacs-version-short ".el")
+                   user-emacs-directory))
+
+(defconst NATIVECOMP (if (fboundp 'native-comp-available-p) (native-comp-available-p)))
+(defconst IS-MAC     (eq system-type 'darwin))
+(defconst IS-LINUX   (eq system-type 'gnu/linux))
+(defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
+
+(add-to-list 'load-path (expand-file-name "custom/" user-emacs-directory))
+
+;; (server-start)
+(defun efs/display-startup-time ()
+  (message "Emacs loaded in %s with %d garbage collections."
+           (format "%.2f seconds"
+                   (float-time
+                    (time-subtract after-init-time before-init-time)))
+           gcs-done))
+
+(when NATIVECOMP
+  (setq native-comp-async-report-warnings-errors nil)
+  (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" "~/.emacs.cache")))
+
+(setq use-package-always-ensure t)
+
+(use-package gcmh
+  :ensure t
+  :config
+  (gcmh-mode 1))
+
+(use-package unicode-fonts
+  :init (slot/vc-install :fetcher "github" :repo "rolandwalker/unicode-fonts"))
+
+(use-package fancy-battery
+  :ensure t
+  :hook (after-init . fancy-battery-mode))
+
+
 (defvar sp/text-height 18)
 ;; (defvar sp/text-height 28)
 (defvar sp/text-height-variable 20)
-(defvar sp/font-string "FiraCode Nerd Font")
+(defvar sp/font-string "Fira Code Nerd Font")
 
 (defun sp/new-frame ()
   (set-face-attribute 'default nil :font (font-spec :family sp/font-string :size sp/text-height))
   (set-face-attribute 'fixed-pitch nil :font (font-spec :family sp/font-string :size sp/text-height))
   (set-face-attribute 'fixed-pitch-serif nil :font (font-spec :family sp/font-string :size sp/text-height))
   (set-face-attribute 'variable-pitch nil :font (font-spec :family sp/font-string :size sp/text-height-variable))
-  (transparency 85))
+  (set-frame-parameter (selected-frame) 'alpha-background 0.9 ))
 
 (defun unicode-fonts-setup-h (frame)
   "Run unicode-fonts-setup, then remove the hook."
@@ -152,8 +155,13 @@
 (global-set-key (kbd "C-=") 'text-scale-increase)
 (global-set-key (kbd "M-RET") 'harpoon-add-file)
 
+(defun spawn-shell (name)
+  (interactive "MName of new shell: ")
+  (pop-to-buffer (get-buffer-create (generate-new-buffer-name name)))
+  (shell (current-buffer)))
 
 (use-package no-littering
+  :ensure t
   :config
   (setq auto-save-file-name-transforms
 	    `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
@@ -161,9 +169,11 @@
 (setq custom-theme-directory (concat user-emacs-directory "themes/"))
 
 (use-package doom-themes
+  :ensure t
   :init (load-theme 'gruvbox-sp t))
 
 (use-package doom-modeline
+  :ensure t
   :hook (doom-modeline-mode . size-indication-mode)
   :hook (doom-modeline-mode . column-number-mode)
   :config
@@ -187,12 +197,12 @@
   (doom-modeline-mode))
 
 (use-package which-key
+  :ensure t
   :defer 0
   :diminish which-key-mode
   :init (which-key-mode)
   :config
   (setq which-key-idle-delay 0.3))
-
 
 (defun lookup-definition ())
 (defun lookup-reference ())
@@ -204,6 +214,7 @@
 
 
 (use-package meow
+  :ensure t
   :config
   (setq meow-use-clipboard t)
   (setq meow-cheatsheet-physical-layout meow-cheatsheet-physical-layout-iso)
@@ -238,12 +249,14 @@
      '("cc" . projectile-compile-project)
      '("db" . killthis-buffer)
      '("dp" . persp-kill)
+     '("ed" . eval-defun)
      '("is" . consult-yasnippet)
+     '("ic" . insert-char)
      '("og" . magit-status)
      '("pp" . projectile-switch-project)
      '("pd" . persp-kill)
      '("op" . +treemacs/toggle)
-     
+     '("os" . spawn-shell)
      (if IS-LINUX
          '("ot" . vterm)
        '("ot" . shell))
@@ -330,6 +343,7 @@
 
 (when IS-LINUX
   (use-package vterm
+    :ensure t
     :config
     (define-key vterm-mode-map (kbd "C-l") 'windmove-right)
     (define-key vterm-mode-map (kbd "C-j") 'windmove-down)
@@ -422,7 +436,6 @@
 (use-package prescient)
 
 (use-package corfu
-  :straight (:files (:defaults "extensions/*"))
   :hook (lsp-completion-mode . corfu-lsp-setup)
   :bind (:map corfu-map
               ("RET" . nil)
@@ -468,7 +481,6 @@
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
 (use-package vertico
-  :straight (:files (:defaults "extensions/*"))
   :hook (vertico-mode . vertico-posframe-mode)
   :config
   (setq vertico-resize nil
@@ -495,7 +507,8 @@
   :config
   (setq vertico-posframe-parameters
         '((left-fringe . 5)
-          (right-fringe . 5)))
+          (right-fringe . 5)
+          (alpha-background . 0.9)))
   (setq vertico-posframe-border-width 2)
   (setq vertico-posframe-poshandler #'posframe-poshandler-frame-bottom-center)
   :init
@@ -526,12 +539,20 @@
 (use-package embark-consult
   :after (embark consult))
 
+(use-package chatgpt
+  :init
+  (slot/vc-install :fetcher "github" :repo "joshcho/ChatGPT.el.git")
+  (require 'python)
+  (setq chatgpt-repo-path (expand-file-name "elpa/ChatGPT.el/" user-emacs-directory))
+  :bind ("C-c q" . chatgpt-query))
+
 (use-package consult-dir)
 
 (use-package consult-flycheck)
 
 (use-package consult-projectile
-  :straight (consult-projectile :type git :host gitlab :repo "OlMon/consult-projectile" :branch "master"))
+  :init (slot/vc-install :fetcher "gitlab" :repo "OlMon/consult-projectile"))
+
 
 (use-package flycheck
   :commands flycheck-list-errors flycheck-buffer
@@ -564,7 +585,7 @@
                                            "W:/foresolutions")))
 
   (when IS-LINUX
-    (setq projectile-project-search-path '("~/programming/"
+    (setq projectile-project-search-path '("~/work/"
                                            "~/programming/odin"))))
 
 (use-package persp-projectile)
@@ -660,7 +681,7 @@ Returns nil if not in a project."
 ;; use lsp
 
 (use-package eglot
-  :straight nil
+  :hook (before-save . eglot-format-buffer)
   :bind (:map eglot-mode-map
               ("C-." . 'eglot-code-actions))
   :config
@@ -674,15 +695,20 @@ Returns nil if not in a project."
   ;; (add-to-list 'eglot-server-programs '(html-mode "tailwindcss-language-server"))
   ;; (add-to-list 'eglot-server-programs '((web-mode :language-id "html") . ("tailwindcss-language-server")))
   (add-to-list 'eglot-server-programs '(web-mode "vscode-html-language-server" "--stdio"))
-  (add-to-list 'eglot-server-programs '(razor-mode "vscode-html-language-server" "--stdio"))
-  (add-to-list 'eglot-server-programs '(razor-mode "tailwindcss-language-server"))
+  (add-to-list 'eglot-server-programs '(razor-mode "rzls"))
+  ;; (add-to-list 'eglot-server-programs '(razor-mode . (eglot-alternatives '(("vscode-html-language-server" "--stdio") ("html-languageserver" "--stdio")))))
+  
+  ;; (add-to-list 'eglot-server-programs '(razor-mode "tailwindcss-language-server"))
+  (add-to-list 'eglot-server-programs '(html-ts-mode . (eglot-alternatives '(("vscode-html-language-server" "--stdio") ("html-languageserver" "--stdio")))))
+  ;; (add-to-list 'eglot-server-programs '(html-ts-mode "tailwindcss-language-server"))
+
   )
 
 (use-package lsp-treemacs
   :after (treemacs lsp))
 
 (use-package lsp-tailwindcss
-    :straight (lsp-tailwindcss :type git :host github :repo "merrickluo/lsp-tailwindcss"))
+    :init (slot/vc-install :fetcher "github" :repo "merrickluo/lsp-tailwindcss"))
 
 (defun corfu-lsp-setup ()
   (setq-local completion-styles '(orderless)
@@ -723,8 +749,7 @@ Returns nil if not in a project."
   (add-to-list 'lsp-language-id-configuration '(sql-mode . "sql"))
   (add-to-list 'lsp-language-id-configuration '(web-mode . "tailwindcss"))
   (add-to-list 'lsp-language-id-configuration '(razor-mode . "rzls"))
-  (add-to-list 'lsp-language-id-configuration '(razor-mode . "html"))
-  (add-to-list 'lsp-language-id-configuration '(razor-mode . "tailwindcss"))
+  (add-to-list 'lsp-language-id-configuration '(razor-mode . "omnisharp"))
   (add-to-list 'lsp-language-id-configuration '(web-mode . "html"))
   ;; (add-to-list 'lsp-language-id-configuration '(csproj-mode . "csharp"))
 
@@ -734,7 +759,7 @@ Returns nil if not in a project."
                     :server-id 'ols
                     :multi-root t))
     (lsp-register-client
-     (make-lsp-client :new-connection (lsp-stdio-connection "c:/tools/rzls/rzls.exe")
+     (make-lsp-client :new-connection (lsp-stdio-connection "rzls")
                     :major-modes '(razor-mode)
                     :server-id 'rzls
                     :multi-root t))
@@ -784,32 +809,10 @@ Returns nil if not in a project."
   (require 'dap-cpptools))
 
 (use-package dap-ui
-  :straight nil
+  :ensure nil
   :after dap-mode
   :hook (dap-mode . dap-ui-mode)
   :hook (dap-ui-mode . dap-ui-controls-mode))
-
-;; use eglot
-
-;; (use-package eglot
-;;   :ensure t
-;;   :commands (eglot eglot-ensure)
-;;   :hook ((swift-mode . eglot-ensure)
-;;          (rust-mode . eglot-ensure)
-;;          (c-mode . eglot-ensure)
-;;          (c++-mode . eglot-ensure)
-;;          (csharp-tree-sitter-mode . eglot-ensure)
-;;          (typescript-mode . eglot-ensure)
-;;          (obc-c-mode . eglot-ensure))
-;;   :config
-;;   (setq eglot-strict-mode nil)
-;;   (setq eglot-confirm-server-initiated-edits nil)
-
-;;   (add-to-list 'eglot-server-programs '((csharp-mode csharp-tree-sitter-mode) "omnisharp" "-lsp"))
-;;   (add-to-list 'eglot-server-programs '((odin-mode) "ols"))
-;;   (add-to-list 'eglot-server-programs '((swift-mode) "sourcekit-lsp"))
-;;   (add-to-list 'eglot-server-programs '((c-mode c++-mode obj-c-mode) "clangd"))
-;;   (add-to-list 'eglot-server-programs '(rust-mode "rust-analyzer")))
 
 (use-package consult-eglot
   :ensure t
@@ -821,7 +824,7 @@ Returns nil if not in a project."
   :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package treesit
-  :straight nil
+  :ensure nil
   :commands (treesit-install-language-grammar nf/treesit-install-all-languages)
   :init
   (setq treesit-font-lock-level 4)
@@ -831,10 +834,10 @@ Returns nil if not in a project."
      (c-sharp . ("https://github.com/tree-sitter/tree-sitter-c-sharp"))
      (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
      (css . ("https://github.com/tree-sitter/tree-sitter-css"))
+     (dockerfile . ("https://github.com/camdencheek/tree-sitter-dockerfile"))
      (go . ("https://github.com/tree-sitter/tree-sitter-go"))
      (html . ("https://github.com/tree-sitter/tree-sitter-html"))
      (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
-     
      (json . ("https://github.com/tree-sitter/tree-sitter-json"))
      (lua . ("https://github.com/Azganoth/tree-sitter-lua"))
      (make . ("https://github.com/alemuller/tree-sitter-make"))
@@ -847,6 +850,7 @@ Returns nil if not in a project."
      (rust . ("https://github.com/tree-sitter/tree-sitter-rust"))
      (sql . ("https://github.com/m-novikov/tree-sitter-sql"))
      (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
+     (yaml . ("https://github.com/ikatyang/tree-sitter-yaml"))
      (zig . ("https://github.com/GrayJack/tree-sitter-zig"))))
   :config
   (defun nf/treesit-install-all-languages ()
@@ -857,18 +861,7 @@ Returns nil if not in a project."
 	      (treesit-install-language-grammar lang)
 	      (message "`%s' parser was installed." lang)
 	      (sit-for 0.75)))))
-;; (use-package tree-sitter
-;;   :defer t
-;;   :config
-;;   (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
-;;   :init
-;;   (global-tree-sitter-mode))
 
-;; (use-package tree-sitter-langs
-;;   :defer t)
-
-;; (use-package tree-sitter-indent
-;;   :defer t)
 
 ;; languages
 
@@ -878,11 +871,10 @@ Returns nil if not in a project."
 
 (use-package csharp-mode
   :mode (("\\.cs\\'" . csharp-ts-mode))
-  :hook (csharp-ts-mode . eglot-ensure)
-  :straight nil)
+  :hook (csharp-ts-mode . eglot-ensure))
 
 (use-package html-mode
-  :straight nil
+  :ensure nil
   :mode (("\\.html\\'" . html-ts-mode)))
 
 ;; (use-package razor-mode
@@ -897,22 +889,19 @@ Returns nil if not in a project."
           sharper--solution-management-mode) . +word-wrap-mode)
   :bind ("C-c n" . sharper-main-transient))
 
-(use-package sln-mode :mode "\\.sln\\'")
-
 (use-package powershell)
 
 (use-package csproj-mode
-  :straight (csproj-mode :type git :host github :repo "omajid/csproj-mode")
+  :init (slot/vc-install :fetcher "github" :repo "omajid/csproj-mode")
   :mode "\\.csproj\\'")
 
 (use-package odin-mode
   :hook (odin-mode . eglot-ensure)
-  :straight (odin-mode :type git :host github :repo "mattt-b/odin-mode")
+  :init (slot/vc-install :fetcher "github" :repo "mattt-b/odin-mode")
   :mode "\\.odin\\'")
 
 (use-package typescript-mode
   :hook (typescript-ts-mode . eglot-ensure)
-  :straight nil
   :mode (("\\.ts\\'" . typescript-ts-mode)
          ("\\.tsx\\'". typescript-ts-mode))
   :config
@@ -931,28 +920,25 @@ Returns nil if not in a project."
   :mode "\\.scss\\'")
 
 (use-package go-mode
-  :straight nil
   :mode (("\\.go\\'" . go-ts-mode)))
 
 (use-package json-mode
-  :straight nil
   :mode (("\\.json\\'" . json-ts-mode))
   )
 
 (use-package yaml-mode
-  :straight nil
   :mode (("\\.yaml" . yaml-ts-mode))
   :mode "Procfile\\'")
 
 (use-package cc-mode
   :hook (c-ts-mode . eglot-ensure)
-  :straight nil
   :mode (("\\.c\\'" . c-ts-mode)
          ("\\.h\\'" . c-ts-mode)))
 
+(use-package lua-mode)
+
 (use-package rust-mode
   :hook (rust-ts-mode . eglot-ensure)
-  :straight nil
   :mode (("\\.rs\\'" . rust-ts-mode)))
 
 (use-package plantuml-mode
@@ -961,7 +947,6 @@ Returns nil if not in a project."
   (setq plantuml-default-exec-mode 'jar))
 
 (use-package dockerfile-mode
-  :straight nil
   :mode (("\\.docker\\'" . dockerfile-ts-mode)))
 
 (use-package docker
@@ -976,10 +961,9 @@ Returns nil if not in a project."
 ;; (use-package ob-restclient)
 
 (use-package ob-csharp
-  :straight (ob-csharp :type git :host github :repo "samwdp/ob-csharp")
+  :init (slot/vc-install :fetcher "github" :repo "samwdp/ob-csharp")
   :config
-  (org-babel-do-load-languages 'org-babel-load-languages '((csharp . t)))
-)
+  (org-babel-do-load-languages 'org-babel-load-languages '((csharp . t))))
 
 (use-package format-all)
 
@@ -1056,7 +1040,7 @@ This function is called by `org-babel-execute-src-block'."
                                                            (plantuml . t)
                                                            (emacs-lisp . t))))
                                                            ;; (restclient . t))))
-(use-package org-mode
+(use-package org
   :hook ((org-mode . org-fancy-priorities-mode))
   :config
   ;; (add-to-list 'org-src-lang-modes '("plantuml" . plantuml))
@@ -1297,8 +1281,7 @@ re-align the table if necessary. (Necessary because org-mode has a
   :after yasnippet)
 
 (use-package doom-snippets
-  :after yasnippet
-  :straight (doom-snippets :type git :host github :repo "hlissner/doom-snippets" :files ("*.el" "*")))
+  :after yasnippet)
 
 (use-package auto-yasnippet
   :defer t)
@@ -1306,3 +1289,4 @@ re-align the table if necessary. (Necessary because org-mode has a
 (use-package consult-yasnippet)
 
 (setq gc-cons-thershold (* 2 1000 1000))
+(put 'downcase-region 'disabled nil)
