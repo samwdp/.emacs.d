@@ -260,7 +260,7 @@ named arguments:
      (if IS-LINUX
          '("ot" . vterm)
        '("ot" . shell))
-     '("fs" . write-file)
+     '("fs" . save-buffer)
      '("ff" . format-all-buffer)
      '("fde" . (lambda ()
                  (interactive)
@@ -436,7 +436,6 @@ named arguments:
 (use-package prescient)
 
 (use-package corfu
-  :hook (lsp-completion-mode . corfu-lsp-setup)
   :bind (:map corfu-map
               ("RET" . nil)
               ("TAB" . corfu-insert)
@@ -685,6 +684,9 @@ Returns nil if not in a project."
   :bind (:map eglot-mode-map
               ("C-." . 'eglot-code-actions))
   :config
+  (add-hook 'before-save-hook
+            (lambda () (eglot-format)))
+
   (define-key eglot-mode-map [remap lookup-definition] #'xref-find-definitions)
   (define-key eglot-mode-map [remap lookup-reference] #'xref-find-references)
   (define-key eglot-mode-map [remap lookup-implementation] #'eglot-find-implementation)
@@ -737,6 +739,7 @@ Returns nil if not in a project."
         lsp-enable-text-document-color nil
         lsp-enable-on-type-formatting nil)
   :config
+  (add-hook 'lsp-mode-hook #'corfu-lsp-setup)
   (define-key lsp-mode-map [remap format-all-buffer] #'lsp-format-buffer)
   (define-key lsp-mode-map [remap format-all-region] #'lsp-format-region)
   (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols)
@@ -905,7 +908,8 @@ Returns nil if not in a project."
   :mode (("\\.ts\\'" . typescript-ts-mode)
          ("\\.tsx\\'". typescript-ts-mode))
   :config
-  (setq typescript-indent-level 2))
+  (setq typescript-indent-level 4
+        typescript-ts-mode-indent-offset 4))
 
 (use-package web-mode
   :mode "\\.html?\\'")
@@ -1275,7 +1279,6 @@ re-align the table if necessary. (Necessary because org-mode has a
   (setq yas-snippet-dirs '(user-snippets))
   (yas-global-mode 1))
 
-(use-package company)
 
 (use-package yasnippet-snippets
   :after yasnippet)
@@ -1289,4 +1292,3 @@ re-align the table if necessary. (Necessary because org-mode has a
 (use-package consult-yasnippet)
 
 (setq gc-cons-thershold (* 2 1000 1000))
-(put 'downcase-region 'disabled nil)
