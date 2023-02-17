@@ -405,10 +405,6 @@ named arguments:
 ;;   :straight (topsy :type git :host github :repo "alphapapa/topsy.el" :branch "master")
 ;;   :hook (prog-mode . topsy-mode))
 
-(require 'word-wrap)
-(require 'razor-mode)
-(+global-word-wrap-mode 1)
-(add-hook 'fundamental-mode-hook #'+word-wrap-mode)
 
 (use-package drag-stuff
   :defer t
@@ -454,13 +450,6 @@ named arguments:
 
 (use-package cape
   :init
-  (defun my/eglot-capf ()
-    (setq-local completion-at-point-functions
-                (list (cape-super-capf
-                       #'eglot-completion-at-point
-                       (cape-company-to-capf #'company-yasnippet)))))
-  
-  (add-hook 'eglot-managed-mode-hook #'my/eglot-capf)
   (add-to-list 'completion-at-point-functions #'cape-file))
 
 (use-package kind-icon
@@ -538,12 +527,12 @@ named arguments:
 (use-package embark-consult
   :after (embark consult))
 
-(use-package chatgpt
-  :init
-  (slot/vc-install :fetcher "github" :repo "joshcho/ChatGPT.el.git")
-  (require 'python)
-  (setq chatgpt-repo-path (expand-file-name "elpa/ChatGPT.el/" user-emacs-directory))
-  :bind ("C-c q" . chatgpt-query))
+;; (use-package chatgpt
+;;   :init
+;;   (slot/vc-install :fetcher "github" :repo "joshcho/ChatGPT.el.git")
+;;   (require 'python)
+;;   (setq chatgpt-repo-path (expand-file-name "elpa/ChatGPT.el/" user-emacs-directory))
+;;   :bind ("C-c q" . chatgpt-query))
 
 (use-package consult-dir)
 
@@ -749,12 +738,8 @@ Returns nil if not in a project."
   (define-key lsp-mode-map [remap lookup-type-definition] #'lsp-goto-type-definition)
 
   (add-to-list 'lsp-language-id-configuration '(odin-mode . "odin"))
-  (add-to-list 'lsp-language-id-configuration '(sql-mode . "sql"))
-  (add-to-list 'lsp-language-id-configuration '(web-mode . "tailwindcss"))
-  (add-to-list 'lsp-language-id-configuration '(razor-mode . "rzls"))
-  (add-to-list 'lsp-language-id-configuration '(razor-mode . "omnisharp"))
-  (add-to-list 'lsp-language-id-configuration '(web-mode . "html"))
-  ;; (add-to-list 'lsp-language-id-configuration '(csproj-mode . "csharp"))
+  (add-to-list 'lsp-language-id-configuration '("\\.razor\\'" . "razor"))
+  
 
   (lsp-register-client
    (make-lsp-client :new-connection (lsp-stdio-connection "ols")
@@ -763,15 +748,12 @@ Returns nil if not in a project."
                     :multi-root t))
     (lsp-register-client
      (make-lsp-client :new-connection (lsp-stdio-connection "rzls")
-                    :major-modes '(razor-mode)
-                    :server-id 'rzls
-                    :multi-root t))
+                      :activation-fn (lsp-activate-on "razor")
+                      ;; :priority -1
+                      :server-id 'rzls
+                      ;; :add-on? t
+                      :multi-root t))
 
-  (lsp-register-client
-   (make-lsp-client :new-connection (lsp-stdio-connection "c:/tools/sqls/sqls.exe")
-                    :major-modes '(sql-mode)
-                    :server-id 'sql
-                    :multi-root t))
 
   (lsp-enable-which-key-integration t))
 
@@ -880,16 +862,13 @@ Returns nil if not in a project."
   :ensure nil
   :mode (("\\.html\\'" . html-ts-mode)))
 
-;; (use-package razor-mode
-;;   :straight (razor-mode :type git :host github :repo "samwdp/razor-mode")
-;;   :hook "\\.razor\\'"
-;;   :hook "\\.cshtml\\'")
+(use-package razor-mode
+  :init (slot/vc-install :fetcher "github" :repo "samwdp/razor-mode")
+  :hook (razor-mode . eglot-ensure)
+  :mode ("\\.razor\\'" . razor-mode)
+  :mode ("\\.cshtml\\'" . yas--direct-razor-mode))
 
 (use-package sharper
-  :hook ((sharper--project-packages-mode
-          sharper--project-references-mode
-          sharper--nuget-results-mode
-          sharper--solution-management-mode) . +word-wrap-mode)
   :bind ("C-c n" . sharper-main-transient))
 
 (use-package powershell)
@@ -907,9 +886,9 @@ Returns nil if not in a project."
   :hook (typescript-ts-mode . eglot-ensure)
   :mode (("\\.ts\\'" . typescript-ts-mode)
          ("\\.tsx\\'". typescript-ts-mode))
-  :config
-  (setq typescript-indent-level 4
-        typescript-ts-mode-indent-offset 4))
+  :custom
+  (typescript-indent-level 4)
+  (typescript-ts-mode-indent-offset 4))
 
 (use-package web-mode
   :mode "\\.html?\\'")
@@ -1279,16 +1258,13 @@ re-align the table if necessary. (Necessary because org-mode has a
   (setq yas-snippet-dirs '(user-snippets))
   (yas-global-mode 1))
 
-
-(use-package yasnippet-snippets
-  :after yasnippet)
-
-(use-package doom-snippets
-  :after yasnippet)
-
 (use-package auto-yasnippet
   :defer t)
 
 (use-package consult-yasnippet)
+
+(use-package adaptive-word-wrap-mode
+  :init (slot/vc-install :fetcher "github" :repo "samwdp/adaptive-word-wrap-mode")
+  (global-adaptive-word-wrap-mode))
 
 (setq gc-cons-thershold (* 2 1000 1000))
