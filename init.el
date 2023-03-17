@@ -91,7 +91,7 @@ named arguments:
 
 (when NATIVECOMP
   (setq native-comp-async-report-warnings-errors nil)
-  (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" "~/.emacs.cache")))
+  (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" user-emacs-directory)))
 
 (setq use-package-always-ensure t)
 
@@ -107,6 +107,12 @@ named arguments:
   :ensure t
   :hook (after-init . fancy-battery-mode))
 
+(defun toggle-transparency () )
+
+(defun transparency (value)
+   "Sets the transparency of the frame window. 0=transparent/1.0=opaque"
+   (interactive "nTransparency Value 0 - 1 opaque: t")
+   (set-frame-parameter (selected-frame) 'alpha-background value))
 
 (defvar sp/text-height 18)
 ;; (defvar sp/text-height 28)
@@ -141,9 +147,6 @@ named arguments:
 
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 
-(defconst emacs-tmp-dir (expand-file-name "temp/" "~/.emacs.cache"))
-(setq backup-directory-alist
-      `((".*" . emacs-tmp-dir)))
 
 (global-set-key (kbd "C-h") 'windmove-left)
 (global-set-key (kbd "C-j") 'windmove-down)
@@ -202,15 +205,17 @@ named arguments:
   :diminish which-key-mode
   :init (which-key-mode)
   :config
-  (setq which-key-idle-delay 0.3))
+  (setq which-key-idle-delay 0.0))
 
 (defun lookup-definition ())
 (defun lookup-reference ())
 (defun lookup-implementation ())
 (defun lookup-declaration ())
 (defun lookup-type-definition ())
+(defun sp/format-buffer ())
 (global-set-key [remap lookup-definition] #'xref-find-definitions)
 (global-set-key [remap lookup-reference] #'xref-find-references)
+;; (global-set-key [remap sp/format-buffer] #'format-all-buffer)
 
 
 (use-package meow
@@ -255,18 +260,21 @@ named arguments:
      '("og" . magit-status)
      '("pp" . projectile-switch-project)
      '("pd" . persp-kill)
+     '("pc" . projectile-compile-project)
+     '("pr" . recompile)
      '("op" . +treemacs/toggle)
      '("os" . spawn-shell)
      (if IS-LINUX
          '("ot" . vterm)
        '("ot" . shell))
      '("fs" . save-buffer)
-     '("ff" . format-all-buffer)
+     '("ff" . sp/format-buffer)
      '("fde" . (lambda ()
                  (interactive)
                  (find-file (expand-file-name (concat user-emacs-directory "init.el")))))
      '("sp" . consult-ripgrep)
      '("ss" . consult-line)
+     '("tt" . transparency)
      )
     (meow-normal-define-key
      '("0" . meow-expand-0)
@@ -441,9 +449,9 @@ named arguments:
   (corfu-separator ?\s)
   (corfu-cycle t)
   (corfu-auto t)
-  (corfu-auto-prefix 2)
+  (corfu-auto-prefix 1)
   (corfu-auto-delay 0.0)
-  (corfu-popupinfo-delay 0.5)
+  (corfu-popupinfo-delay 0.3)
   :init
   (global-corfu-mode)
   (corfu-popupinfo-mode))
@@ -574,7 +582,7 @@ named arguments:
 
   (when IS-LINUX
     (setq projectile-project-search-path '("~/work/"
-                                           "~/programming/odin"))))
+                                           "~/projects/"))))
 
 (use-package persp-projectile)
 
@@ -670,23 +678,27 @@ Returns nil if not in a project."
 
 (use-package eglot
   :hook (before-save . eglot-format-buffer)
+  :hook (eglot-mode . eglot-inlay-hints-mode)
   :bind (:map eglot-mode-map
               ("C-." . 'eglot-code-actions))
   :config
   (add-hook 'before-save-hook
             (lambda () (eglot-format)))
 
+  (setq completion-category-overrides '((eglot (styles orderless))))
+
   (define-key eglot-mode-map [remap lookup-definition] #'xref-find-definitions)
   (define-key eglot-mode-map [remap lookup-reference] #'xref-find-references)
   (define-key eglot-mode-map [remap lookup-implementation] #'eglot-find-implementation)
   (define-key eglot-mode-map [remap lookup-declaration] #'eglot-find-declaration)
   (define-key eglot-mode-map [remap lookup-type-definition] #'eglot-find-typeDefinition)
+  (define-key eglot-mode-map [remap sp/format-buffer] #'eglot-format-buffer)
   (setq eglot-connect-timeout 90)
   (add-to-list 'eglot-server-programs '(odin-mode "ols"))
   ;; (add-to-list 'eglot-server-programs '(html-mode "tailwindcss-language-server"))
   ;; (add-to-list 'eglot-server-programs '((web-mode :language-id "html") . ("tailwindcss-language-server")))
-  (add-to-list 'eglot-server-programs '(web-mode "vscode-html-language-server" "--stdio"))
   (add-to-list 'eglot-server-programs '(razor-mode "rzls"))
+  (add-to-list 'eglot-server-programs '(web-mode "rzls"))
   ;; (add-to-list 'eglot-server-programs '(razor-mode . (eglot-alternatives '(("vscode-html-language-server" "--stdio") ("html-languageserver" "--stdio")))))
   
   ;; (add-to-list 'eglot-server-programs '(razor-mode "tailwindcss-language-server"))
@@ -712,11 +724,18 @@ Returns nil if not in a project."
   :hook (lsp-mode . +lsp-optimization-mode)
   :hook (lsp-mode . lsp-signature-mode) 
   :hook (before-save . lsp-format-buffer)
+  :hook (lsp-completion-mode . my/lsp-mode-setup-completion)
   :commands (lsp lsp-deferred)
+  :custom
+  (lsp-completion-provider :none) ;; we use Corfu!
   :init
+  (defun my/lsp-mode-setup-completion ()
+    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+          '(orderless))) 
   (setq lsp-completion-provider nil)
   (setq lsp-keymap-prefix "C-c l")
   (setq lsp-headerline-breadcrumb-enable t
+        lsp-idle-delay 0.0
         lsp-headerline-breadcrumb-icons-enable nil
         lsp-keep-workspace-alive nil
         lsp-modeline-diagnostics-enable nil
@@ -729,13 +748,12 @@ Returns nil if not in a project."
         lsp-enable-on-type-formatting nil)
   :config
   (add-hook 'lsp-mode-hook #'corfu-lsp-setup)
-  (define-key lsp-mode-map [remap format-all-buffer] #'lsp-format-buffer)
-  (define-key lsp-mode-map [remap format-all-region] #'lsp-format-region)
   (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols)
   (define-key lsp-mode-map [remap lookup-implementation] #'lsp-goto-implementation)
   (define-key lsp-mode-map [remap lookup-reference] #'lsp-find-references)
   (define-key lsp-mode-map [remap lookup-definition] #'lsp-find-definition)
   (define-key lsp-mode-map [remap lookup-type-definition] #'lsp-goto-type-definition)
+  (define-key lsp-mode-map [remap sp/format-buffer] #'lsp-format-buffer)
 
   (add-to-list 'lsp-language-id-configuration '(odin-mode . "odin"))
   (add-to-list 'lsp-language-id-configuration '("\\.razor\\'" . "razor"))
@@ -866,7 +884,10 @@ Returns nil if not in a project."
   :init (slot/vc-install :fetcher "github" :repo "samwdp/razor-mode")
   :hook (razor-mode . eglot-ensure)
   :mode ("\\.razor\\'" . razor-mode)
-  :mode ("\\.cshtml\\'" . yas--direct-razor-mode))
+  :mode ("\\.cshtml\\'" . yas--direct-razor-mode)
+  :config
+    (remove-hook 'before-save-hook
+            (lambda () (eglot-format))))
 
 (use-package sharper
   :bind ("C-c n" . sharper-main-transient))
@@ -1215,11 +1236,18 @@ re-align the table if necessary. (Necessary because org-mode has a
           ;; For warning about a problematic or misguiding code
           ("XXX" font-lock-constant-face bold))))
 
+(use-package org-brain
+  :config
+  (setq org-brain-path "~/brain"))
+
+(use-package polymode
+  :hook (org-brain-visualize-mode . org-brain-polymode))
 (use-package pdf-tools
   :hook (pdf-view-mode . (lambda () (beacon-mode -1)))
   :mode ("\\.pdf\\'" . pdf-view-mode)
-  :custom
-  ((pdf-info-epdfinfo-program "c:/tools/epdfinfo/epdfinfo.exe")))
+  :config
+  (when IS-WINDOWS
+    setq pdf-info-epdfinfo-program "c:/tools/epdfino/epdfinfo.exe"))
 
 (use-package saveplace-pdf-view)
 
@@ -1265,6 +1293,27 @@ re-align the table if necessary. (Necessary because org-mode has a
 
 (use-package adaptive-word-wrap-mode
   :init (slot/vc-install :fetcher "github" :repo "samwdp/adaptive-word-wrap-mode")
-  (global-adaptive-word-wrap-mode))
+  :hook (after-init . global-adaptive-word-wrap-mode))
+
+(use-package highlight-indent-guides
+  :config
+  (setq highlight-indent-guides-method 'character)
+  (set-face-background 'highlight-indent-guides-odd-face "darkgray")
+  (set-face-background 'highlight-indent-guides-even-face "dimgray")
+  (set-face-foreground 'highlight-indent-guides-character-face "dimgray"))
+
+
+(use-package which-func
+  :init
+  (which-function-mode 1)
+  :config
+  (setq mode-line-format (delete (assoc 'which-func-mode
+                                      mode-line-format) mode-line-format)
+      which-func-header-line-format '(which-func-mode ("" which-func-format)))
+(defadvice which-func-ff-hook (after header-line activate)
+  (when which-func-mode
+    (setq mode-line-format (delete (assoc 'which-func-mode
+                                          mode-line-format) mode-line-format)
+          header-line-format which-func-header-line-format))))
 
 (setq gc-cons-thershold (* 2 1000 1000))

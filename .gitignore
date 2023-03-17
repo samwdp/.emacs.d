@@ -8,5 +8,6 @@
 /tree-sitter/
 /elpa/
 /eln-cache/
+/.cask/
 custom*
 async-bytecomp.log
