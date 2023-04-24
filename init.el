@@ -621,11 +621,14 @@ named arguments:
 
 (use-package treemacs
   :defer t
+  :bind (:map treemacs-mode-map
+              ("C-k" . windmove-up)
+              ("C-j" . windmove-down))
   :init
   (setq treemacs-follow-after-init t
         treemacs-is-never-other-window nil
         treemacs-width 50
-        treemacs-position 'right
+        treemacs-position 'left
         treemacs-sorting 'alphabetic-case-insensitive-asc)
   :config
   (treemacs-follow-mode -1))
@@ -827,6 +830,10 @@ Returns nil if not in a project."
   :defer t)
 
 (use-package dap-mode
+  :bind (:map dap-mode-map
+              ("<f10>" . 'dap-next)
+              ("<f11>" . 'dap-step-in)
+              ("<f5>" . 'dap-continue))
   :commands dap-debug
   :hook (dap-mode . dap-tooltip-mode)
   :config
