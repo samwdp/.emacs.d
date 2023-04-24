@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: import vendor
-# key: /iv
-# --
-
-import $2 \"vendor:$1\"
-$0

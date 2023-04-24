@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: multi-var
-# key: \mv
-# --
-:$1 = <<
-$0
-#

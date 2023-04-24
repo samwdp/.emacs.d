@@ -3,7 +3,6 @@
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
                          ("org" . "https://orgmode.org/elpa/")
                          ("elpa" . "https://elpa.gnu.org/packages/")))
-
 (blink-cursor-mode 0)
 (pixel-scroll-mode 1)
 (display-time-mode 1)
@@ -31,9 +30,14 @@
       set-language-environment "UTF-8")
 
 (package-initialize)
+
 (unless package-archive-contents
   (package-refresh-contents))
 
+(when (memq window-system '(mac ns x))
+  (exec-path-from-shell-initialize))
+(when (daemonp)
+  (exec-path-from-shell-initialize))
 (cl-defun slot/vc-install (&key (fetcher "github") repo name rev backend)
   "Install a package from a remote if it's not already installed.
 This is a thin wrapper around `package-vc-install' in order to
@@ -54,6 +58,7 @@ named arguments:
     (unless (package-installed-p pac-name)
       (package-vc-install url iname rev backend))))
 
+
 (defun sp/defer-garbage-collection-h ()
   (setq gc-cons-threshold most-positive-fixnum))
 
@@ -66,10 +71,9 @@ named arguments:
 (add-hook 'minibuffer-setup-hook #'sp/defer-garbage-collection-h)
 (add-hook 'minibuffer-exit-hook #'sp/restore-garbage-collection-h)
 
-(setq emacs-version-short  (replace-regexp-in-string
+(setq emacs-version-short (replace-regexp-in-string
                             "\\([0-9]+\\)\\.\\([0-9]+\\).*"
                             "\\1_\\2" emacs-version))
-
 (setq custom-file (expand-file-name
                    (concat "custom_" emacs-version-short ".el")
                    user-emacs-directory))
@@ -99,7 +103,6 @@ named arguments:
   :ensure t
   :config
   (gcmh-mode 1))
-
 (use-package unicode-fonts
   :init (slot/vc-install :fetcher "github" :repo "rolandwalker/unicode-fonts"))
 
@@ -117,7 +120,7 @@ named arguments:
 (defvar sp/text-height 18)
 ;; (defvar sp/text-height 28)
 (defvar sp/text-height-variable 20)
-(defvar sp/font-string "Fira Code Nerd Font")
+(defvar sp/font-string "FiraCode Nerd Font")
 
 (defun sp/new-frame ()
   (set-face-attribute 'default nil :font (font-spec :family sp/font-string :size sp/text-height))
@@ -161,7 +164,23 @@ named arguments:
 (defun spawn-shell (name)
   (interactive "MName of new shell: ")
   (pop-to-buffer (get-buffer-create (generate-new-buffer-name name)))
-  (shell (current-buffer)))
+  (term (current-buffer)))
+
+
+(defun eshell-with-name ()
+    (interactive)
+    (let* ((eshell-buffer-names (mapcar (lambda (buf)
+					                      (buffer-name buf))
+					                    (buffer-list)))
+	       (match (completing-read "eshell buffers: "
+				                   eshell-buffer-names
+                                   (lambda (buf)
+				                     (string-match-p "*eshell*" buf))))
+	       (eshell-buffer-exists (member match eshell-buffer-names)))
+      (if eshell-buffer-exists
+	      (switch-to-buffer match)
+	    (eshell 99)
+	    (rename-buffer (concat "*eshell*<" match ">")))))
 
 (use-package no-littering
   :ensure t
@@ -248,7 +267,7 @@ named arguments:
      '("SPC" . consult-projectile-find-file)
      '("TAB" . persp-switch)
      '("ac" . quick-calc)
-     '("bb" . consult-projectile-switch-to-buffer)
+     '("bb" . consult-project-buffer)
      '("bd" . kill-this-buffer)
      '("bB" . consult-buffer)
      '("cc" . projectile-compile-project)
@@ -261,14 +280,16 @@ named arguments:
      '("pp" . projectile-switch-project)
      '("pd" . persp-kill)
      '("pc" . projectile-compile-project)
+     '("ps" . projectile-discover-projects-in-search-path)
      '("pr" . recompile)
+     '("pi" . projectile-invalidate-cache)
      '("op" . +treemacs/toggle)
-     '("os" . spawn-shell)
+     '("os" . eshell-with-name)
      (if IS-LINUX
          '("ot" . vterm)
        '("ot" . shell))
      '("fs" . save-buffer)
-     '("ff" . sp/format-buffer)
+     '("ff" . format-all-buffer)
      '("fde" . (lambda ()
                  (interactive)
                  (find-file (expand-file-name (concat user-emacs-directory "init.el")))))
@@ -370,9 +391,7 @@ named arguments:
   :defer t)
 
 (use-package smartparens
-  :defer t
-  :init
-  (smartparens-global-mode))
+  :defer t)
 
 (use-package anzu
   :init
@@ -458,7 +477,8 @@ named arguments:
 
 (use-package cape
   :init
-  (add-to-list 'completion-at-point-functions #'cape-file))
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-tex))
 
 (use-package kind-icon
   :after corfu
@@ -522,14 +542,15 @@ named arguments:
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref)
   :config
+  (setq consult-preview-key "M-.")
   (consult-customize
-   consult-theme
-   :preview-key '(:debounce 0.2 any)
+   consult-theme :preview-key '(:debounce 0.2 any)
    consult-ripgrep consult-git-grep consult-grep
    consult-bookmark consult-recent-file consult-xref
-   consult--source-bookmark consult--source-recent-file
-   consult--source-project-recent-file
-   :preview-key (kbd "M-."))
+   consult--source-bookmark consult--source-file-register
+   consult--source-recent-file consult--source-project-recent-file
+   :preview-key '(:debounce 0.4 any))
+
   (setq consult-narrow-key "<"))
 
 (use-package embark-consult
@@ -553,11 +574,14 @@ named arguments:
 (use-package flycheck
   :commands flycheck-list-errors flycheck-buffer
   :config
+  (setq flycheck-display-errors-function 'ignore)
   (setq flycheck-emacs-lisp-load-path 'inherit)
   (delq 'new-line flycheck-check-syntax-automatically)
   (setq flycheck-idle-change-delay 1.0)
   (setq flycheck-buffer-switch-check-intermediate-buffers t)
   (setq flycheck-display-errors-delay 0.25))
+
+(use-package flycheck-tip)
 
 (use-package projectile
   :defer t
@@ -581,8 +605,8 @@ named arguments:
                                            "W:/foresolutions")))
 
   (when IS-LINUX
-    (setq projectile-project-search-path '("~/work/"
-                                           "~/projects/"))))
+    (setq projectile-project-search-path '(("~/work/" . 4)
+                                           ("~/projects/" . 4)))))
 
 (use-package persp-projectile)
 
@@ -734,7 +758,7 @@ Returns nil if not in a project."
           '(orderless))) 
   (setq lsp-completion-provider nil)
   (setq lsp-keymap-prefix "C-c l")
-  (setq lsp-headerline-breadcrumb-enable t
+  (setq lsp-headerline-breadcrumb-enable nil
         lsp-idle-delay 0.0
         lsp-headerline-breadcrumb-icons-enable nil
         lsp-keep-workspace-alive nil
@@ -747,6 +771,9 @@ Returns nil if not in a project."
         lsp-enable-text-document-color nil
         lsp-enable-on-type-formatting nil)
   :config
+  (add-hook 'before-save-hook
+            (lambda () (lsp-format-buffer)))
+
   (add-hook 'lsp-mode-hook #'corfu-lsp-setup)
   (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols)
   (define-key lsp-mode-map [remap lookup-implementation] #'lsp-goto-implementation)
@@ -866,6 +893,10 @@ Returns nil if not in a project."
 	      (sit-for 0.75)))))
 
 
+(use-package treesit-auto
+  :config
+  (global-treesit-auto-mode))
+
 ;; languages
 
 (use-package csv-mode
@@ -873,8 +904,8 @@ Returns nil if not in a project."
   :hook (csv-mode . csv-align-mode))
 
 (use-package csharp-mode
-  :mode (("\\.cs\\'" . csharp-ts-mode))
-  :hook (csharp-ts-mode . eglot-ensure))
+  :hook (csharp-ts-mode . lsp-deferred)
+  :mode (("\\.cs\\'" . csharp-ts-mode)))
 
 (use-package html-mode
   :ensure nil
@@ -882,7 +913,6 @@ Returns nil if not in a project."
 
 (use-package razor-mode
   :init (slot/vc-install :fetcher "github" :repo "samwdp/razor-mode")
-  :hook (razor-mode . eglot-ensure)
   :mode ("\\.razor\\'" . razor-mode)
   :mode ("\\.cshtml\\'" . yas--direct-razor-mode)
   :config
@@ -899,12 +929,12 @@ Returns nil if not in a project."
   :mode "\\.csproj\\'")
 
 (use-package odin-mode
-  :hook (odin-mode . eglot-ensure)
+  :hook (odin-mode . lsp-deferred)
   :init (slot/vc-install :fetcher "github" :repo "mattt-b/odin-mode")
   :mode "\\.odin\\'")
 
 (use-package typescript-mode
-  :hook (typescript-ts-mode . eglot-ensure)
+  :hook (typescript-ts-mode . lsp-deferred)
   :mode (("\\.ts\\'" . typescript-ts-mode)
          ("\\.tsx\\'". typescript-ts-mode))
   :custom
@@ -915,34 +945,44 @@ Returns nil if not in a project."
   :mode "\\.html?\\'")
 
 (use-package sass-mode
+  :hook (sass-mode . lsp-deferred)
   :mode "\\.sass\\'")
 
 (use-package css-mode
+  :hook (css-ts-mode . lsp-deferred)
   :mode (("\\.css\\'" . css-ts-mode)))
 
 (use-package scss-mode
+  :hook (scss-mode . lsp-deferred)
   :mode "\\.scss\\'")
 
 (use-package go-mode
+  :hook (csharp-ts-mode . lsp-deferred)
   :mode (("\\.go\\'" . go-ts-mode)))
 
 (use-package json-mode
+  :hook (json-ts-mode . lsp-deferred)
   :mode (("\\.json\\'" . json-ts-mode))
   )
 
 (use-package yaml-mode
+  :hook (yaml-ts-mode . lsp-deferred)
   :mode (("\\.yaml" . yaml-ts-mode))
   :mode "Procfile\\'")
 
+(use-package toml-mode
+  :hook (toml-ts-mode . lsp-deferred)
+  :mode (("\\.toml" . toml-ts-mode)))
+
 (use-package cc-mode
-  :hook (c-ts-mode . eglot-ensure)
+  :hook (c-ts-mode . lsp-deferred)
   :mode (("\\.c\\'" . c-ts-mode)
          ("\\.h\\'" . c-ts-mode)))
 
 (use-package lua-mode)
 
 (use-package rust-mode
-  :hook (rust-ts-mode . eglot-ensure)
+  :hook (rust-ts-mode . lsp-deferred)
   :mode (("\\.rs\\'" . rust-ts-mode)))
 
 (use-package plantuml-mode
@@ -968,6 +1008,8 @@ Returns nil if not in a project."
   :init (slot/vc-install :fetcher "github" :repo "samwdp/ob-csharp")
   :config
   (org-babel-do-load-languages 'org-babel-load-languages '((csharp . t))))
+
+(use-package glsl-mode)
 
 (use-package format-all)
 
@@ -1043,7 +1085,8 @@ This function is called by `org-babel-execute-src-block'."
   (org-babel-do-load-languages 'org-babel-load-languages '((ruby . t)
                                                            (plantuml . t)
                                                            (emacs-lisp . t))))
-                                                           ;; (restclient . t))))
+;; (restclient . t))))
+
 (use-package org
   :hook ((org-mode . org-fancy-priorities-mode))
   :config
@@ -1268,22 +1311,7 @@ re-align the table if necessary. (Necessary because org-mode has a
 
 (use-package yasnippet
   :defer t
-  :config
-  (defun check-save ()
-    (expansion-excursion
-      (if (looking-at "\\_>") t
-        (backward-char 1)
-        (if (looking-at "\\.") t
-          (backward-char 1)
-          (if (looking-at "->") t nil)))))
-
-  (defun do-yas-expand ()
-    (let ((yas/fallback-behavior 'return-nil))
-      (yas/expand)))
-  (global-set-key (kbd "C-<return>") 'tab-indent-or-complete)
   :init
-  (defvar user-snippets (concat user-emacs-directory "snippets/"))
-  (setq yas-snippet-dirs '(user-snippets))
   (yas-global-mode 1))
 
 (use-package auto-yasnippet
@@ -1291,17 +1319,15 @@ re-align the table if necessary. (Necessary because org-mode has a
 
 (use-package consult-yasnippet)
 
+(use-package doom-snippets
+  :after yasnippet
+  :config
+  (setq doom-snippets-enable-short-helpers t)
+  :init (slot/vc-install :fetcher "github" :repo "hlissner/doom-snippets"))
+
 (use-package adaptive-word-wrap-mode
   :init (slot/vc-install :fetcher "github" :repo "samwdp/adaptive-word-wrap-mode")
   :hook (after-init . global-adaptive-word-wrap-mode))
-
-(use-package highlight-indent-guides
-  :config
-  (setq highlight-indent-guides-method 'character)
-  (set-face-background 'highlight-indent-guides-odd-face "darkgray")
-  (set-face-background 'highlight-indent-guides-even-face "dimgray")
-  (set-face-foreground 'highlight-indent-guides-character-face "dimgray"))
-
 
 (use-package which-func
   :init
@@ -1315,5 +1341,17 @@ re-align the table if necessary. (Necessary because org-mode has a
     (setq mode-line-format (delete (assoc 'which-func-mode
                                           mode-line-format) mode-line-format)
           header-line-format which-func-header-line-format))))
+
+(use-package sideline
+  :init
+  (setq sideline-backends-right '(
+                                  (sideline-flycheck . up)
+                                  )
+        sideline-backends-left '((sideline-eldoc . up))
+        sideline-display-backend-name t))
+
+(use-package sideline-flycheck)
+(use-package sideline-eldoc
+  :init (slot/vc-install :fetcher "github" :repo "ginqi7/sideline-eldoc"))
 
 (setq gc-cons-thershold (* 2 1000 1000))

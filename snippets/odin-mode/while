@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: for 
-# key: \while
-# --
-for ${1:true} {
-    $0
-} 

@@ -1,8 +1,0 @@
-# -*- mode: snippet -*-
-# name: struct 
-# key: \str
-# --
-
-$1 :: struct {
-    $0
-}

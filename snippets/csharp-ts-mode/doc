@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: doc comment 
-# key: /// 
-# --
-/// <summary>
-/// $0 
-/// </summary>

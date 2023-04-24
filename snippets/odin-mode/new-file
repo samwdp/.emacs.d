@@ -1,9 +1,0 @@
-# -*- mode: snippet -*-
-# name: template 
-# key: \\
-# --
-package $1
-
-main :: proc() {
-    $0
-}

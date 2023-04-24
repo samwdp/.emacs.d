@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: proc 
-# key: \proc
-# --
-$1 :: proc($2) {
-    $0
-}

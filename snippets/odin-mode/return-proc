@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: proc-retutun 
-# key: \pr
-# --
-$1 :: proc() -> ($2) {
-    $3
-}

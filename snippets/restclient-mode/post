@@ -1,9 +1,0 @@
-# -*- mode: snippet -*-
-# name: post
-# key: \p
-# --
-
-POST $1
-Content-Type: $2
-
-$0
