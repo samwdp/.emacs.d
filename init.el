@@ -231,6 +231,7 @@ named arguments:
 (defun lookup-implementation ())
 (defun lookup-declaration ())
 (defun lookup-type-definition ())
+(defun lookup-doc ())
 (defun sp/format-buffer ())
 (global-set-key [remap lookup-definition] #'xref-find-definitions)
 (global-set-key [remap lookup-reference] #'xref-find-references)
@@ -357,6 +358,7 @@ named arguments:
      '("v i" . lookup-implementation)
      '("v e" . lookup-declaration)
      '("v t" . lookup-type-definition)
+     '("v v" . lookup-doc)
      '("e" . meow-mark-word)
      '("E" . meow-mark-symbol)
      '("x" . meow-line)
@@ -783,11 +785,12 @@ Returns nil if not in a project."
   (define-key lsp-mode-map [remap lookup-reference] #'lsp-find-references)
   (define-key lsp-mode-map [remap lookup-definition] #'lsp-find-definition)
   (define-key lsp-mode-map [remap lookup-type-definition] #'lsp-goto-type-definition)
+  (define-key lsp-mode-map [remap lookup-doc] #'lsp-ui-doc-glance)
   (define-key lsp-mode-map [remap sp/format-buffer] #'lsp-format-buffer)
+  (define-key lsp-mode-map (kbd "<f7>") 'lsp-ui-doc-focus-frame)
 
   (add-to-list 'lsp-language-id-configuration '(odin-mode . "odin"))
   (add-to-list 'lsp-language-id-configuration '("\\.razor\\'" . "razor"))
-  
 
   (lsp-register-client
    (make-lsp-client :new-connection (lsp-stdio-connection "ols")
@@ -810,6 +813,8 @@ Returns nil if not in a project."
   :config
   (setq
    lsp-ui-doc-enable nil
+   lsp-ui-doc-position 'at-point
+   lsp-ui-doc-show-with-cursor t
    lsp-signature-auto-activate t
    lsp-signature-render-documentation t
    lsp-headerline-breadcrumb-segments '(symbols)
@@ -1361,4 +1366,14 @@ re-align the table if necessary. (Necessary because org-mode has a
 (use-package sideline-eldoc
   :init (slot/vc-install :fetcher "github" :repo "ginqi7/sideline-eldoc"))
 
+(use-package git-gutter
+  :hook (prog-mode . git-gutter-mode))
+
+(use-package git-gutter-fringe
+  :config
+  (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
+ 
 (setq gc-cons-thershold (* 2 1000 1000))
+
