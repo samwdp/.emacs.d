@@ -31,6 +31,13 @@
 
 (package-initialize)
 
+(defconst NATIVECOMP (if (fboundp 'native-comp-available-p) (native-comp-available-p)))
+(defconst IS-MAC     (eq system-type 'darwin))
+(defconst IS-LINUX   (eq system-type 'gnu/linux))
+(defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
+
+(when IS-WINDOWS (setq package-gnupghome-dir (concat user-emacs-directory "elpa/gnupg/pubring.kbx")))
+
 (unless package-archive-contents
   (package-refresh-contents))
 
@@ -77,11 +84,6 @@ named arguments:
 (setq custom-file (expand-file-name
                    (concat "custom_" emacs-version-short ".el")
                    user-emacs-directory))
-
-(defconst NATIVECOMP (if (fboundp 'native-comp-available-p) (native-comp-available-p)))
-(defconst IS-MAC     (eq system-type 'darwin))
-(defconst IS-LINUX   (eq system-type 'gnu/linux))
-(defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
 
 (add-to-list 'load-path (expand-file-name "custom/" user-emacs-directory))
 
@@ -289,7 +291,7 @@ named arguments:
      (if IS-LINUX
          '("ot" . vterm)
        '("ot" . shell))
-     '("fs" . save-buffer)
+     '("w" . save-buffer)
      '("ff" . format-all-buffer)
      '("fde" . (lambda ()
                  (interactive)
@@ -594,17 +596,7 @@ named arguments:
   :init
   (setq projectile-enable-caching t)
   (when IS-WINDOWS
-    (setq projectile-project-search-path '("W:/"
-                                           "W:/personal/angular/src"
-                                           "W:/personal/c/src"
-                                           "W:/personal/cpp/src"
-                                           "W:/personal/csharp/src"
-                                           "W:/personal/emacs/src"
-                                           "W:/personal/odin/src"
-                                           "W:/personal/go/src"
-                                           "W:/personal/rust/src"
-                                           "W:/personal/odin/src"
-                                           "W:/foresolutions")))
+    (setq projectile-project-search-path '(("D:/work".4))))
 
   (when IS-LINUX
     (setq projectile-project-search-path '(("~/work/" . 4)
@@ -1331,12 +1323,6 @@ re-align the table if necessary. (Necessary because org-mode has a
 
 (use-package consult-yasnippet)
 
-(use-package doom-snippets
-  :after yasnippet
-  :config
-  (setq doom-snippets-enable-short-helpers t)
-  :init (slot/vc-install :fetcher "github" :repo "hlissner/doom-snippets"))
-
 (use-package adaptive-word-wrap-mode
   :init (slot/vc-install :fetcher "github" :repo "samwdp/adaptive-word-wrap-mode")
   :hook (after-init . global-adaptive-word-wrap-mode))
@@ -1374,6 +1360,8 @@ re-align the table if necessary. (Necessary because org-mode has a
   (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
   (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
   (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
- 
+
+(use-package yasnippet-snippets)
+(use-package competitive-programming-snippets)
 (setq gc-cons-thershold (* 2 1000 1000))
 
