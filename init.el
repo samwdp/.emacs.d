@@ -596,7 +596,7 @@ named arguments:
   :init
   (setq projectile-enable-caching t)
   (when IS-WINDOWS
-    (setq projectile-project-search-path '(("D:/work".4))))
+    (setq projectile-project-search-path '(("D:/work" . 4))))
 
   (when IS-LINUX
     (setq projectile-project-search-path '(("~/work/" . 4)
