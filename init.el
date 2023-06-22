@@ -35,7 +35,7 @@
 (defconst IS-MAC     (eq system-type 'darwin))
 (defconst IS-LINUX   (eq system-type 'gnu/linux))
 (defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
-
+(defconst EVIL-ON t)
 (when IS-WINDOWS (setq package-gnupghome-dir (concat user-emacs-directory "elpa/gnupg/pubring.kbx")))
 
 (unless package-archive-contents
@@ -79,8 +79,8 @@ named arguments:
 (add-hook 'minibuffer-exit-hook #'sp/restore-garbage-collection-h)
 
 (setq emacs-version-short (replace-regexp-in-string
-                            "\\([0-9]+\\)\\.\\([0-9]+\\).*"
-                            "\\1_\\2" emacs-version))
+                           "\\([0-9]+\\)\\.\\([0-9]+\\).*"
+                           "\\1_\\2" emacs-version))
 (setq custom-file (expand-file-name
                    (concat "custom_" emacs-version-short ".el")
                    user-emacs-directory))
@@ -115,9 +115,9 @@ named arguments:
 (defun toggle-transparency () )
 
 (defun transparency (value)
-   "Sets the transparency of the frame window. 0=transparent/1.0=opaque"
-   (interactive "nTransparency Value 0 - 1 opaque: t")
-   (set-frame-parameter (selected-frame) 'alpha-background value))
+  "Sets the transparency of the frame window. 0=transparent/1.0=opaque"
+  (interactive "nTransparency Value 0 - 1 opaque: t")
+  (set-frame-parameter (selected-frame) 'alpha-background value))
 
 (defvar sp/text-height 18)
 ;; (defvar sp/text-height 28)
@@ -170,19 +170,19 @@ named arguments:
 
 
 (defun eshell-with-name ()
-    (interactive)
-    (let* ((eshell-buffer-names (mapcar (lambda (buf)
-					                      (buffer-name buf))
-					                    (buffer-list)))
-	       (match (completing-read "eshell buffers: "
-				                   eshell-buffer-names
-                                   (lambda (buf)
-				                     (string-match-p "*eshell*" buf))))
-	       (eshell-buffer-exists (member match eshell-buffer-names)))
-      (if eshell-buffer-exists
-	      (switch-to-buffer match)
-	    (eshell 99)
-	    (rename-buffer (concat "*eshell*<" match ">")))))
+  (interactive)
+  (let* ((eshell-buffer-names (mapcar (lambda (buf)
+					                    (buffer-name buf))
+					                  (buffer-list)))
+	     (match (completing-read "eshell buffers: "
+				                 eshell-buffer-names
+                                 (lambda (buf)
+				                   (string-match-p "*eshell*" buf))))
+	     (eshell-buffer-exists (member match eshell-buffer-names)))
+    (if eshell-buffer-exists
+	    (switch-to-buffer match)
+	  (eshell 99)
+	  (rename-buffer (concat "*eshell*<" match ">")))))
 
 (use-package no-littering
   :ensure t
@@ -238,142 +238,205 @@ named arguments:
 (global-set-key [remap lookup-definition] #'xref-find-definitions)
 (global-set-key [remap lookup-reference] #'xref-find-references)
 ;; (global-set-key [remap sp/format-buffer] #'format-all-buffer)
+(when EVIL-ON
+  (use-package evil
+    :init      ;; tweak evil's configuration before loading it
+    (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
+    (setq evil-want-keybinding nil)
+    (setq evil-vsplit-window-right t)
+    (setq evil-split-window-below t)
+    (evil-mode))
+  (use-package evil-collection
+    :after evil
+    :config
+    (setq evil-collection-mode-list '(dashboard dired ibuffer))
+    (evil-collection-init))
+  (use-package evil-tutor)
 
+  (use-package general
+    :config
+    (general-evil-setup)
 
-(use-package meow
-  :ensure t
-  :config
-  (setq meow-use-clipboard t)
-  (setq meow-cheatsheet-physical-layout meow-cheatsheet-physical-layout-iso)
-  (defun meow-setup ()
-    (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-    (meow-motion-overwrite-define-key
-     '("j" . meow-next)
-     '("k" . meow-prev)
-     '("<escape>" . ignore))
-    (meow-leader-define-key
-     ;; SPC j/k will run the original command in MOTION state.
-     ;; Use SPC (0-9) for digit arguments.
-     '("1" . meow-digit-argument)
-     '("2" . meow-digit-argument)
-     '("3" . meow-digit-argument)
-     '("4" . meow-digit-argument)
-     '("5" . meow-digit-argument)
-     '("6" . meow-digit-argument)
-     '("7" . meow-digit-argument)
-     '("8" . meow-digit-argument)
-     '("9" . meow-digit-argument)
-     '("0" . meow-digit-argument)
-     '("." . find-file)
-     '("/" . meow-keypad-describe-key)
-     '("?" . meow-cheatsheet)
-     '("SPC" . consult-projectile-find-file)
-     '("TAB" . persp-switch)
-     '("ac" . quick-calc)
-     '("bb" . consult-project-buffer)
-     '("bd" . kill-this-buffer)
-     '("bB" . consult-buffer)
-     '("cc" . projectile-compile-project)
-     '("db" . killthis-buffer)
-     '("dp" . persp-kill)
-     '("ed" . eval-defun)
-     '("is" . consult-yasnippet)
-     '("ic" . insert-char)
-     '("og" . magit-status)
-     '("pp" . projectile-switch-project)
-     '("pd" . persp-kill)
-     '("pc" . projectile-compile-project)
-     '("ps" . projectile-discover-projects-in-search-path)
-     '("pr" . recompile)
-     '("pi" . projectile-invalidate-cache)
-     '("op" . +treemacs/toggle)
-     '("os" . eshell-with-name)
-     (if IS-LINUX
-         '("ot" . vterm)
-       '("ot" . shell))
-     '("w" . save-buffer)
-     '("ff" . format-all-buffer)
-     '("fde" . (lambda ()
-                 (interactive)
-                 (find-file (expand-file-name (concat user-emacs-directory "init.el")))))
-     '("sp" . consult-ripgrep)
-     '("ss" . consult-line)
-     '("tt" . transparency)
-     )
-    (meow-normal-define-key
-     '("0" . meow-expand-0)
-     '("9" . meow-expand-9)
-     '("8" . meow-expand-8)
-     '("7" . meow-expand-7)
-     '("6" . meow-expand-6)
-     '("5" . meow-expand-5)
-     '("4" . meow-expand-4)
-     '("3" . meow-expand-3)
-     '("2" . meow-expand-2)
-     '("1" . meow-expand-1)
-     '("-" . negative-argument)
-     '(";" . meow-reverse)
-     '("," . meow-inner-of-thing)
-     '("." . meow-bounds-of-thing)
-     '("#" . comment-line)
-     '("/" . meow-visit)
-     '("?" . meow-comment)
-     '("[" . meow-beginning-of-thing)
-     '("]" . meow-end-of-thing)
-     '("a" . meow-append)
-     '("A" . meow-open-below)
-     '("b" . meow-back-word)
-     '("B" . meow-back-symbol)
-     '("c" . meow-change)
-     '("d" . meow-delete)
-     '("D" . meow-backward-delete)
-     '("w" . meow-next-word)
-     '("W" . meow-next-symbol)
-     '("f" . meow-find)
-     '("g" . meow-cancel-selection)
-     '("G" . meow-grab)
-     '("h" . meow-left)
-     '("H" . meow-left-expand)
-     '("i" . meow-insert)
-     '("I" . meow-open-above)
-     '("j" . meow-next)
-     '("J" . meow-next-expand)
-     '("k" . meow-prev)
-     '("K" . meow-prev-expand)
-     '("l" . meow-right)
-     '("L" . meow-right-expand)
-     '("m" . meow-join)
-     '("n" . meow-search)
-     '("o" . meow-block)
-     '("O" . meow-to-block)
-     '("p" . yank)
-     '("q" . meow-quit)
-     '("Q" . meow-goto-line)
-     '("r" . meow-replace)
-     '("R" . meow-swap-grab)
-     '("s" . meow-kill)
-     '("t" . meow-till)
-     '("u" . meow-undo)
-     '("U" . meow-undo-in-selection)
-     '("v d" . lookup-definition)
-     '("v r" . lookup-reference)
-     '("v i" . lookup-implementation)
-     '("v e" . lookup-declaration)
-     '("v t" . lookup-type-definition)
-     '("v v" . lookup-doc)
-     '("e" . meow-mark-word)
-     '("E" . meow-mark-symbol)
-     '("x" . meow-line)
-     '("X" . meow-goto-line)
-     '("y" . meow-save)
-     '("Y" . meow-sync-grab)
-     '("z" . meow-pop-selection)
-     '("'" . repeat)
-     '("<escape>" . ignore)))
-  (meow-setup)
-  :init
-  (meow-global-mode 1))
+    ;; set up 'SPC' as the global leader key
+    (general-create-definer sp/leader-keys
+      :states '(normal insert visual emacs)
+      :keymaps 'override
+      :prefix "SPC" ;; set leader
+      :global-prefix "M-SPC") ;; access leader in insert mode
 
+     
+    (sp/leader-keys
+      "b" '(:ignore t :wk "buffer")
+      "bb" '(consult-project-buffer
+             :wk "Switch buffer")
+      "bB" '(consult-buffer :wk "all buffers")
+      "bk" '(kill-this-buffer :wk "Kill this buffer")
+      "bn" '(next-buffer :wk "Next buffer")
+      "bp" '(previous-buffer :wk "Previous buffer")
+      "br" '(revert-buffer :wk "Reload buffer"))
+
+    (sp/leader-keys
+      "e" '(:ignore t :wk "eval")
+      "eb" '(eval-buffer :wk "eval buffer")
+      )
+    (sp/leader-keys
+      "w" '(save-buffer :wk "save")
+      "f" '(:ignore t :wk "files")
+      "ff" '(format-all-buffer :wk "format buffer")
+      "fde" '((lambda ()
+                (interactive)
+                (find-file (expand-file-name (concat user-emacs-directory "init.el"))))
+              :wk "files")
+      "sp" '( consult-ripgrep :wk "search")
+      "ss" '( consult-line :wk "find line")
+      )
+    (sp/leader-keys
+      "p" '(:ignore t :wk "project")
+      "pc" '(projectile-compile-project
+             t :wk "project")
+      "pp" '(projectile-switch-project :wk "switch project")
+      "pd" '(persp-kill :wk "project kill")
+      "ps" '(projectile-discover-projects-in-search-path :wk "discover project")
+      "pr" '(recompile :wk "recompile")
+      "pi" '(projectile-invalidate-cache :wk "invalidate cache")
+      )
+    )
+  )
+(unless EVIL-ON
+  (use-package meow
+    :ensure t
+    :config
+    (setq meow-use-clipboard t)
+    (setq meow-cheatsheet-physical-layout meow-cheatsheet-physical-layout-iso)
+    (defun meow-setup ()
+      (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+      (meow-motion-overwrite-define-key
+       '("j" . meow-next)
+       '("k" . meow-prev)
+       '("<escape>" . ignore))
+      (meow-leader-define-key
+       ;; SPC j/k will run the original command in MOTION state.
+       ;; Use SPC (0-9) for digit arguments.
+       '("1" . meow-digit-argument)
+       '("2" . meow-digit-argument)
+       '("3" . meow-digit-argument)
+       '("4" . meow-digit-argument)
+       '("5" . meow-digit-argument)
+       '("6" . meow-digit-argument)
+       '("7" . meow-digit-argument)
+       '("8" . meow-digit-argument)
+       '("9" . meow-digit-argument)
+       '("0" . meow-digit-argument)
+       '("." . find-file)
+       '("/" . meow-keypad-describe-key)
+       '("?" . meow-cheatsheet)
+       '("SPC" . consult-projectile-find-file)
+       '("TAB" . persp-switch)
+       '("ac" . quick-calc)
+       '("bb" . consult-project-buffer)
+       '("bd" . kill-this-buffer)
+       '("bB" . consult-buffer)
+       '("cc" . projectile-compile-project)
+       '("db" . killthis-buffer)
+       '("dp" . persp-kill)
+       '("ed" . eval-defun)
+       '("is" . consult-yasnippet)
+       '("ic" . insert-char)
+       '("og" . magit-status)
+       '("pp" . projectile-switch-project)
+       '("pd" . persp-kill)
+       '("pc" . projectile-compile-project)
+       '("ps" . projectile-discover-projects-in-search-path)
+       '("pr" . recompile)
+       '("pi" . projectile-invalidate-cache)
+       '("op" . +treemacs/toggle)
+       '("os" . eshell-with-name)
+       (if IS-LINUX
+           '("ot" . vterm)
+         '("ot" . shell))
+       '("w" . save-buffer)
+       '("ff" . format-all-buffer)
+       '("fde" . (lambda ()
+                   (interactive)
+                   (find-file (expand-file-name (concat user-emacs-directory "init.el")))))
+       '("sp" . consult-ripgrep)
+       '("ss" . consult-line)
+       '("tt" . transparency)
+       )
+      (meow-normal-define-key
+       '("0" . meow-expand-0)
+       '("9" . meow-expand-9)
+       '("8" . meow-expand-8)
+       '("7" . meow-expand-7)
+       '("6" . meow-expand-6)
+       '("5" . meow-expand-5)
+       '("4" . meow-expand-4)
+       '("3" . meow-expand-3)
+       '("2" . meow-expand-2)
+       '("1" . meow-expand-1)
+       '("-" . negative-argument)
+       '(";" . meow-reverse)
+       '("," . meow-inner-of-thing)
+       '("." . meow-bounds-of-thing)
+       '("#" . comment-line)
+       '("/" . meow-visit)
+       '("?" . meow-comment)
+       '("[" . meow-beginning-of-thing)
+       '("]" . meow-end-of-thing)
+       '("a" . meow-append)
+       '("A" . meow-open-below)
+       '("b" . meow-back-word)
+       '("B" . meow-back-symbol)
+       '("c" . meow-change)
+       '("d" . meow-delete)
+       '("D" . meow-backward-delete)
+       '("w" . meow-next-word)
+       '("W" . meow-next-symbol)
+       '("f" . meow-find)
+       '("g" . meow-cancel-selection)
+       '("G" . meow-grab)
+       '("h" . meow-left)
+       '("H" . meow-left-expand)
+       '("i" . meow-insert)
+       '("I" . meow-open-above)
+       '("j" . meow-next)
+       '("J" . meow-next-expand)
+       '("k" . meow-prev)
+       '("K" . meow-prev-expand)
+       '("l" . meow-right)
+       '("L" . meow-right-expand)
+       '("m" . meow-join)
+       '("n" . meow-search)
+       '("o" . meow-block)
+       '("O" . meow-to-block)
+       '("p" . yank)
+       '("q" . meow-quit)
+       '("Q" . meow-goto-line)
+       '("r" . meow-replace)
+       '("R" . meow-swap-grab)
+       '("s" . meow-kill)
+       '("t" . meow-till)
+       '("u" . meow-undo)
+       '("U" . meow-undo-in-selection)
+       '("v d" . lookup-definition)
+       '("v r" . lookup-reference)
+       '("v i" . lookup-implementation)
+       '("v e" . lookup-declaration)
+       '("v t" . lookup-type-definition)
+       '("v v" . lookup-doc)
+       '("e" . meow-mark-word)
+       '("E" . meow-mark-symbol)
+       '("x" . meow-line)
+       '("X" . meow-goto-line)
+       '("y" . meow-save)
+       '("Y" . meow-sync-grab)
+       '("z" . meow-pop-selection)
+       '("'" . repeat)
+       '("<escape>" . ignore)))
+    (meow-setup)
+    :init
+    (meow-global-mode 1))
+  )
 (when IS-LINUX
   (use-package vterm
     :ensure t
@@ -464,8 +527,9 @@ named arguments:
 
 (use-package corfu
   :bind (:map corfu-map
-              ("RET" . nil)
-              ("TAB" . corfu-insert)
+              ("RET" . corfu-insert)
+              ("C-n" . corfu-next)
+              ("C-p" . corfu-previous)
               ("C-<return>" . yas/expand))
   :custom
   (tab-always-indent 'complete-tag)
@@ -596,7 +660,8 @@ named arguments:
   :init
   (setq projectile-enable-caching t)
   (when IS-WINDOWS
-    (setq projectile-project-search-path '(("D:/work" . 4))))
+    (setq projectile-project-search-path '(("D:/work" . 4)
+                                           ("D:/projects" . 4))))
 
   (when IS-LINUX
     (setq projectile-project-search-path '(("~/work/" . 4)
@@ -721,7 +786,7 @@ Returns nil if not in a project."
   (add-to-list 'eglot-server-programs '(razor-mode "rzls"))
   (add-to-list 'eglot-server-programs '(web-mode "rzls"))
   ;; (add-to-list 'eglot-server-programs '(razor-mode . (eglot-alternatives '(("vscode-html-language-server" "--stdio") ("html-languageserver" "--stdio")))))
-  
+
   ;; (add-to-list 'eglot-server-programs '(razor-mode "tailwindcss-language-server"))
   (add-to-list 'eglot-server-programs '(html-ts-mode . (eglot-alternatives '(("vscode-html-language-server" "--stdio") ("html-languageserver" "--stdio")))))
   ;; (add-to-list 'eglot-server-programs '(html-ts-mode "tailwindcss-language-server"))
@@ -732,7 +797,7 @@ Returns nil if not in a project."
   :after (treemacs lsp))
 
 (use-package lsp-tailwindcss
-    :init (slot/vc-install :fetcher "github" :repo "merrickluo/lsp-tailwindcss"))
+  :init (slot/vc-install :fetcher "github" :repo "merrickluo/lsp-tailwindcss"))
 
 (defun corfu-lsp-setup ()
   (setq-local completion-styles '(orderless)
@@ -743,7 +808,7 @@ Returns nil if not in a project."
   :bind (:map lsp-mode-map
               ("C-." . 'lsp-execute-code-action))
   :hook (lsp-mode . +lsp-optimization-mode)
-  :hook (lsp-mode . lsp-signature-mode) 
+  :hook (lsp-mode . lsp-signature-mode)
   :hook (before-save . lsp-format-buffer)
   :hook (lsp-completion-mode . my/lsp-mode-setup-completion)
   :commands (lsp lsp-deferred)
@@ -752,7 +817,7 @@ Returns nil if not in a project."
   :init
   (defun my/lsp-mode-setup-completion ()
     (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-          '(orderless))) 
+          '(orderless)))
   (setq lsp-completion-provider nil)
   (setq lsp-keymap-prefix "C-c l")
   (setq lsp-headerline-breadcrumb-enable nil
@@ -789,13 +854,13 @@ Returns nil if not in a project."
                     :major-modes '(odin-mode)
                     :server-id 'ols
                     :multi-root t))
-    (lsp-register-client
-     (make-lsp-client :new-connection (lsp-stdio-connection "rzls")
-                      :activation-fn (lsp-activate-on "razor")
-                      ;; :priority -1
-                      :server-id 'rzls
-                      ;; :add-on? t
-                      :multi-root t))
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-stdio-connection "rzls")
+                    :activation-fn (lsp-activate-on "razor")
+                    ;; :priority -1
+                    :server-id 'rzls
+                    ;; :add-on? t
+                    :multi-root t))
 
 
   (lsp-enable-which-key-integration t))
@@ -863,38 +928,39 @@ Returns nil if not in a project."
   :init
   (setq treesit-font-lock-level 4)
   (setq treesit-language-source-alist
-   '((bash . ("https://github.com/tree-sitter/tree-sitter-bash"))
-     (c . ("https://github.com/tree-sitter/tree-sitter-c"))
-     (c-sharp . ("https://github.com/tree-sitter/tree-sitter-c-sharp"))
-     (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
-     (css . ("https://github.com/tree-sitter/tree-sitter-css"))
-     (dockerfile . ("https://github.com/camdencheek/tree-sitter-dockerfile"))
-     (go . ("https://github.com/tree-sitter/tree-sitter-go"))
-     (html . ("https://github.com/tree-sitter/tree-sitter-html"))
-     (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
-     (json . ("https://github.com/tree-sitter/tree-sitter-json"))
-     (lua . ("https://github.com/Azganoth/tree-sitter-lua"))
-     (make . ("https://github.com/alemuller/tree-sitter-make"))
-     (ocaml . ("https://github.com/tree-sitter/tree-sitter-ocaml" "master" "ocaml/src"))
-     (python . ("https://github.com/tree-sitter/tree-sitter-python"))
-     (php . ("https://github.com/tree-sitter/tree-sitter-php"))
-     (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src"))
-     (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src"))
-     (ruby . ("https://github.com/tree-sitter/tree-sitter-ruby"))
-     (rust . ("https://github.com/tree-sitter/tree-sitter-rust"))
-     (sql . ("https://github.com/m-novikov/tree-sitter-sql"))
-     (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
-     (yaml . ("https://github.com/ikatyang/tree-sitter-yaml"))
-     (zig . ("https://github.com/GrayJack/tree-sitter-zig"))))
+        '((bash . ("https://github.com/tree-sitter/tree-sitter-bash"))
+          (c . ("https://github.com/tree-sitter/tree-sitter-c"))
+          (c-sharp . ("https://github.com/tree-sitter/tree-sitter-c-sharp"))
+          (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+          (css . ("https://github.com/tree-sitter/tree-sitter-css"))
+          (dockerfile . ("https://github.com/camdencheek/tree-sitter-dockerfile"))
+          (go . ("https://github.com/tree-sitter/tree-sitter-go"))
+          (html . ("https://github.com/tree-sitter/tree-sitter-html"))
+          (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
+          (json . ("https://github.com/tree-sitter/tree-sitter-json"))
+          (lua . ("https://github.com/Azganoth/tree-sitter-lua"))
+          (make . ("https://github.com/alemuller/tree-sitter-make"))
+          (ocaml . ("https://github.com/tree-sitter/tree-sitter-ocaml" "master" "ocaml/src"))
+          (python . ("https://github.com/tree-sitter/tree-sitter-python"))
+          (php . ("https://github.com/tree-sitter/tree-sitter-php"))
+          (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src"))
+          (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src"))
+          (ruby . ("https://github.com/tree-sitter/tree-sitter-ruby"))
+          (rust . ("https://github.com/tree-sitter/tree-sitter-rust"))
+          (sql . ("https://github.com/m-novikov/tree-sitter-sql"))
+          (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
+          (yaml . ("https://github.com/ikatyang/tree-sitter-yaml"))
+          (odin . ("https://github.com/ap29600/tree-sitter-odin"))
+          (zig . ("https://github.com/GrayJack/tree-sitter-zig"))))
   :config
   (defun nf/treesit-install-all-languages ()
     "Install all languages specified by `treesit-language-source-alist'."
     (interactive)
     (let ((languages (mapcar 'car treesit-language-source-alist)))
       (dolist (lang languages)
-	      (treesit-install-language-grammar lang)
-	      (message "`%s' parser was installed." lang)
-	      (sit-for 0.75)))))
+	    (treesit-install-language-grammar lang)
+	    (message "`%s' parser was installed." lang)
+	    (sit-for 0.75)))))
 
 
 (use-package treesit-auto
@@ -920,8 +986,8 @@ Returns nil if not in a project."
   :mode ("\\.razor\\'" . razor-mode)
   :mode ("\\.cshtml\\'" . yas--direct-razor-mode)
   :config
-    (remove-hook 'before-save-hook
-            (lambda () (eglot-format))))
+  (remove-hook 'before-save-hook
+               (lambda () (eglot-format))))
 
 (use-package sharper
   :bind ("C-c n" . sharper-main-transient))
@@ -1294,8 +1360,7 @@ re-align the table if necessary. (Necessary because org-mode has a
   :mode ("\\.pdf\\'" . pdf-view-mode)
   :config
   (when IS-WINDOWS
-    setq pdf-info-epdfinfo-program "c:/tools/epdfino/epdfinfo.exe"))
-
+    (setq pdf-info-epdfinfo-program "c:/tools/epdfino/epdfinfo.exe")))
 (use-package saveplace-pdf-view)
 
 (defun no-xls (&optional filename)
@@ -1332,13 +1397,13 @@ re-align the table if necessary. (Necessary because org-mode has a
   (which-function-mode 1)
   :config
   (setq mode-line-format (delete (assoc 'which-func-mode
-                                      mode-line-format) mode-line-format)
-      which-func-header-line-format '(which-func-mode ("" which-func-format)))
-(defadvice which-func-ff-hook (after header-line activate)
-  (when which-func-mode
-    (setq mode-line-format (delete (assoc 'which-func-mode
-                                          mode-line-format) mode-line-format)
-          header-line-format which-func-header-line-format))))
+                                        mode-line-format) mode-line-format)
+        which-func-header-line-format '(which-func-mode ("" which-func-format)))
+  (defadvice which-func-ff-hook (after header-line activate)
+    (when which-func-mode
+      (setq mode-line-format (delete (assoc 'which-func-mode
+                                            mode-line-format) mode-line-format)
+            header-line-format which-func-header-line-format))))
 
 (use-package sideline
   :init
@@ -1364,4 +1429,3 @@ re-align the table if necessary. (Necessary because org-mode has a
 (use-package yasnippet-snippets)
 (use-package competitive-programming-snippets)
 (setq gc-cons-thershold (* 2 1000 1000))
-
