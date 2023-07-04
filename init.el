@@ -13,7 +13,7 @@
 (global-visual-line-mode)
 (menu-bar-mode -1)            ; Disable the menu bar
 (setq scroll-margin 8
-      idle-update-delay 0.05
+      idle-update-delay 0.02
       visible-bell t
       create-lockfiles nil
       use-short-answers t
@@ -152,7 +152,6 @@ named arguments:
 
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 
-
 (global-set-key (kbd "C-h") 'windmove-left)
 (global-set-key (kbd "C-j") 'windmove-down)
 (global-set-key (kbd "C-k") 'windmove-up)
@@ -167,7 +166,6 @@ named arguments:
   (interactive "MName of new shell: ")
   (pop-to-buffer (get-buffer-create (generate-new-buffer-name name)))
   (term (current-buffer)))
-
 
 (defun eshell-with-name ()
   (interactive)
@@ -239,18 +237,27 @@ named arguments:
 (global-set-key [remap lookup-reference] #'xref-find-references)
 ;; (global-set-key [remap sp/format-buffer] #'format-all-buffer)
 (when EVIL-ON
+
+  (defun sp/evil-yank-advice (orig-fn beg end &rest args)
+    (pulse-momentary-highlight-region beg end)
+    (apply orig-fn beg end args))
+
   (use-package evil
+    :config
+    (advice-add 'evil-yank :around 'sp/evil-yank-advice)
     :init      ;; tweak evil's configuration before loading it
     (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
     (setq evil-want-keybinding nil)
     (setq evil-vsplit-window-right t)
     (setq evil-split-window-below t)
     (evil-mode))
+
   (use-package evil-collection
     :after evil
     :config
     (setq evil-collection-mode-list '(dashboard dired ibuffer))
     (evil-collection-init))
+
   (use-package evil-tutor)
 
   (use-package general
@@ -264,11 +271,10 @@ named arguments:
       :prefix "SPC" ;; set leader
       :global-prefix "M-SPC") ;; access leader in insert mode
 
-     
     (sp/leader-keys
       "b" '(:ignore t :wk "buffer")
-      "bb" '(consult-project-buffer
-             :wk "Switch buffer")
+      "bb" '(consult-project-buffer :wk "Switch buffer")
+      "bd" '(kill-this-buffer :wk "Switch buffer")
       "bB" '(consult-buffer :wk "all buffers")
       "bk" '(kill-this-buffer :wk "Kill this buffer")
       "bn" '(next-buffer :wk "Next buffer")
@@ -276,9 +282,16 @@ named arguments:
       "br" '(revert-buffer :wk "Reload buffer"))
 
     (sp/leader-keys
+      "." '(find-file :wk "find files")
+      "SPC" '(consult-projectile-find-file :wk "find files")
+      "TAB" '(persp-switch :wk "switch project")
+      )
+
+    (sp/leader-keys
       "e" '(:ignore t :wk "eval")
       "eb" '(eval-buffer :wk "eval buffer")
       )
+
     (sp/leader-keys
       "w" '(save-buffer :wk "save")
       "f" '(:ignore t :wk "files")
@@ -290,6 +303,7 @@ named arguments:
       "sp" '( consult-ripgrep :wk "search")
       "ss" '( consult-line :wk "find line")
       )
+
     (sp/leader-keys
       "p" '(:ignore t :wk "project")
       "pc" '(projectile-compile-project
@@ -299,6 +313,7 @@ named arguments:
       "ps" '(projectile-discover-projects-in-search-path :wk "discover project")
       "pr" '(recompile :wk "recompile")
       "pi" '(projectile-invalidate-cache :wk "invalidate cache")
+      "op" '(+treemacs/toggle :wk "project filetree")
       )
     )
   )
@@ -980,6 +995,11 @@ Returns nil if not in a project."
 (use-package html-mode
   :ensure nil
   :mode (("\\.html\\'" . html-ts-mode)))
+
+(use-package sql
+  :ensure nil
+  :config
+  (setq sql-ms-program "sqlcmd"))
 
 (use-package razor-mode
   :init (slot/vc-install :fetcher "github" :repo "samwdp/razor-mode")
