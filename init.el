@@ -245,6 +245,10 @@ named arguments:
   (use-package evil
     :config
     (advice-add 'evil-yank :around 'sp/evil-yank-advice)
+    (evil-global-set-key 'normal (kbd "g d") 'lookup-definition)
+    (evil-global-set-key 'normal (kbd "g i") 'lookup-implementation)
+    (evil-global-set-key 'normal (kbd "g r") 'lookup-reference)
+    (evil-global-set-key 'normal (kbd "g t") 'lookup-type-definition)
     :init      ;; tweak evil's configuration before loading it
     (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
     (setq evil-want-keybinding nil)
@@ -545,7 +549,7 @@ named arguments:
 (use-package prescient)
 
 (use-package corfu
-  
+
   :custom
   (tab-always-indent 'complete-tag)
   (corfu-separator ?\s)
@@ -854,6 +858,7 @@ Returns nil if not in a project."
   (add-hook 'lsp-mode-hook #'corfu-lsp-setup)
   (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols)
   (define-key lsp-mode-map [remap lookup-implementation] #'lsp-goto-implementation)
+  (define-key lsp-mode-map [remap lookup-declaration] #'lsp-find-declaration)
   (define-key lsp-mode-map [remap lookup-reference] #'lsp-find-references)
   (define-key lsp-mode-map [remap lookup-definition] #'lsp-find-definition)
   (define-key lsp-mode-map [remap lookup-type-definition] #'lsp-goto-type-definition)
@@ -883,6 +888,10 @@ Returns nil if not in a project."
 (use-package lsp-ui
   :hook (lsp-mode . lsp-ui-mode)
   :config
+  (defun toggle-doc ()
+    (interactive)
+    (cursor)
+    )
   (setq
    lsp-ui-doc-enable nil
    lsp-ui-doc-position 'at-point
@@ -898,6 +907,8 @@ Returns nil if not in a project."
   (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
   (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references)
 
+  (when EVIL-ON
+    (evil-define-key 'normal lsp-mode-map (kbd "K") 'lsp-ui-doc-glance))
   (define-key lsp-ui-peek-mode-map (kbd "j") #'lsp-ui-peek--select-next)
   (define-key lsp-ui-peek-mode-map (kbd "k") #'lsp-ui-peek--select-prev)
   (define-key lsp-ui-peek-mode-map (kbd "M-j") #'lsp-ui-peek--select-next-file)
