@@ -255,7 +255,6 @@ named arguments:
   (use-package evil-collection
     :after evil
     :config
-    (setq evil-collection-mode-list '(dashboard dired ibuffer))
     (evil-collection-init))
 
   (use-package evil-tutor)
@@ -290,6 +289,11 @@ named arguments:
     (sp/leader-keys
       "e" '(:ignore t :wk "eval")
       "eb" '(eval-buffer :wk "eval buffer")
+      )
+
+    (sp/leader-keys
+      "g" '(:ignore t :wk "git")
+      "gs" '(magit-status :wk "magit status")
       )
 
     (sp/leader-keys
@@ -541,11 +545,7 @@ named arguments:
 (use-package prescient)
 
 (use-package corfu
-  :bind (:map corfu-map
-              ("RET" . corfu-insert)
-              ("C-n" . corfu-next)
-              ("C-p" . corfu-previous)
-              ("C-<return>" . yas/expand))
+  
   :custom
   (tab-always-indent 'complete-tag)
   (corfu-separator ?\s)
@@ -865,7 +865,7 @@ Returns nil if not in a project."
   (add-to-list 'lsp-language-id-configuration '("\\.razor\\'" . "razor"))
 
   (lsp-register-client
-   (make-lsp-client :new-connection (lsp-stdio-connection "ols")
+   (make-lsp-client :new-connection (lsp-stdio-connection "c:/tools/ols/ols.exe")
                     :major-modes '(odin-mode)
                     :server-id 'ols
                     :multi-root t))
