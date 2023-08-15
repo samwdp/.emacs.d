@@ -35,7 +35,7 @@
 (defconst IS-MAC     (eq system-type 'darwin))
 (defconst IS-LINUX   (eq system-type 'gnu/linux))
 (defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
-(defconst EVIL-ON t)
+(defconst USE-LSP t)
 (when IS-WINDOWS (setq package-gnupghome-dir (concat user-emacs-directory "elpa/gnupg/pubring.kbx")))
 
 (unless package-archive-contents
@@ -129,7 +129,7 @@ named arguments:
   (set-face-attribute 'fixed-pitch nil :font (font-spec :family sp/font-string :size sp/text-height))
   (set-face-attribute 'fixed-pitch-serif nil :font (font-spec :family sp/font-string :size sp/text-height))
   (set-face-attribute 'variable-pitch nil :font (font-spec :family sp/font-string :size sp/text-height-variable))
-  (set-frame-parameter (selected-frame) 'alpha-background 0.9 ))
+  (set-frame-parameter (selected-frame) 'alpha-background 1.0 ))
 
 (defun unicode-fonts-setup-h (frame)
   "Run unicode-fonts-setup, then remove the hook."
@@ -236,229 +236,115 @@ named arguments:
 (global-set-key [remap lookup-definition] #'xref-find-definitions)
 (global-set-key [remap lookup-reference] #'xref-find-references)
 ;; (global-set-key [remap sp/format-buffer] #'format-all-buffer)
-(when EVIL-ON
 
-  (defun sp/evil-yank-advice (orig-fn beg end &rest args)
-    (pulse-momentary-highlight-region beg end)
-    (apply orig-fn beg end args))
+(defun sp/evil-yank-advice (orig-fn beg end &rest args)
+  (pulse-momentary-highlight-region beg end)
+  (apply orig-fn beg end args))
 
-  (use-package evil
-    :config
-    (advice-add 'evil-yank :around 'sp/evil-yank-advice)
-    (evil-global-set-key 'normal (kbd "g d") 'lookup-definition)
-    (evil-global-set-key 'normal (kbd "g i") 'lookup-implementation)
-    (evil-global-set-key 'normal (kbd "g r") 'lookup-reference)
-    (evil-global-set-key 'normal (kbd "g t") 'lookup-type-definition)
-    :init      ;; tweak evil's configuration before loading it
-    (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
-    (setq evil-want-keybinding nil)
-    (setq evil-vsplit-window-right t)
-    (setq evil-split-window-below t)
-    (evil-mode))
+(use-package evil
+  :config
+  (advice-add 'evil-yank :around 'sp/evil-yank-advice)
+  (evil-global-set-key 'normal (kbd "g d") 'lookup-definition)
+  (evil-global-set-key 'normal (kbd "g i") 'lookup-implementation)
+  (evil-global-set-key 'normal (kbd "g r") 'lookup-reference)
+  (evil-global-set-key 'normal (kbd "g t") 'lookup-type-definition)
+  :init      ;; tweak evil's configuration before loading it
+  (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
+  (setq evil-want-keybinding nil)
+  (setq evil-vsplit-window-right t)
+  (setq evil-split-window-below t)
+  (evil-mode))
 
-  (use-package evil-collection
-    :after evil
-    :config
-    (evil-collection-init))
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
 
-  (use-package evil-tutor)
+(use-package evil-tutor)
 
-  (use-package general
-    :config
-    (general-evil-setup)
+(use-package general
+  :config
+  (general-evil-setup)
 
-    ;; set up 'SPC' as the global leader key
-    (general-create-definer sp/leader-keys
-      :states '(normal insert visual emacs)
-      :keymaps 'override
-      :prefix "SPC" ;; set leader
-      :global-prefix "M-SPC") ;; access leader in insert mode
+  ;; set up 'SPC' as the global leader key
+  (general-create-definer sp/leader-keys
+    :states '(normal insert visual emacs)
+    :keymaps 'override
+    :prefix "SPC" ;; set leader
+    :global-prefix "M-SPC") ;; access leader in insert mode
 
-    (sp/leader-keys
-      "b" '(:ignore t :wk "buffer")
-      "bb" '(consult-project-buffer :wk "Switch buffer")
-      "bd" '(kill-this-buffer :wk "Switch buffer")
-      "bB" '(consult-buffer :wk "all buffers")
-      "bk" '(kill-this-buffer :wk "Kill this buffer")
-      "bn" '(next-buffer :wk "Next buffer")
-      "bp" '(previous-buffer :wk "Previous buffer")
-      "br" '(revert-buffer :wk "Reload buffer"))
+  (sp/leader-keys
+    "a" '(:ignore :wk "application")
+    "ac" '(quick-calc :wk "application")
+    )
 
-    (sp/leader-keys
-      "." '(find-file :wk "find files")
-      "SPC" '(consult-projectile-find-file :wk "find files")
-      "TAB" '(persp-switch :wk "switch project")
-      )
+  (sp/leader-keys
+    "b" '(:ignore t :wk "buffer")
+    "bb" '(consult-project-buffer :wk "Switch buffer")
+    "bd" '(kill-this-buffer :wk "Switch buffer")
+    "bB" '(consult-buffer :wk "all buffers")
+    "bk" '(kill-this-buffer :wk "Kill this buffer")
+    "bn" '(next-buffer :wk "Next buffer")
+    "bp" '(previous-buffer :wk "Previous buffer")
+    "br" '(revert-buffer :wk "Reload buffer"))
 
-    (sp/leader-keys
-      "e" '(:ignore t :wk "eval")
-      "eb" '(eval-buffer :wk "eval buffer")
-      )
+  (sp/leader-keys
+    ;; single use keymaps
+    "." '(find-file :wk "find files")
+    "SPC" '(consult-projectile-find-file :wk "find files")
+    "TAB" '(persp-switch :wk "switch project")
+    "f" '(format-all-buffer :wk "format buffer")
+    "w" '(save-buffer :wk "save")
+    )
 
-    (sp/leader-keys
-      "g" '(:ignore t :wk "git")
-      "gs" '(magit-status :wk "magit status")
-      )
+  (sp/leader-keys
+    ;; eval keymaps
+    "e" '(:ignore t :wk "eval")
+    "eb" '(eval-buffer :wk "eval buffer")
+    "ed" '(eval-defun :wk "eval defun")
+    "er" '(eval-region :wk "eval region")
+    "ei" '((lambda ()
+             (interactive)
+             (find-file (expand-file-name (concat user-emacs-directory "init.el"))))
+           :wk "emacs config")
+    )
 
-    (sp/leader-keys
-      "w" '(save-buffer :wk "save")
-      "f" '(format-all-buffer :wk "format buffer")
-      "ei" '((lambda ()
-               (interactive)
-               (find-file (expand-file-name (concat user-emacs-directory "init.el"))))
-             :wk "emacs config")
-      "sp" '( consult-ripgrep :wk "search")
-      "ss" '( consult-line :wk "find line")
-      )
+  (sp/leader-keys
+    ;; insert keymaps
+    "i" '(:ignore t :wk "insert")
+    "eb" '(yas-insert-snippet :wk "insert snippet")
+    "ot"  (if IS-LINUX
+              '(vterm :wk "vterm")
+            '(eshell :wk "eshell"))
+    )
 
-    (sp/leader-keys
-      "p" '(:ignore t :wk "project")
-      "pc" '(projectile-compile-project
-             t :wk "project")
-      "pp" '(projectile-switch-project :wk "switch project")
-      "pd" '(persp-kill :wk "project kill")
-      "ps" '(projectile-discover-projects-in-search-path :wk "discover project")
-      "pr" '(recompile :wk "recompile")
-      "pi" '(projectile-invalidate-cache :wk "invalidate cache")
-      "op" '(+treemacs/toggle :wk "project filetree")
-      )
+  (sp/leader-keys
+    ;; magit keymaps
+    "g" '(:ignore t :wk "git")
+    "gs" '(magit-status :wk "magit status")
+    )
+
+  (sp/leader-keys
+    ;; search
+    "s" '(:ignore :wk "search")
+    "ss" '( consult-line :wk "find line")
+    )
+
+  (sp/leader-keys
+    ;; project keymaps
+    "p" '(:ignore t :wk "project")
+    "pc" '(projectile-compile-project
+           t :wk "project")
+    "pp" '(projectile-switch-project :wk "switch project")
+    "pd" '(persp-kill :wk "project kill")
+    "ps" '(consult-ripgrep :wk "search in project")
+    "pr" '(recompile :wk "recompile")
+    "pI" '(projectile-invalidate-cache :wk "invalidate cache")
+    "pi" '(projectile-discover-projects-in-search-path :wk "invalidate cache")
+    "pv" '(+treemacs/toggle :wk "project filetree")
     )
   )
-(unless EVIL-ON
-  (use-package meow
-    :ensure t
-    :config
-    (setq meow-use-clipboard t)
-    (setq meow-cheatsheet-physical-layout meow-cheatsheet-physical-layout-iso)
-    (defun meow-setup ()
-      (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-      (meow-motion-overwrite-define-key
-       '("j" . meow-next)
-       '("k" . meow-prev)
-       '("<escape>" . ignore))
-      (meow-leader-define-key
-       ;; SPC j/k will run the original command in MOTION state.
-       ;; Use SPC (0-9) for digit arguments.
-       '("1" . meow-digit-argument)
-       '("2" . meow-digit-argument)
-       '("3" . meow-digit-argument)
-       '("4" . meow-digit-argument)
-       '("5" . meow-digit-argument)
-       '("6" . meow-digit-argument)
-       '("7" . meow-digit-argument)
-       '("8" . meow-digit-argument)
-       '("9" . meow-digit-argument)
-       '("0" . meow-digit-argument)
-       '("." . find-file)
-       '("/" . meow-keypad-describe-key)
-       '("?" . meow-cheatsheet)
-       '("SPC" . consult-projectile-find-file)
-       '("TAB" . persp-switch)
-       '("ac" . quick-calc)
-       '("bb" . consult-project-buffer)
-       '("bd" . kill-this-buffer)
-       '("bB" . consult-buffer)
-       '("cc" . projectile-compile-project)
-       '("db" . killthis-buffer)
-       '("dp" . persp-kill)
-       '("ed" . eval-defun)
-       '("is" . consult-yasnippet)
-       '("ic" . insert-char)
-       '("og" . magit-status)
-       '("pp" . projectile-switch-project)
-       '("pd" . persp-kill)
-       '("pc" . projectile-compile-project)
-       '("ps" . projectile-discover-projects-in-search-path)
-       '("pr" . recompile)
-       '("pi" . projectile-invalidate-cache)
-       '("op" . +treemacs/toggle)
-       '("os" . eshell-with-name)
-       (if IS-LINUX
-           '("ot" . vterm)
-         '("ot" . shell))
-       '("w" . save-buffer)
-       '("ff" . format-all-buffer)
-       '("fde" . (lambda ()
-                   (interactive)
-                   (find-file (expand-file-name (concat user-emacs-directory "init.el")))))
-       '("sp" . consult-ripgrep)
-       '("ss" . consult-line)
-       '("tt" . transparency)
-       )
-      (meow-normal-define-key
-       '("0" . meow-expand-0)
-       '("9" . meow-expand-9)
-       '("8" . meow-expand-8)
-       '("7" . meow-expand-7)
-       '("6" . meow-expand-6)
-       '("5" . meow-expand-5)
-       '("4" . meow-expand-4)
-       '("3" . meow-expand-3)
-       '("2" . meow-expand-2)
-       '("1" . meow-expand-1)
-       '("-" . negative-argument)
-       '(";" . meow-reverse)
-       '("," . meow-inner-of-thing)
-       '("." . meow-bounds-of-thing)
-       '("#" . comment-line)
-       '("/" . meow-visit)
-       '("?" . meow-comment)
-       '("[" . meow-beginning-of-thing)
-       '("]" . meow-end-of-thing)
-       '("a" . meow-append)
-       '("A" . meow-open-below)
-       '("b" . meow-back-word)
-       '("B" . meow-back-symbol)
-       '("c" . meow-change)
-       '("d" . meow-delete)
-       '("D" . meow-backward-delete)
-       '("w" . meow-next-word)
-       '("W" . meow-next-symbol)
-       '("f" . meow-find)
-       '("g" . meow-cancel-selection)
-       '("G" . meow-grab)
-       '("h" . meow-left)
-       '("H" . meow-left-expand)
-       '("i" . meow-insert)
-       '("I" . meow-open-above)
-       '("j" . meow-next)
-       '("J" . meow-next-expand)
-       '("k" . meow-prev)
-       '("K" . meow-prev-expand)
-       '("l" . meow-right)
-       '("L" . meow-right-expand)
-       '("m" . meow-join)
-       '("n" . meow-search)
-       '("o" . meow-block)
-       '("O" . meow-to-block)
-       '("p" . yank)
-       '("q" . meow-quit)
-       '("Q" . meow-goto-line)
-       '("r" . meow-replace)
-       '("R" . meow-swap-grab)
-       '("s" . meow-kill)
-       '("t" . meow-till)
-       '("u" . meow-undo)
-       '("U" . meow-undo-in-selection)
-       '("v d" . lookup-definition)
-       '("v r" . lookup-reference)
-       '("v i" . lookup-implementation)
-       '("v e" . lookup-declaration)
-       '("v t" . lookup-type-definition)
-       '("v v" . lookup-doc)
-       '("e" . meow-mark-word)
-       '("E" . meow-mark-symbol)
-       '("x" . meow-line)
-       '("X" . meow-goto-line)
-       '("y" . meow-save)
-       '("Y" . meow-sync-grab)
-       '("z" . meow-pop-selection)
-       '("'" . repeat)
-       '("<escape>" . ignore)))
-    (meow-setup)
-    :init
-    (meow-global-mode 1))
-  )
+
 (when IS-LINUX
   (use-package vterm
     :ensure t
@@ -610,7 +496,7 @@ named arguments:
   (setq vertico-posframe-parameters
         '((left-fringe . 5)
           (right-fringe . 5)
-          (alpha-background . 0.9)))
+          (alpha-background . 1.0)))
   (setq vertico-posframe-border-width 2)
   (setq vertico-posframe-poshandler #'posframe-poshandler-frame-bottom-center)
   :init
@@ -642,13 +528,6 @@ named arguments:
 (use-package embark-consult
   :after (embark consult))
 
-;; (use-package chatgpt
-;;   :init
-;;   (slot/vc-install :fetcher "github" :repo "joshcho/ChatGPT.el.git")
-;;   (require 'python)
-;;   (setq chatgpt-repo-path (expand-file-name "elpa/ChatGPT.el/" user-emacs-directory))
-;;   :bind ("C-c q" . chatgpt-query))
-
 (use-package consult-dir)
 
 (use-package consult-flycheck)
@@ -678,12 +557,12 @@ named arguments:
   :init
   (setq projectile-enable-caching t)
   (when IS-WINDOWS
-    (setq projectile-project-search-path '(("D:/work" . 4)
-                                           ("D:/projects" . 4))))
+    (setq projectile-project-search-path '(("D:/work" . 3)
+                                           ("D:/projects" . 3))))
 
   (when IS-LINUX
-    (setq projectile-project-search-path '(("~/work/" . 4)
-                                           ("~/projects/" . 4)))))
+    (setq projectile-project-search-path '(("~/work/" . 3)
+                                           ("~/projects/" . 3)))))
 
 (use-package persp-projectile)
 
@@ -779,36 +658,41 @@ Returns nil if not in a project."
       (setq +lsp--optimization-init-p t))))
 
 ;; use lsp
+(when (not USE-LSP)
+  (use-package eglot
+    :hook (before-save . eglot-format-buffer)
+    :hook (eglot-mode . eglot-inlay-hints-mode)
+    :bind (:map eglot-mode-map
+                ("C-." . 'eglot-code-actions))
+    :config
+    (add-hook 'before-save-hook
+              (lambda () (eglot-format)))
 
-(use-package eglot
-  :hook (before-save . eglot-format-buffer)
-  :hook (eglot-mode . eglot-inlay-hints-mode)
-  :bind (:map eglot-mode-map
-              ("C-." . 'eglot-code-actions))
-  :config
-  (add-hook 'before-save-hook
-            (lambda () (eglot-format)))
+    (setq completion-category-overrides '((eglot (styles orderless))))
 
-  (setq completion-category-overrides '((eglot (styles orderless))))
+    (define-key eglot-mode-map [remap lookup-definition] #'xref-find-definitions)
+    (define-key eglot-mode-map [remap lookup-reference] #'xref-find-references)
+    (define-key eglot-mode-map [remap lookup-implementation] #'eglot-find-implementation)
+    (define-key eglot-mode-map [remap lookup-declaration] #'eglot-find-declaration)
+    (define-key eglot-mode-map [remap lookup-type-definition] #'eglot-find-typeDefinition)
+    (define-key eglot-mode-map [remap sp/format-buffer] #'eglot-format-buffer)
+    (setq eglot-connect-timeout 90)
+    (add-to-list 'eglot-server-programs '(odin-mode "c:/tools/ols/ols.exe"))
+    ;; (add-to-list 'eglot-server-programs '(html-mode "tailwindcss-language-server"))
+    ;; (add-to-list 'eglot-server-programs '((web-mode :language-id "html") . ("tailwindcss-language-server")))
+    (add-to-list 'eglot-server-programs '(razor-mode "rzls"))
+    (add-to-list 'eglot-server-programs '(web-mode "rzls"))
+    ;; (add-to-list 'eglot-server-programs '(razor-mode . (eglot-alternatives '(("vscode-html-language-server" "--stdio") ("html-languageserver" "--stdio")))))
 
-  (define-key eglot-mode-map [remap lookup-definition] #'xref-find-definitions)
-  (define-key eglot-mode-map [remap lookup-reference] #'xref-find-references)
-  (define-key eglot-mode-map [remap lookup-implementation] #'eglot-find-implementation)
-  (define-key eglot-mode-map [remap lookup-declaration] #'eglot-find-declaration)
-  (define-key eglot-mode-map [remap lookup-type-definition] #'eglot-find-typeDefinition)
-  (define-key eglot-mode-map [remap sp/format-buffer] #'eglot-format-buffer)
-  (setq eglot-connect-timeout 90)
-  (add-to-list 'eglot-server-programs '(odin-mode "c:/tools/ols/ols.exe"))
-  ;; (add-to-list 'eglot-server-programs '(html-mode "tailwindcss-language-server"))
-  ;; (add-to-list 'eglot-server-programs '((web-mode :language-id "html") . ("tailwindcss-language-server")))
-  (add-to-list 'eglot-server-programs '(razor-mode "rzls"))
-  (add-to-list 'eglot-server-programs '(web-mode "rzls"))
-  ;; (add-to-list 'eglot-server-programs '(razor-mode . (eglot-alternatives '(("vscode-html-language-server" "--stdio") ("html-languageserver" "--stdio")))))
+    ;; (add-to-list 'eglot-server-programs '(razor-mode "tailwindcss-language-server"))
+    (add-to-list 'eglot-server-programs '(html-ts-mode . (eglot-alternatives '(("vscode-html-language-server" "--stdio") ("html-languageserver" "--stdio")))))
+    ;; (add-to-list 'eglot-server-programs '(html-ts-mode "tailwindcss-language-server"))
 
-  ;; (add-to-list 'eglot-server-programs '(razor-mode "tailwindcss-language-server"))
-  (add-to-list 'eglot-server-programs '(html-ts-mode . (eglot-alternatives '(("vscode-html-language-server" "--stdio") ("html-languageserver" "--stdio")))))
-  ;; (add-to-list 'eglot-server-programs '(html-ts-mode "tailwindcss-language-server"))
+    )
 
+  (use-package consult-eglot
+    :ensure t
+    :defer t)
   )
 
 (use-package lsp-treemacs
@@ -822,124 +706,121 @@ Returns nil if not in a project."
               completion-category-defaults nil))
 
 ;; (require 'init-tabnine-capf)
-(use-package lsp-mode
-  :bind (:map lsp-mode-map
-              ("C-." . 'lsp-execute-code-action))
-  :hook (lsp-mode . +lsp-optimization-mode)
-  :hook (lsp-mode . lsp-signature-mode)
-  :hook (lsp-completion-mode . my/lsp-mode-setup-completion)
-  :commands (lsp lsp-deferred)
-  :custom
-  (lsp-completion-provider :none) ;; we use Corfu!
-  :init
-  (defun my/lsp-mode-setup-completion ()
-    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-          '(orderless)))
-  (setq lsp-completion-provider nil)
-  (setq lsp-keymap-prefix "C-c l")
-  (setq lsp-headerline-breadcrumb-enable nil
-        lsp-idle-delay 0.0
-        lsp-headerline-breadcrumb-icons-enable nil
-        lsp-keep-workspace-alive nil
-        lsp-modeline-diagnostics-enable nil
-        lsp-modeline-code-actions-enable nil
-        lsp-lens-enable nil
-        lsp-enable-which-key-integration t
-        lsp-enable-file-watchers nil
-        lsp-enable-folding nil
-        lsp-enable-text-document-color nil
-        lsp-enable-on-type-formatting nil)
-  :config
-  (add-hook 'before-save-hook
-            (lambda () (lsp-format-buffer)))
+(when USE-LSP
+  (use-package lsp-mode
+    :bind (:map lsp-mode-map
+                ("C-." . 'lsp-execute-code-action))
+    :hook (lsp-mode . +lsp-optimization-mode)
+    :hook (lsp-mode . lsp-signature-mode)
+    :hook (lsp-completion-mode . my/lsp-mode-setup-completion)
+    :commands (lsp lsp-deferred)
+    :custom
+    (lsp-completion-provider :none) ;; we use Corfu!
+    :init
+    (defun my/lsp-mode-setup-completion ()
+      (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+            '(orderless)))
+    (setq lsp-completion-provider nil)
+    (setq lsp-keymap-prefix "C-c l")
+    (setq lsp-headerline-breadcrumb-enable nil
+          lsp-idle-delay 0.0
+          lsp-headerline-breadcrumb-icons-enable nil
+          lsp-keep-workspace-alive nil
+          lsp-modeline-diagnostics-enable nil
+          lsp-modeline-code-actions-enable nil
+          lsp-lens-enable nil
+          lsp-enable-which-key-integration t
+          lsp-enable-file-watchers nil
+          lsp-enable-folding nil
+          lsp-enable-text-document-color nil
+          lsp-enable-on-type-formatting nil)
+    :config
+    (add-hook 'before-save-hook
+              (lambda () (lsp-format-buffer)))
 
-  (add-hook 'lsp-mode-hook #'corfu-lsp-setup)
-  (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols)
-  (define-key lsp-mode-map [remap lookup-implementation] #'lsp-goto-implementation)
-  (define-key lsp-mode-map [remap lookup-declaration] #'lsp-find-declaration)
-  (define-key lsp-mode-map [remap lookup-reference] #'lsp-find-references)
-  (define-key lsp-mode-map [remap lookup-definition] #'lsp-find-definition)
-  (define-key lsp-mode-map [remap lookup-type-definition] #'lsp-goto-type-definition)
-  (define-key lsp-mode-map [remap lookup-doc] #'lsp-ui-doc-glance)
-  (define-key lsp-mode-map [remap sp/format-buffer] #'lsp-format-buffer)
-  (define-key lsp-mode-map (kbd "<f7>") 'lsp-ui-doc-focus-frame)
+    (add-hook 'lsp-mode-hook #'corfu-lsp-setup)
+    (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols)
+    (define-key lsp-mode-map [remap lookup-implementation] #'lsp-goto-implementation)
+    (define-key lsp-mode-map [remap lookup-declaration] #'lsp-find-declaration)
+    (define-key lsp-mode-map [remap lookup-reference] #'lsp-find-references)
+    (define-key lsp-mode-map [remap lookup-definition] #'lsp-find-definition)
+    (define-key lsp-mode-map [remap lookup-type-definition] #'lsp-goto-type-definition)
+    (define-key lsp-mode-map [remap lookup-doc] #'lsp-ui-doc-glance)
+    (define-key lsp-mode-map [remap sp/format-buffer] #'lsp-format-buffer)
+    (define-key lsp-mode-map (kbd "<f7>") 'lsp-ui-doc-focus-frame)
 
-  (add-to-list 'lsp-language-id-configuration '(odin-mode . "odin"))
-  (add-to-list 'lsp-language-id-configuration '("\\.razor\\'" . "razor"))
+    (add-to-list 'lsp-language-id-configuration '(odin-mode . "odin"))
+    (add-to-list 'lsp-language-id-configuration '("\\.razor\\'" . "razor"))
 
-  (lsp-register-client
-   (make-lsp-client :new-connection (lsp-stdio-connection "c:/tools/ols/ols.exe")
-                    :major-modes '(odin-mode)
-                    :server-id 'ols
-                    :multi-root t))
-  (lsp-register-client
-   (make-lsp-client :new-connection (lsp-stdio-connection "rzls")
-                    :activation-fn (lsp-activate-on "razor")
-                    ;; :priority -1
-                    :server-id 'rzls
-                    ;; :add-on? t
-                    :multi-root t))
+    (lsp-register-client
+     (make-lsp-client :new-connection (lsp-stdio-connection "c:/tools/ols/ols.exe")
+                      :major-modes '(odin-mode)
+                      :server-id 'ols
+                      :multi-root t))
+    (lsp-register-client
+     (make-lsp-client :new-connection (lsp-stdio-connection "rzls")
+                      :activation-fn (lsp-activate-on "razor")
+                      ;; :priority -1
+                      :server-id 'rzls
+                      ;; :add-on? t
+                      :multi-root t))
 
 
-  (lsp-enable-which-key-integration t))
+    (lsp-enable-which-key-integration t))
 
-(use-package lsp-ui
-  :hook (lsp-mode . lsp-ui-mode)
-  :config
-  (defun toggle-doc ()
-    (interactive)
-    (cursor)
-    )
-  (setq
-   lsp-ui-doc-enable nil
-   lsp-ui-doc-position 'at-point
-   lsp-ui-doc-show-with-cursor t
-   lsp-signature-auto-activate t
-   lsp-signature-render-documentation t
-   lsp-headerline-breadcrumb-segments '(symbols)
-   lsp-ui-sideline-show-code-actions nil
-   lsp-ui-sideline-ignore-duplicate t
-   lsp-ui-sideline-show-hover t
-   lsp-ui-sideline-show-diagnostics t
-   lsp-ui-sideline-actions-icon lsp-ui-sideline-actions-icon-default)
-  (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
-  (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references)
+  (use-package lsp-ui
+    :hook (lsp-mode . lsp-ui-mode)
+    :config
+    (defun toggle-doc ()
+      (interactive)
+      (cursor)
+      )
+    (setq
+     lsp-ui-doc-enable nil
+     lsp-ui-doc-position 'at-point
+     lsp-ui-doc-show-with-cursor t
+     lsp-signature-auto-activate t
+     lsp-signature-render-documentation t
+     lsp-headerline-breadcrumb-segments '(symbols)
+     lsp-ui-sideline-show-code-actions nil
+     lsp-ui-sideline-ignore-duplicate t
+     lsp-ui-sideline-show-hover t
+     lsp-ui-sideline-show-diagnostics t
+     lsp-ui-sideline-actions-icon lsp-ui-sideline-actions-icon-default)
+    (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
+    (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references)
 
-  (when EVIL-ON
-    (evil-define-key 'normal lsp-mode-map (kbd "K") 'lsp-ui-doc-glance))
-  (define-key lsp-ui-peek-mode-map (kbd "j") #'lsp-ui-peek--select-next)
-  (define-key lsp-ui-peek-mode-map (kbd "k") #'lsp-ui-peek--select-prev)
-  (define-key lsp-ui-peek-mode-map (kbd "M-j") #'lsp-ui-peek--select-next-file)
-  (define-key lsp-ui-peek-mode-map (kbd "M-j") #'lsp-ui-peek--select-prev-file))
+    (evil-define-key 'normal lsp-mode-map (kbd "K") 'lsp-ui-doc-glance)
+    (define-key lsp-ui-peek-mode-map (kbd "j") #'lsp-ui-peek--select-next)
+    (define-key lsp-ui-peek-mode-map (kbd "k") #'lsp-ui-peek--select-prev)
+    (define-key lsp-ui-peek-mode-map (kbd "M-j") #'lsp-ui-peek--select-next-file)
+    (define-key lsp-ui-peek-mode-map (kbd "M-j") #'lsp-ui-peek--select-prev-file))
 
-(use-package consult-lsp
-  :defer t)
+  (use-package consult-lsp
+    :defer t)
 
-(use-package dap-mode
-  :bind (:map dap-mode-map
-              ("<f10>" . 'dap-next)
-              ("<f11>" . 'dap-step-in)
-              ("<f5>" . 'dap-continue))
-  :commands dap-debug
-  :hook (dap-mode . dap-tooltip-mode)
-  :config
-  (require 'dap-node)
-  (require 'dap-chrome)
-  (require 'dap-firefox)
-  (require 'dap-edge)
-  (require 'dap-netcore)
-  (require 'dap-lldb)
-  (require 'dap-cpptools))
+  (use-package dap-mode
+    :bind (:map dap-mode-map
+                ("<f10>" . 'dap-next)
+                ("<f11>" . 'dap-step-in)
+                ("<f5>" . 'dap-continue))
+    :commands dap-debug
+    :hook (dap-mode . dap-tooltip-mode)
+    :config
+    (require 'dap-node)
+    (require 'dap-chrome)
+    (require 'dap-firefox)
+    (require 'dap-edge)
+    (require 'dap-netcore)
+    (require 'dap-lldb)
+    (require 'dap-cpptools))
 
-(use-package dap-ui
-  :ensure nil
-  :after dap-mode
-  :hook (dap-mode . dap-ui-mode)
-  :hook (dap-ui-mode . dap-ui-controls-mode))
-
-(use-package consult-eglot
-  :ensure t
-  :defer t)
+  (use-package dap-ui
+    :ensure nil
+    :after dap-mode
+    :hook (dap-mode . dap-ui-mode)
+    :hook (dap-ui-mode . dap-ui-controls-mode))
+  )
 
 (use-package cheat-sh)
 
@@ -1013,10 +894,7 @@ Returns nil if not in a project."
 (use-package razor-mode
   :init (slot/vc-install :fetcher "github" :repo "samwdp/razor-mode")
   :mode ("\\.razor\\'" . razor-mode)
-  :mode ("\\.cshtml\\'" . yas--direct-razor-mode)
-  :config
-  (remove-hook 'before-save-hook
-               (lambda () (eglot-format))))
+  :mode ("\\.cshtml\\'" . yas--direct-razor-mode))
 
 (use-package sharper
   :bind ("C-c n" . sharper-main-transient))
@@ -1041,7 +919,7 @@ Returns nil if not in a project."
   (typescript-ts-mode-indent-offset 4))
 
 (use-package web-mode
-  :mode "\\.html?\\'")
+  :mode "\\.razor?\\'")
 
 (use-package sass-mode
   :hook (sass-mode . lsp-deferred)
@@ -1384,12 +1262,14 @@ re-align the table if necessary. (Necessary because org-mode has a
 
 (use-package polymode
   :hook (org-brain-visualize-mode . org-brain-polymode))
+
 (use-package pdf-tools
   :hook (pdf-view-mode . (lambda () (beacon-mode -1)))
   :mode ("\\.pdf\\'" . pdf-view-mode)
   :config
   (when IS-WINDOWS
     (setq pdf-info-epdfinfo-program "c:/tools/epdfino/epdfinfo.exe")))
+
 (use-package saveplace-pdf-view)
 
 (defun no-xls (&optional filename)
