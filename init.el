@@ -224,6 +224,7 @@ named arguments:
   :diminish which-key-mode
   :init (which-key-mode)
   :config
+  (setq which-key-frame-max-height 80)
   (setq which-key-idle-delay 0.0))
 
 (defun lookup-definition ())
@@ -248,6 +249,8 @@ named arguments:
   (evil-global-set-key 'normal (kbd "g i") 'lookup-implementation)
   (evil-global-set-key 'normal (kbd "g r") 'lookup-reference)
   (evil-global-set-key 'normal (kbd "g t") 'lookup-type-definition)
+  (evil-global-set-key 'normal (kbd "g c c") 'comment-line)
+  (evil-global-set-key 'visual (kbd "g c") 'comment-line)
   :init      ;; tweak evil's configuration before loading it
   (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
   (setq evil-want-keybinding nil)
@@ -660,7 +663,6 @@ Returns nil if not in a project."
 ;; use lsp
 (when (not USE-LSP)
   (use-package eglot
-    :hook (before-save . eglot-format-buffer)
     :hook (eglot-mode . eglot-inlay-hints-mode)
     :bind (:map eglot-mode-map
                 ("C-." . 'eglot-code-actions))
@@ -677,7 +679,7 @@ Returns nil if not in a project."
     (define-key eglot-mode-map [remap lookup-type-definition] #'eglot-find-typeDefinition)
     (define-key eglot-mode-map [remap sp/format-buffer] #'eglot-format-buffer)
     (setq eglot-connect-timeout 90)
-    (add-to-list 'eglot-server-programs '(odin-mode "c:/tools/ols/ols.exe"))
+    (add-to-list 'eglot-server-programs '(odin-ts-mode "c:/tools/ols/ols.exe"))
     ;; (add-to-list 'eglot-server-programs '(html-mode "tailwindcss-language-server"))
     ;; (add-to-list 'eglot-server-programs '((web-mode :language-id "html") . ("tailwindcss-language-server")))
     (add-to-list 'eglot-server-programs '(razor-mode "rzls"))
@@ -735,9 +737,6 @@ Returns nil if not in a project."
           lsp-enable-text-document-color nil
           lsp-enable-on-type-formatting nil)
     :config
-    (add-hook 'before-save-hook
-              (lambda () (lsp-format-buffer)))
-
     (add-hook 'lsp-mode-hook #'corfu-lsp-setup)
     (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols)
     (define-key lsp-mode-map [remap lookup-implementation] #'lsp-goto-implementation)
@@ -749,12 +748,12 @@ Returns nil if not in a project."
     (define-key lsp-mode-map [remap sp/format-buffer] #'lsp-format-buffer)
     (define-key lsp-mode-map (kbd "<f7>") 'lsp-ui-doc-focus-frame)
 
-    (add-to-list 'lsp-language-id-configuration '(odin-mode . "odin"))
+    (add-to-list 'lsp-language-id-configuration '(odin-ts-mode . "odin"))
     (add-to-list 'lsp-language-id-configuration '("\\.razor\\'" . "razor"))
 
     (lsp-register-client
      (make-lsp-client :new-connection (lsp-stdio-connection "c:/tools/ols/ols.exe")
-                      :major-modes '(odin-mode)
+                      :major-modes '(odin-ts-mode)
                       :server-id 'ols
                       :multi-root t))
     (lsp-register-client
@@ -907,16 +906,16 @@ Returns nil if not in a project."
 
 (use-package odin-mode
   :hook (odin-mode . lsp-deferred)
-  :init (slot/vc-install :fetcher "github" :repo "mattt-b/odin-mode")
-  :mode "\\.odin\\'")
+  :init (slot/vc-install :fetcher "github" :repo "samwdp/odin-mode")
+  :mode (("\\.odin\\'". odin-ts-mode)))
 
 (use-package typescript-mode
   :hook (typescript-ts-mode . lsp-deferred)
   :mode (("\\.ts\\'" . typescript-ts-mode)
          ("\\.tsx\\'". typescript-ts-mode))
   :custom
-  (typescript-indent-level 4)
-  (typescript-ts-mode-indent-offset 4))
+  (typescript-indent-level 2)
+  (typescript-ts-mode-indent-offset 2))
 
 (use-package web-mode
   :mode "\\.razor?\\'")
@@ -1302,8 +1301,6 @@ re-align the table if necessary. (Necessary because org-mode has a
   :hook (after-init . global-adaptive-word-wrap-mode))
 
 (use-package which-func
-  :init
-  (which-function-mode 1)
   :config
   (setq mode-line-format (delete (assoc 'which-func-mode
                                         mode-line-format) mode-line-format)
