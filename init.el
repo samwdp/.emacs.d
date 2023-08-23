@@ -250,7 +250,7 @@ named arguments:
   (evil-global-set-key 'normal (kbd "g r") 'lookup-reference)
   (evil-global-set-key 'normal (kbd "g t") 'lookup-type-definition)
   (evil-global-set-key 'normal (kbd "g c c") 'comment-line)
-  (evil-global-set-key 'visual (kbd "g c") 'comment-line)
+  (evil-global-set-key 'visual (kbd "g c") 'comment-region)
   :init      ;; tweak evil's configuration before loading it
   (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
   (setq evil-want-keybinding nil)
