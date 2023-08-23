@@ -236,7 +236,7 @@ named arguments:
 (defun sp/format-buffer ())
 (global-set-key [remap lookup-definition] #'xref-find-definitions)
 (global-set-key [remap lookup-reference] #'xref-find-references)
-;; (global-set-key [remap sp/format-buffer] #'format-all-buffer)
+(global-set-key [remap sp/format-buffer] #'format-all-buffer)
 
 (defun sp/evil-yank-advice (orig-fn beg end &rest args)
   (pulse-momentary-highlight-region beg end)
@@ -296,7 +296,7 @@ named arguments:
     "." '(find-file :wk "find files")
     "SPC" '(consult-projectile-find-file :wk "find files")
     "TAB" '(persp-switch :wk "switch project")
-    "f" '(format-all-buffer :wk "format buffer")
+    "f" '(sp/format-buffer :wk "format buffer")
     "w" '(save-buffer :wk "save")
     )
 
