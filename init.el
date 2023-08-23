@@ -157,9 +157,8 @@ named arguments:
 (global-set-key (kbd "C-k") 'windmove-up)
 (global-set-key (kbd "C-l") 'windmove-right)
 (global-set-key (kbd "C-SPC") 'completion-at-point)
-;; (global-set-key (kbd "C-.") lsp-execute-code-action)
 (global-set-key (kbd "C--") 'text-scale-decrease)
-(global-set-key (kbd "C-=") 'text-scale-increase)
+(global-set-key (kbd "C-+") 'text-scale-increase)
 (global-set-key (kbd "M-RET") 'harpoon-add-file)
 
 (defun spawn-shell (name)
@@ -366,6 +365,7 @@ named arguments:
   (all-the-icons-completion-mode))
 
 (use-package all-the-icons-dired
+  :hook (dired-mode . all-the-icons-dired-mode)
   :defer t)
 
 (use-package smartparens
@@ -437,15 +437,14 @@ named arguments:
 (use-package prescient)
 
 (use-package corfu
-
   :custom
-  (tab-always-indent 'complete-tag)
   (corfu-separator ?\s)
-  (corfu-cycle t)
   (corfu-auto t)
   (corfu-auto-prefix 1)
   (corfu-auto-delay 0.0)
   (corfu-popupinfo-delay 0.3)
+  (corfu-auto-prefix 1)
+  (corfu-auto-delay 0.0)
   :init
   (global-corfu-mode)
   (corfu-popupinfo-mode))
@@ -660,58 +659,11 @@ Returns nil if not in a project."
       (gcmh-set-high-threshold)
       (setq +lsp--optimization-init-p t))))
 
-;; use lsp
-(when (not USE-LSP)
-  (use-package eglot
-    :hook (eglot-mode . eglot-inlay-hints-mode)
-    :bind (:map eglot-mode-map
-                ("C-." . 'eglot-code-actions))
-    :config
-    (add-hook 'before-save-hook
-              (lambda () (eglot-format)))
-
-    (setq completion-category-overrides '((eglot (styles orderless))))
-
-    (define-key eglot-mode-map [remap lookup-definition] #'xref-find-definitions)
-    (define-key eglot-mode-map [remap lookup-reference] #'xref-find-references)
-    (define-key eglot-mode-map [remap lookup-implementation] #'eglot-find-implementation)
-    (define-key eglot-mode-map [remap lookup-declaration] #'eglot-find-declaration)
-    (define-key eglot-mode-map [remap lookup-type-definition] #'eglot-find-typeDefinition)
-    (define-key eglot-mode-map [remap sp/format-buffer] #'eglot-format-buffer)
-    (setq eglot-connect-timeout 90)
-    (add-to-list 'eglot-server-programs '(odin-ts-mode "c:/tools/ols/ols.exe"))
-    ;; (add-to-list 'eglot-server-programs '(html-mode "tailwindcss-language-server"))
-    ;; (add-to-list 'eglot-server-programs '((web-mode :language-id "html") . ("tailwindcss-language-server")))
-    (add-to-list 'eglot-server-programs '(razor-mode "rzls"))
-    (add-to-list 'eglot-server-programs '(web-mode "rzls"))
-    ;; (add-to-list 'eglot-server-programs '(razor-mode . (eglot-alternatives '(("vscode-html-language-server" "--stdio") ("html-languageserver" "--stdio")))))
-
-    ;; (add-to-list 'eglot-server-programs '(razor-mode "tailwindcss-language-server"))
-    (add-to-list 'eglot-server-programs '(html-ts-mode . (eglot-alternatives '(("vscode-html-language-server" "--stdio") ("html-languageserver" "--stdio")))))
-    ;; (add-to-list 'eglot-server-programs '(html-ts-mode "tailwindcss-language-server"))
-
-    )
-
-  (use-package consult-eglot
-    :ensure t
-    :defer t)
-  )
-
-(use-package lsp-treemacs
-  :after (treemacs lsp))
-
-(use-package lsp-tailwindcss
-  :init (slot/vc-install :fetcher "github" :repo "merrickluo/lsp-tailwindcss"))
-
-(defun corfu-lsp-setup ()
-  (setq-local completion-styles '(orderless)
-              completion-category-defaults nil))
-
 ;; (require 'init-tabnine-capf)
 (when USE-LSP
   (use-package lsp-mode
     :bind (:map lsp-mode-map
-                ("C-." . 'lsp-execute-code-action))
+                ("C-," . 'lsp-execute-code-action))
     :hook (lsp-mode . +lsp-optimization-mode)
     :hook (lsp-mode . lsp-signature-mode)
     :hook (lsp-completion-mode . my/lsp-mode-setup-completion)
@@ -724,9 +676,10 @@ Returns nil if not in a project."
             '(orderless)))
     (setq lsp-completion-provider nil)
     (setq lsp-keymap-prefix "C-c l")
-    (setq lsp-headerline-breadcrumb-enable nil
+    (setq lsp-headerline-breadcrumb-icons-enable nil
+          lsp-headerline-breadcrumb-enable nil
+          lsp-headerline-breadcrumb-segments '(symbols)
           lsp-idle-delay 0.0
-          lsp-headerline-breadcrumb-icons-enable nil
           lsp-keep-workspace-alive nil
           lsp-modeline-diagnostics-enable nil
           lsp-modeline-code-actions-enable nil
@@ -748,12 +701,12 @@ Returns nil if not in a project."
     (define-key lsp-mode-map [remap sp/format-buffer] #'lsp-format-buffer)
     (define-key lsp-mode-map (kbd "<f7>") 'lsp-ui-doc-focus-frame)
 
-    (add-to-list 'lsp-language-id-configuration '(odin-ts-mode . "odin"))
+    (add-to-list 'lsp-language-id-configuration '(odin-mode . "odin"))
     (add-to-list 'lsp-language-id-configuration '("\\.razor\\'" . "razor"))
 
     (lsp-register-client
      (make-lsp-client :new-connection (lsp-stdio-connection "c:/tools/ols/ols.exe")
-                      :major-modes '(odin-ts-mode)
+                      :major-modes '(odin-mode)
                       :server-id 'ols
                       :multi-root t))
     (lsp-register-client
@@ -774,18 +727,16 @@ Returns nil if not in a project."
       (interactive)
       (cursor)
       )
-    (setq
-     lsp-ui-doc-enable nil
-     lsp-ui-doc-position 'at-point
-     lsp-ui-doc-show-with-cursor t
-     lsp-signature-auto-activate t
-     lsp-signature-render-documentation t
-     lsp-headerline-breadcrumb-segments '(symbols)
-     lsp-ui-sideline-show-code-actions nil
-     lsp-ui-sideline-ignore-duplicate t
-     lsp-ui-sideline-show-hover t
-     lsp-ui-sideline-show-diagnostics t
-     lsp-ui-sideline-actions-icon lsp-ui-sideline-actions-icon-default)
+    (setq lsp-ui-doc-enable nil
+          lsp-ui-doc-position 'at-point
+          lsp-ui-doc-show-with-cursor t
+          lsp-signature-auto-activate t
+          lsp-signature-render-documentation t
+          lsp-ui-sideline-show-code-actions t
+          lsp-ui-sideline-ignore-duplicate t
+          lsp-ui-sideline-show-hover nil
+          lsp-ui-sideline-show-diagnostics t
+          lsp-ui-sideline-actions-icon lsp-ui-sideline-actions-icon-default)
     (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
     (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references)
 
@@ -819,6 +770,19 @@ Returns nil if not in a project."
     :after dap-mode
     :hook (dap-mode . dap-ui-mode)
     :hook (dap-ui-mode . dap-ui-controls-mode))
+
+  (use-package lsp-treemacs
+    :after (treemacs lsp))
+
+  (use-package lsp-tailwindcss
+    :config
+    (add-to-list 'lsp-tailwindcss-major-modes 'xhtml-mode)
+    :init (slot/vc-install :fetcher "github" :repo "merrickluo/lsp-tailwindcss")
+    (setq lsp-tailwindcss-add-on-mode t))
+
+  (defun corfu-lsp-setup ()
+    (setq-local completion-styles '(orderless)
+                completion-category-defaults nil))
   )
 
 (use-package cheat-sh)
@@ -881,9 +845,6 @@ Returns nil if not in a project."
   :hook (csharp-ts-mode . lsp-deferred)
   :mode (("\\.cs\\'" . csharp-ts-mode)))
 
-(use-package html-mode
-  :ensure nil
-  :mode (("\\.html\\'" . html-ts-mode)))
 
 (use-package sql
   :ensure nil
@@ -907,7 +868,7 @@ Returns nil if not in a project."
 (use-package odin-mode
   :hook (odin-mode . lsp-deferred)
   :init (slot/vc-install :fetcher "github" :repo "samwdp/odin-mode")
-  :mode (("\\.odin\\'". odin-ts-mode)))
+  :mode "\\.odin\\'")
 
 (use-package typescript-mode
   :hook (typescript-ts-mode . lsp-deferred)
@@ -933,7 +894,9 @@ Returns nil if not in a project."
   :mode "\\.scss\\'")
 
 (use-package go-mode
-  :hook (csharp-ts-mode . lsp-deferred)
+  :hook (go-ts-mode . lsp-deferred)
+  :custom
+  (go-ts-mode-indent-offset 4)
   :mode (("\\.go\\'" . go-ts-mode)))
 
 (use-package json-mode
