@@ -354,6 +354,13 @@ named arguments:
     "pi" '(projectile-discover-projects-in-search-path :wk "invalidate cache")
     "pv" '(+treemacs/toggle :wk "project filetree")
     )
+
+  (sp/leader-keys
+    ;; window
+    "w" '(:ignore :wk "window")
+    "wq" '(kill-buffer-and-window :wk "buffer and window")
+    "wd" '(delete-window :wk "delete window")
+    )
   )
 
 (when IS-LINUX
