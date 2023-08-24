@@ -291,6 +291,14 @@ named arguments:
     "br" '(revert-buffer :wk "Reload buffer"))
 
   (sp/leader-keys
+    "c" '(:ignore t :wk "code")
+    "cc" '(projectile-compile-project :wk "compile")
+    "ce" '(consult-flycheck :wk "flycheck")
+    "cm" '(consult-flymake :wk "flycheck")
+    "ca" '(lsp-execute-code-action :wk "code actions")
+    )
+
+  (sp/leader-keys
     ;; single use keymaps
     "." '(find-file :wk "find files")
     "SPC" '(consult-projectile-find-file :wk "find files")
@@ -314,6 +322,7 @@ named arguments:
   (sp/leader-keys
     ;; insert keymaps
     "i" '(:ignore t :wk "insert")
+    "is" '(consult-yasnippet t :wk "yasnippet")
     "eb" '(yas-insert-snippet :wk "insert snippet")
     "ot"  (if IS-LINUX
               '(vterm :wk "vterm")
@@ -472,6 +481,7 @@ named arguments:
 
 (use-package vertico
   :hook (vertico-mode . vertico-posframe-mode)
+  :hook (vertico-mode . vertico-grid-mode)
   :config
   (setq vertico-resize nil
         vertico-count 17
@@ -484,6 +494,11 @@ named arguments:
                  args)))
   :init
   (vertico-mode))
+
+(use-package vertico-directory
+  :after vertico
+  :ensure nil
+  )
 
 (use-package orderless
   :ensure t
