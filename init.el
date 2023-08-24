@@ -45,6 +45,7 @@
   (exec-path-from-shell-initialize))
 (when (daemonp)
   (exec-path-from-shell-initialize))
+
 (cl-defun slot/vc-install (&key (fetcher "github") repo name rev backend)
   "Install a package from a remote if it's not already installed.
 This is a thin wrapper around `package-vc-install' in order to
@@ -303,7 +304,7 @@ named arguments:
     "SPC" '(consult-projectile-find-file :wk "find files")
     "TAB" '(persp-switch :wk "switch project")
     "f" '(sp/format-buffer :wk "format buffer")
-    "w" '(save-buffer :wk "save")
+    "RET" '(save-buffer :wk "save")
     )
 
   (sp/leader-keys
