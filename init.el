@@ -346,7 +346,8 @@ named arguments:
     "pc" '(projectile-compile-project
            t :wk "project")
     "pp" '(projectile-switch-project :wk "switch project")
-    "pd" '(persp-kill :wk "project kill")
+    "pk" '(persp-kill :wk "project kill")
+    "pd" '(dired :wk "dired")
     "ps" '(consult-ripgrep :wk "search in project")
     "pr" '(recompile :wk "recompile")
     "pI" '(projectile-invalidate-cache :wk "invalidate cache")
@@ -611,6 +612,14 @@ named arguments:
         treemacs-sorting 'alphabetic-case-insensitive-asc)
   :config
   (treemacs-follow-mode -1))
+
+(use-package treemacs-evil
+  :after (treemacs evil)
+  :ensure t)
+
+(use-package treemacs-icons-dired
+  :hook (dired-mode . treemacs-icons-dired-enable-once)
+  :ensure t)
 
 (use-package treemacs-magit
   :after treemacs magit
