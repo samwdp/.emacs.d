@@ -107,8 +107,8 @@ named arguments:
 (defun sp/new-frame ()
   (set-face-attribute 'default nil :font sp/font-string :height sp/text-height)
   (set-face-attribute 'fixed-pitch nil :font sp/font-string :height sp/text-height)
-  ;;(set-face-attribute 'default nil :font sp/font-string :height sp/text-height) ;; this equally does not work
-  ;;(set-face-attribute 'default nil :font sp/font-string) ;; this works but I need to increase the defualt font size
+  ;;(set-face-attribute 'default nil :font (font-spec :family sp/font-string :size sp/text-height)) ;; this equally does not work
+  ;;(set-face-attribute 'default nil :font (font-spec :family sp/font-string :size sp/text-height)) ;; this works but I need to increase the defualt font size
   ;; (set-face-attribute 'fixed-pitch nil :font sp/font-string :height sp/text-height)
   (set-frame-parameter (selected-frame) 'alpha-background 1.0 ))
 
