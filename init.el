@@ -102,20 +102,19 @@ named arguments:
 
 (setq use-package-always-ensure t)
 
-(defvar sp/text-height 150)
+(defvar sp/text-height 18)
 (defvar sp/font-string "Fira Code Retina")
 
 (defun sp/new-frame ()
-  (set-face-attribute 'default nil :font sp/font-string :height sp/text-height)
-  (set-face-attribute 'fixed-pitch nil :font sp/font-string :height sp/text-height)
-  ;;(set-face-attribute 'default nil :font (font-spec :family sp/font-string :size sp/text-height)) ;; this equally does not work
-  ;;(set-face-attribute 'fixed-pitch nil :font (font-spec :family sp/font-string :size sp/text-height)) ;; this works but I need to increase the defualt font size
+  (set-face-attribute 'default nil :font (font-spec :family sp/font-string :size sp/text-height))
+  (set-face-attribute 'fixed-pitch nil :font (font-spec :family sp/font-string :size sp/text-height))
   (set-frame-parameter (selected-frame) 'alpha-background 1.0 ))
 
 (use-package gcmh
   :ensure t
   :config
   (gcmh-mode 1))
+
 (use-package unicode-fonts
   :init (slot/vc-install :fetcher "github" :repo "rolandwalker/unicode-fonts"))
 
@@ -304,7 +303,7 @@ named arguments:
     "SPC" '(consult-projectile-find-file :wk "find files")
     "TAB" '(persp-switch :wk "switch project")
     "f" '(sp/format-buffer :wk "format buffer")
-    "RET" '(save-buffer :wk "save")
+    "w" '(save-buffer :wk "save")
     )
 
   (sp/leader-keys
@@ -356,10 +355,9 @@ named arguments:
     )
 
   (sp/leader-keys
-    ;; window
-    "w" '(:ignore :wk "window")
-    "wq" '(kill-buffer-and-window :wk "buffer and window")
-    "wd" '(delete-window :wk "delete window")
+    ;; kill things
+    "d" '(:ignore :wk "window")
+    "dw" '(delete-window :wk "delete window")
     )
   )
 
@@ -473,7 +471,8 @@ named arguments:
 (use-package kind-icon
   :after corfu
   :custom
-  (kind-icon-use-icons t)
+  ;; (kind-icon-use-icons t)
+  (kind-icon-use-icons nil) ;; disabled as this causes problems with corfu sizing
   (kind-icon-default-face 'corfu-default) ; Have background color be the same as `corfu' face background
   (kind-icon-blend-background nil)  ; Use midpoint color between foreground and background colors ("blended")?
   (kind-icon-blend-frac 0.08)
