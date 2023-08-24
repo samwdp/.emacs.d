@@ -101,16 +101,16 @@ named arguments:
 
 (setq use-package-always-ensure t)
 
-(defvar sp/text-height 140)
+(defvar sp/text-height 120)
 (defvar sp/font-string "Fira Code Retina")
 
-(set-face-attribute 'default nil :font (font-spec :family sp/font-string :size 18))
+(set-face-attribute 'default nil :font sp/font-string :height sp/text-height) 
+(set-face-attribute 'fixed-pitch nil :font sp/font-string :height sp/text-height)
 ;;(set-face-attribute 'default nil :font sp/font-string :height sp/text-height) ;; this equally does not work
 ;;(set-face-attribute 'default nil :font sp/font-string) ;; this works but I need to increase the defualt font size
-(set-face-attribute 'fixed-pitch nil :font sp/font-string :height sp/text-height)
-(set-face-attribute 'fixed-pitch-serif nil :font sp/font-string :height sp/text-height)
-(set-face-attribute 'variable-pitch nil :font sp/font-string :height sp/text-height)
+;; (set-face-attribute 'fixed-pitch nil :font sp/font-string :height sp/text-height)
 (set-frame-parameter (selected-frame) 'alpha-background 1.0 )
+
 (use-package gcmh
   :ensure t
   :config
