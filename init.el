@@ -119,24 +119,22 @@ named arguments:
   (interactive "nTransparency Value 0 - 1 opaque: t")
   (set-frame-parameter (selected-frame) 'alpha-background value))
 
-(defvar sp/text-height 18)
-;; (defvar sp/text-height 28)
-(defvar sp/text-height-variable 20)
-(defvar sp/font-string "FiraCode Nerd Font")
+(defvar sp/text-height 140)
+(defvar sp/font-string "Fira Code Retina")
 
-(defun sp/new-frame ()
-  (set-face-attribute 'default nil :font (font-spec :family sp/font-string :size sp/text-height))
-  (set-face-attribute 'fixed-pitch nil :font (font-spec :family sp/font-string :size sp/text-height))
-  (set-face-attribute 'fixed-pitch-serif nil :font (font-spec :family sp/font-string :size sp/text-height))
-  (set-face-attribute 'variable-pitch nil :font (font-spec :family sp/font-string :size sp/text-height-variable))
-  (set-frame-parameter (selected-frame) 'alpha-background 1.0 ))
+(set-face-attribute 'default nil :font (font-spec :family sp/font-string :size 18))
+;;(set-face-attribute 'default nil :font sp/font-string :height sp/text-height) ;; this equally does not work
+;;(set-face-attribute 'default nil :font sp/font-string) ;; this works but I need to increase the defualt font size
+(set-face-attribute 'fixed-pitch nil :font sp/font-string :height sp/text-height)
+(set-face-attribute 'fixed-pitch-serif nil :font sp/font-string :height sp/text-height)
+(set-face-attribute 'variable-pitch nil :font sp/font-string :height sp/text-height)
+(set-frame-parameter (selected-frame) 'alpha-background 1.0 )
 
 (defun unicode-fonts-setup-h (frame)
   "Run unicode-fonts-setup, then remove the hook."
   (when (and frame (display-graphic-p frame))
     (with-selected-frame frame
       (require 'unicode-fonts)
-      (sp/new-frame)
       (unicode-fonts-setup))))
 
 (if (display-graphic-p)
