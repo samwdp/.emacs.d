@@ -217,13 +217,7 @@ named arguments:
   (doom-modeline-mode))
 
 (use-package which-key
-  :ensure t
-  :defer 0
-  :diminish which-key-mode
-  :init (which-key-mode)
-  :config
-  (setq which-key-frame-max-height 80)
-  (setq which-key-idle-delay 0.0))
+  :init (which-key-mode))
 
 (defun lookup-definition ())
 (defun lookup-reference ())
@@ -398,10 +392,14 @@ named arguments:
   :init
   (marginalia-mode))
 
-(use-package beacon
-  :defer t
-  :init
-  (beacon-mode 1))
+;; (use-package beacon
+;;   :defer t
+;;   :init
+;;   (beacon-mode 1))
+
+(use-package pulsar
+  :init (pulsar-global-mode +1)
+  )
 
 (use-package dtrt-indent)
 
