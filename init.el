@@ -103,7 +103,7 @@ named arguments:
 (setq use-package-always-ensure t)
 
 (defvar sp/text-height 18)
-(defvar sp/font-string "Fira Code Retina")
+(defvar sp/font-string "FiraCode Nerd Font")
 
 (defun sp/new-frame ()
   (set-face-attribute 'default nil :font (font-spec :family sp/font-string :size sp/text-height))
