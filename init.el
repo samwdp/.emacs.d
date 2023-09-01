@@ -339,7 +339,7 @@ named arguments:
     "p" '(:ignore t :wk "project")
     "pc" '(projectile-compile-project
            t :wk "project")
-    "pp" '(projectile-switch-project :wk "switch project")
+    "pp" '(consult-projectile-switch-project :wk "switch project")
     "pk" '(persp-kill :wk "project kill")
     "pd" '(dired :wk "dired")
     "ps" '(consult-ripgrep :wk "search in project")
