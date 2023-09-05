@@ -2,6 +2,7 @@
 (setq read-process-output-max (* 1024 1024)) ;; 1mb
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
                          ("org" . "https://orgmode.org/elpa/")
+                         ("nongnu" . "https://elpa.nongnu.org/nongnu/")
                          ("elpa" . "https://elpa.gnu.org/packages/")))
 (blink-cursor-mode 0)
 (pixel-scroll-mode 1)
@@ -242,7 +243,7 @@ named arguments:
   (evil-global-set-key 'normal (kbd "g r") 'lookup-reference)
   (evil-global-set-key 'normal (kbd "g t") 'lookup-type-definition)
   (evil-global-set-key 'normal (kbd "g c c") 'comment-line)
-  (evil-global-set-key 'visual (kbd "g c") 'comment-region)
+  (evil-global-set-key 'visual (kbd "g c") 'comment-or-uncomment-region)
   :init      ;; tweak evil's configuration before loading it
   (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
   (setq evil-want-keybinding nil)
@@ -1322,6 +1323,13 @@ re-align the table if necessary. (Necessary because org-mode has a
   (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
   (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
   (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
+
+(use-package eshell
+  :ensure nil
+  :hook (eshell-mode . eat-eshell-mode)
+  :hook (eshell-mode . eat-eshell-visual-command-mode))
+
+(use-package eat)
 
 (use-package yasnippet-snippets)
 (use-package competitive-programming-snippets)
