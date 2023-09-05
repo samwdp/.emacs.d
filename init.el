@@ -340,7 +340,7 @@ named arguments:
     "p" '(:ignore t :wk "project")
     "pc" '(projectile-compile-project
            t :wk "project")
-    "pp" '(consult-projectile-switch-project :wk "switch project")
+    "pp" '(projectile-persp-switch-project :wk "switch project")
     "pk" '(persp-kill :wk "project kill")
     "pd" '(dired :wk "dired")
     "ps" '(consult-ripgrep :wk "search in project")
@@ -589,14 +589,99 @@ named arguments:
 
 (use-package persp-projectile)
 
+;;;###autoload
+(defun projectile-persp-switch-project (project-to-switch)
+  "Switch to a project or perspective we have visited before.
+If the perspective of corresponding project does not exist, this
+function will call `persp-switch' to create one and switch to
+that before `projectile-switch-project' invokes
+`projectile-switch-project-action'.
+
+Otherwise, this function calls `persp-switch' to switch to an
+existing perspective of the project unless we're already in that
+perspective."
+  (interactive (list (projectile-completing-read "Switch to project: "
+                                                 (projectile-relevant-known-projects))))
+  (let* ((name (or projectile-project-name
+                   (funcall projectile-project-name-function project-to-switch)))
+         (persp (gethash name (perspectives-hash))))
+    (cond
+     ;; project-specific perspective already exists
+     ((and persp (not (equal persp (persp-curr))))
+      (persp-switch name))
+     ;; persp exists but not match with projectile-name
+     ((and persp (not (equal persp name)))
+      (persp-switch name)
+      (projectile-switch-project-by-name project-to-switch))
+     ;; project-specific perspective doesn't exist
+     ((not persp)
+      (let ((frame (selected-frame)))
+        (persp-switch name)
+        (projectile-switch-project-by-name project-to-switch)
+        ;; Clean up if we switched to a new frame. `helm' for one allows finding
+        ;; files in new frames so this is a real possibility.
+        (when (not (equal frame (selected-frame)))
+          (with-selected-frame frame
+            (persp-kill name)))))
+     )))
+
+;; ;;;###autoload
+;; (defun consult-projectile-persp-list (&optional sources)
+;;   (interactive)
+;;   (when-let (project (consult--multi (or sources consult-projectile-sources)
+;;                                      :prompt "Switch to: "
+;;                                      :history 'consult-projectile--project-history
+;;                                      :sort nil))
+;;     (message (car project))
+;;     (message (length (string-split (car project) "/")))
+;;     (message (nth (- (length (string-split (car project))) 1) (string-split (car project) "/")))
+;;     (let* ((list (string-split (car project) "/"))
+;;            (name (or projecile-project-name)
+;;                  (funcall projecitle-project-name-funtion (nth (- (length list) 2) list))
+;;                  (persp (gethash name (perspectives-hash))))
+;;            (cond
+;;             ;; project-specific perspective already exists
+;;             ((and persp (not (equal persp (persp-curr))))
+;;              (message "aaa")
+;;              (message name)
+;;              (persp-switch name))
+
+;;             ;; persp exists but not match with projectile-name
+;;             ((and persp (not (equal persp name)))
+;;              (message "bbb")
+;;              (message name)
+;;              (persp-switch name)
+;;              (projectile-switch-project-by-name buffer))
+
+;;             ;; project-specific perspective doesn't exist
+;;             ((not persp)
+;;              (message "ccc")
+;;              (message name)
+;;              (let ((frame (selected-frame)))
+;;                (persp-switch name)
+;;                (projectile-switch-project-by-name project-to-switch)
+;;                ;; Clean up if we switched to a new frame. `helm' for one allows finding
+;;                ;; files in new frames so this is a real possibility.
+;;                (when (not (equal frame (selected-frame)))
+;;                  (with-selected-frame frame
+;;                    (persp-kill name)))))
+;;             )
+;;            )
+;;       )
+;;     )
+;;   )
+
+;; ;;;###autoload
+;; (defun consult-projectile-persp-switch-project ()
+;;   (interactive)
+;;   (funcall-interactively #'consult-projectile-persp-list '(consult-projectile--source-projectile-project)))
+
 (use-package marginalia
   :after vertico
   :ensure t
   :init
   (add-hook 'marginalia-mode-hook #'all-the-icons-completion-marginalia-setup)
   (marginalia-mode))
-
-(use-package persp-projectile)
 
 (use-package treemacs
   :defer t
