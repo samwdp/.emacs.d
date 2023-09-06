@@ -159,7 +159,6 @@ named arguments:
 (global-set-key (kbd "C-SPC") 'completion-at-point)
 (global-set-key (kbd "C--") 'text-scale-decrease)
 (global-set-key (kbd "C-+") 'text-scale-increase)
-(global-set-key (kbd "M-RET") 'harpoon-add-file)
 
 (defun spawn-shell (name)
   (interactive "MName of new shell: ")
@@ -270,11 +269,22 @@ named arguments:
     :global-prefix "M-SPC") ;; access leader in insert mode
 
   (sp/leader-keys
-    "a" '(:ignore :wk "application")
+    ;; single use keymaps
+    "." '(find-file :wk "find files")
+    "SPC" '(consult-projectile-find-file :wk "find files")
+    "TAB" '(persp-switch :wk "switch project")
+    "f" '(sp/format-buffer :wk "format buffer")
+    "w" '(save-buffer :wk "save")
+    )
+
+  (sp/leader-keys
+    ;; inbuilt applications
+    "a" '(:ignore t :wk "application")
     "ac" '(quick-calc :wk "application")
     )
 
   (sp/leader-keys
+    ;; buffer configuration
     "b" '(:ignore t :wk "buffer")
     "bb" '(consult-project-buffer :wk "Switch buffer")
     "bd" '(kill-this-buffer :wk "Switch buffer")
@@ -282,9 +292,11 @@ named arguments:
     "bk" '(kill-this-buffer :wk "Kill this buffer")
     "bn" '(next-buffer :wk "Next buffer")
     "bp" '(previous-buffer :wk "Previous buffer")
-    "br" '(revert-buffer :wk "Reload buffer"))
+    "br" '(revert-buffer :wk "Reload buffer")
+    )
 
   (sp/leader-keys
+    ;; code actions
     "c" '(:ignore t :wk "code")
     "cc" '(projectile-compile-project :wk "compile")
     "ce" '(consult-flycheck :wk "flycheck")
@@ -293,12 +305,9 @@ named arguments:
     )
 
   (sp/leader-keys
-    ;; single use keymaps
-    "." '(find-file :wk "find files")
-    "SPC" '(consult-projectile-find-file :wk "find files")
-    "TAB" '(persp-switch :wk "switch project")
-    "f" '(sp/format-buffer :wk "format buffer")
-    "w" '(save-buffer :wk "save")
+    ;; kill things
+    "d" '(:ignore :wk "window")
+    "dw" '(delete-window :wk "delete window")
     )
 
   (sp/leader-keys
@@ -314,25 +323,24 @@ named arguments:
     )
 
   (sp/leader-keys
-    ;; insert keymaps
-    "i" '(:ignore t :wk "insert")
-    "is" '(consult-yasnippet t :wk "yasnippet")
-    "eb" '(yas-insert-snippet :wk "insert snippet")
-    "ot"  (if IS-LINUX
-              '(vterm :wk "vterm")
-            '(eshell :wk "eshell"))
-    )
-
-  (sp/leader-keys
     ;; magit keymaps
     "g" '(:ignore t :wk "git")
     "gs" '(magit-status :wk "magit status")
     )
 
   (sp/leader-keys
-    ;; search
-    "s" '(:ignore :wk "search")
-    "ss" '( consult-line :wk "find line")
+    ;; insert keymaps
+    "i" '(:ignore t :wk "insert")
+    "is" '(consult-yasnippet t :wk "yasnippet")
+    )
+
+  (sp/leader-keys
+    ;; open applications
+    "o" '(:ignore t :wk "open")
+    "oe" '(eshell :wk "eshell")
+    "ot"  (if IS-LINUX
+              '(vterm :wk "vterm")
+            '(eshell :wk "eshell"))
     )
 
   (sp/leader-keys
@@ -340,7 +348,7 @@ named arguments:
     "p" '(:ignore t :wk "project")
     "pc" '(projectile-compile-project
            t :wk "project")
-    "pp" '(projectile-persp-switch-project :wk "switch project")
+    "pp" '(projectile-persp-switch-project :wk "switch project") ;; find some way to integrate consult with this
     "pk" '(persp-kill :wk "project kill")
     "pd" '(dired :wk "dired")
     "ps" '(consult-ripgrep :wk "search in project")
@@ -351,9 +359,9 @@ named arguments:
     )
 
   (sp/leader-keys
-    ;; kill things
-    "d" '(:ignore :wk "window")
-    "dw" '(delete-window :wk "delete window")
+    ;; search
+    "s" '(:ignore t :wk "search")
+    "ss" '( consult-line :wk "find line")
     )
   )
 
@@ -393,11 +401,6 @@ named arguments:
   :init
   (marginalia-mode))
 
-;; (use-package beacon
-;;   :defer t
-;;   :init
-;;   (beacon-mode 1))
-
 (use-package pulsar
   :init (pulsar-global-mode +1)
   )
@@ -406,6 +409,7 @@ named arguments:
 
 (use-package harpoon
   :config
+  (global-set-key (kbd "M-RET") 'harpoon-add-file)
   (global-set-key (kbd "C-c h RET") 'harpoon-add-file)
   (global-set-key (kbd "C-c h f") 'harpoon-toggle-file)
   (global-set-key (kbd "C-c h h") 'harpoon-toggle-quick-menu)
@@ -430,13 +434,6 @@ named arguments:
   :config
   (global-set-key (kbd "M-k") 'drag-stuff-up)
   (global-set-key (kbd "M-j") 'drag-stuff-down))
-
-
-(use-package rainbow-mode
-  :defer t
-  :hook ((prog-mode . rainbow-mode)
-         (org-mode . rainbow-mode)
-         (fundamental-mode . rainbow-mode)))
 
 (use-package perspective
   :custom
@@ -487,7 +484,6 @@ named arguments:
 
 (use-package vertico
   :hook (vertico-mode . vertico-posframe-mode)
-  :hook (vertico-mode . vertico-grid-mode)
   :config
   (setq vertico-resize nil
         vertico-count 17
