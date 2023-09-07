@@ -451,13 +451,12 @@ named arguments:
   :custom
   (corfu-separator ?\s)
   (corfu-auto t)
-  (corfu-auto-prefix 1)
-  (corfu-auto-delay 0.0)
+  (corfu-auto-prefix 2)
   (corfu-popupinfo-delay 0.3)
-  (corfu-auto-prefix 1)
   (corfu-auto-delay 0.0)
   :init
   (global-corfu-mode)
+  (corfu-history-mode)
   (corfu-popupinfo-mode))
 
 (use-package cape
