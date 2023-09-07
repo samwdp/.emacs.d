@@ -103,7 +103,7 @@ named arguments:
 
 (setq use-package-always-ensure t)
 
-(defvar sp/text-height 18)
+(defvar sp/text-height 20)
 (defvar sp/font-string "FiraCode Nerd Font")
 
 (defun sp/new-frame ()
