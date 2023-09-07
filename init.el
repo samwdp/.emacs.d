@@ -451,6 +451,7 @@ named arguments:
   :custom
   (corfu-auto t)
   (corfu-auto-prefix 2)
+  (corfu-quit-at-boundry 'separator)
   (corfu-popupinfo-delay 0.3)
   (corfu-auto-delay 0.0)
   :init
