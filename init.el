@@ -266,7 +266,7 @@ named arguments:
     :states '(normal insert visual emacs)
     :keymaps 'override
     :prefix "SPC" ;; set leader
-    :global-prefix "M-SPC") ;; access leader in insert mode
+    :global-prefix "C-M-SPC") ;; access leader in insert mode
 
   (sp/leader-keys
     ;; single use keymaps
