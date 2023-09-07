@@ -265,8 +265,7 @@ named arguments:
   (general-create-definer sp/leader-keys
     :states '(normal insert visual emacs)
     :keymaps 'override
-    :prefix "SPC" ;; set leader
-    :global-prefix "M-SPC") ;; access leader in insert mode
+    :prefix "SPC" ) ;; access leader in insert mode
 
   (sp/leader-keys
     ;; single use keymaps
@@ -449,7 +448,6 @@ named arguments:
 
 (use-package corfu
   :custom
-  (corfu-separator ?\s)
   (corfu-auto t)
   (corfu-auto-prefix 2)
   (corfu-popupinfo-delay 0.3)
