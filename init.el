@@ -265,7 +265,8 @@ named arguments:
   (general-create-definer sp/leader-keys
     :states '(normal insert visual emacs)
     :keymaps 'override
-    :prefix "SPC" ) ;; access leader in insert mode
+    :prefix "SPC" ;; set leader
+    :global-prefix "C-M-SPC") ;; access leader in insert mode
 
   (sp/leader-keys
     ;; single use keymaps
