@@ -47,7 +47,7 @@
 (when (daemonp)
   (exec-path-from-shell-initialize))
 
-(cl-defun slot/vc-install (&key (fetcher "github") repo name rev backend)
+(cl-defun slot/vc-install (&key (fetcher "github") (extension "com") repo name rev backend)
   "Install a package from a remote if it's not already installed.
 This is a thin wrapper around `package-vc-install' in order to
 make non-interactive usage more ergonomic.  Takes the following
@@ -61,7 +61,7 @@ named arguments:
 
 - NAME, REV, and BACKEND are as in `package-vc-install' (which
   see)."
-  (let* ((url (format "https://www.%s.com/%s" fetcher repo))
+  (let* ((url (format "https://www.%s.%s/%s" fetcher extension repo))
          (iname (when name (intern name)))
          (pac-name (or iname (intern (file-name-base repo)))))
     (unless (package-installed-p pac-name)
@@ -444,7 +444,6 @@ named arguments:
         persp-modestring-short t)
   (persp-mode))
 
-
 (use-package prescient)
 
 (use-package corfu
@@ -457,6 +456,14 @@ named arguments:
   (global-corfu-mode)
   (corfu-history-mode)
   (corfu-popupinfo-mode))
+
+(use-package corfu-terminal
+  :init (slot/vc-install :fetcher "codeberg" :extension "org" :repo "akib/emacs-corfu-terminal")
+  :config
+  (unless (display-graphic-p)
+    (corfu-terminal-mode +1))
+  )
+
 
 (use-package cape
   :init
@@ -784,14 +791,14 @@ Returns nil if not in a project."
             '(orderless)))
     (setq lsp-completion-provider nil)
     (setq lsp-keymap-prefix "C-c l")
-    (setq lsp-headerline-breadcrumb-icons-enable nil
-          lsp-headerline-breadcrumb-enable nil
+    (setq lsp-headerline-breadcrumb-icons-enable t
+          lsp-headerline-breadcrumb-enable t
           lsp-headerline-breadcrumb-segments '(symbols)
           lsp-idle-delay 0.0
           lsp-keep-workspace-alive nil
           lsp-modeline-diagnostics-enable nil
           lsp-modeline-code-actions-enable nil
-          lsp-lens-enable nil
+          lsp-lens-enable t
           lsp-enable-which-key-integration t
           lsp-enable-file-watchers nil
           lsp-enable-folding nil
