@@ -488,7 +488,6 @@ named arguments:
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
 (use-package vertico
-  :hook (vertico-mode . vertico-posframe-mode)
   :config
   (setq vertico-resize nil
         vertico-count 17
@@ -523,8 +522,10 @@ named arguments:
           (alpha-background . 1.0)))
   (setq vertico-posframe-border-width 2)
   (setq vertico-posframe-poshandler #'posframe-poshandler-frame-bottom-center)
-  :init
-  (vertico-posframe-mode 1))
+  (if (display-graphic-p)
+      (vertico-posframe-mode +1)
+    )
+  )
 
 (use-package embark
   :defer t)
