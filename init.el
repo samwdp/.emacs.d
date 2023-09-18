@@ -159,6 +159,9 @@ named arguments:
 (global-set-key (kbd "C-SPC") 'completion-at-point)
 (global-set-key (kbd "C--") 'text-scale-decrease)
 (global-set-key (kbd "C-+") 'text-scale-increase)
+(global-set-key (kbd "C-M-n") 'treesit-end-of-defun)
+(global-set-key (kbd "C-M-p") 'treesit-beginning-of-defun)
+(global-set-key (kbd "C-M-j") 'treesit-forward-sexp)
 
 (defun spawn-shell (name)
   (interactive "MName of new shell: ")
@@ -445,13 +448,23 @@ named arguments:
   (persp-mode))
 
 (use-package prescient)
-
 (use-package corfu
+  :bind (:map corfu-map
+              ("M-SPC" . corfu-insert-separator)
+              ("RET" . nil)
+              ("TAB" . corfu-next)
+              ([tab] . corfu-next)
+              ("S-TAB" . corfu-previous)
+              ([backtab] . corfu-previous)
+              ("S-<return>" . corfu-insert)
+              )
   :custom
   (corfu-auto t)
+  (corfu-cycle t)
   (corfu-auto-prefix 2)
   (corfu-popupinfo-delay 0.3)
   (corfu-auto-delay 0.0)
+  (corfu-quit-at-boundary 'separator)
   :init
   (global-corfu-mode)
   (corfu-history-mode)
@@ -1379,16 +1392,16 @@ re-align the table if necessary. (Necessary because org-mode has a
   :init (slot/vc-install :fetcher "github" :repo "samwdp/adaptive-word-wrap-mode")
   :hook (after-init . global-adaptive-word-wrap-mode))
 
-(use-package which-func
-  :config
-  (setq mode-line-format (delete (assoc 'which-func-mode
-                                        mode-line-format) mode-line-format)
-        which-func-header-line-format '(which-func-mode ("" which-func-format)))
-  (defadvice which-func-ff-hook (after header-line activate)
-    (when which-func-mode
-      (setq mode-line-format (delete (assoc 'which-func-mode
-                                            mode-line-format) mode-line-format)
-            header-line-format which-func-header-line-format))))
+;; (use-package which-func
+;;   :config
+;;   (setq mode-line-format (delete (assoc 'which-func-mode
+;;                                         mode-line-format) mode-line-format)
+;;         which-func-header-line-format '(which-func-mode ("" which-func-format)))
+;;   (define-advice which-func-ff-hook (after header-line activate)
+;;     (when which-func-mode
+;;       (setq mode-line-format (delete (assoc 'which-func-mode
+;;                                             mode-line-format) mode-line-format)
+;;             header-line-format which-func-header-line-format))))
 
 (use-package sideline
   :init
