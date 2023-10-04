@@ -785,10 +785,6 @@ Returns nil if not in a project."
 (defvar +lsp--default-gcmh-high-cons-threshold nil)
 (defvar +lsp--optimization-init-p nil)
 
-(use-package eglot
-  :config
-  (setq consult-eglot-ignore-column
-  )
 (define-minor-mode +lsp-optimization-mode
   "Deploys universal GC and IPC optimizations for `lsp-mode' and `eglot'."
   :global t
