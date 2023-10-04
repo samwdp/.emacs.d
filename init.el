@@ -413,6 +413,7 @@ named arguments:
 (use-package harpoon
   :config
   (global-set-key (kbd "M-RET") 'harpoon-add-file)
+  (global-set-key (kbd "M-<return>") 'harpoon-add-file)
   (global-set-key (kbd "C-c h RET") 'harpoon-add-file)
   (global-set-key (kbd "C-c h f") 'harpoon-toggle-file)
   (global-set-key (kbd "C-c h h") 'harpoon-toggle-quick-menu)
@@ -449,15 +450,6 @@ named arguments:
 
 (use-package prescient)
 (use-package corfu
-  :bind (:map corfu-map
-              ("M-SPC" . corfu-insert-separator)
-              ("RET" . nil)
-              ("TAB" . corfu-next)
-              ([tab] . corfu-next)
-              ("S-TAB" . corfu-previous)
-              ([backtab] . corfu-previous)
-              ("S-<return>" . corfu-insert)
-              )
   :custom
   (corfu-auto t)
   (corfu-cycle t)
@@ -578,6 +570,7 @@ named arguments:
   :commands flycheck-list-errors flycheck-buffer
   :config
   (setq flycheck-display-errors-function 'ignore)
+  (setq flycheck-checker-error-threshold 10000)
   (setq flycheck-emacs-lisp-load-path 'inherit)
   (delq 'new-line flycheck-check-syntax-automatically)
   (setq flycheck-idle-change-delay 1.0)
@@ -756,10 +749,46 @@ Returns nil if not in a project."
         projectile-require-project-root)
     (projectile-project-root dir)))
 
+;;;###autoload
+(defun +lsp/switch-client (client)
+  "Switch to another LSP server."
+  (interactive
+   (progn
+     (require 'lsp-mode)
+     (list (completing-read
+            "Select server: "
+            (or (mapcar #'lsp--client-server-id (lsp--filter-clients (-andfn #'lsp--supports-buffer?
+                                                                             #'lsp--server-binary-present?)))
+                (user-error "No available LSP clients for %S" major-mode))))))
+  (require 'lsp-mode)
+  (let* ((client (if (symbolp client) client (intern client)))
+         (match (car (lsp--filter-clients (lambda (c) (eq (lsp--client-server-id c) client)))))
+         (workspaces (lsp-workspaces)))
+    (unless match
+      (user-error "Couldn't find an LSP client named %S" client))
+    (let ((old-priority (lsp--client-priority match)))
+      (setf (lsp--client-priority match) 9999)
+      (unwind-protect
+          (if workspaces
+              (lsp-workspace-restart
+               (if (cdr workspaces)
+                   (lsp--completing-read "Select server: "
+                                         workspaces
+                                         'lsp--workspace-print
+                                         nil t)
+                 (car workspaces)))
+            (lsp-mode +1))
+       (add-transient-hook! 'lsp-after-initialize-hook
+          (setf (lsp--client-priority match) old-priority))))))
+
 (defvar +lsp--default-read-process-output-max nil)
 (defvar +lsp--default-gcmh-high-cons-threshold nil)
 (defvar +lsp--optimization-init-p nil)
 
+(use-package eglot
+  :config
+  (setq consult-eglot-ignore-column
+  )
 (define-minor-mode +lsp-optimization-mode
   "Deploys universal GC and IPC optimizations for `lsp-mode' and `eglot'."
   :global t
@@ -812,7 +841,6 @@ Returns nil if not in a project."
           lsp-keep-workspace-alive nil
           lsp-modeline-diagnostics-enable nil
           lsp-modeline-code-actions-enable nil
-          lsp-lens-enable t
           lsp-enable-which-key-integration t
           lsp-enable-file-watchers nil
           lsp-enable-folding nil
