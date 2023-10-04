@@ -824,6 +824,7 @@ Returns nil if not in a project."
                 ("C-," . 'lsp-execute-code-action))
     :hook (lsp-mode . +lsp-optimization-mode)
     :hook (lsp-mode . lsp-signature-mode)
+    :hook (lsp-mode . lsp-inlay-hints-mode)
     :hook (lsp-completion-mode . my/lsp-mode-setup-completion)
     :commands (lsp lsp-deferred)
     :custom
