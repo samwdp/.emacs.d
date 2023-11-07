@@ -390,9 +390,6 @@ named arguments:
 (use-package smartparens
   :defer t)
 
-(use-package anzu
-  :init
-  (global-anzu-mode +1))
 
 (use-package marginalia
   :after vertico
@@ -435,7 +432,9 @@ named arguments:
   :defer t
   :config
   (global-set-key (kbd "M-k") 'drag-stuff-up)
-  (global-set-key (kbd "M-j") 'drag-stuff-down))
+  (global-set-key (kbd "M-j") 'drag-stuff-down)
+  :init
+  (drag-stuff-global-mode +1))
 
 (use-package perspective
   :custom
@@ -466,7 +465,6 @@ named arguments:
   (unless (display-graphic-p)
     (corfu-terminal-mode +1))
   )
-
 
 (use-package cape
   :init
@@ -563,7 +561,6 @@ named arguments:
 (use-package consult-projectile
   :init (slot/vc-install :fetcher "gitlab" :repo "OlMon/consult-projectile"))
 
-
 (use-package flycheck
   :commands flycheck-list-errors flycheck-buffer
   :config
@@ -630,57 +627,6 @@ perspective."
           (with-selected-frame frame
             (persp-kill name)))))
      )))
-
-;; ;;;###autoload
-;; (defun consult-projectile-persp-list (&optional sources)
-;;   (interactive)
-;;   (when-let (project (consult--multi (or sources consult-projectile-sources)
-;;                                      :prompt "Switch to: "
-;;                                      :history 'consult-projectile--project-history
-;;                                      :sort nil))
-;;     (message (car project))
-;;     (message (length (string-split (car project) "/")))
-;;     (message (nth (- (length (string-split (car project))) 1) (string-split (car project) "/")))
-;;     (let* ((list (string-split (car project) "/"))
-;;            (name (or projecile-project-name)
-;;                  (funcall projecitle-project-name-funtion (nth (- (length list) 2) list))
-;;                  (persp (gethash name (perspectives-hash))))
-;;            (cond
-;;             ;; project-specific perspective already exists
-;;             ((and persp (not (equal persp (persp-curr))))
-;;              (message "aaa")
-;;              (message name)
-;;              (persp-switch name))
-
-;;             ;; persp exists but not match with projectile-name
-;;             ((and persp (not (equal persp name)))
-;;              (message "bbb")
-;;              (message name)
-;;              (persp-switch name)
-;;              (projectile-switch-project-by-name buffer))
-
-;;             ;; project-specific perspective doesn't exist
-;;             ((not persp)
-;;              (message "ccc")
-;;              (message name)
-;;              (let ((frame (selected-frame)))
-;;                (persp-switch name)
-;;                (projectile-switch-project-by-name project-to-switch)
-;;                ;; Clean up if we switched to a new frame. `helm' for one allows finding
-;;                ;; files in new frames so this is a real possibility.
-;;                (when (not (equal frame (selected-frame)))
-;;                  (with-selected-frame frame
-;;                    (persp-kill name)))))
-;;             )
-;;            )
-;;       )
-;;     )
-;;   )
-
-;; ;;;###autoload
-;; (defun consult-projectile-persp-switch-project ()
-;;   (interactive)
-;;   (funcall-interactively #'consult-projectile-persp-list '(consult-projectile--source-projectile-project)))
 
 (use-package marginalia
   :after vertico
@@ -996,6 +942,10 @@ Returns nil if not in a project."
   :hook (csharp-ts-mode . lsp-deferred)
   :mode (("\\.cs\\'" . csharp-ts-mode)))
 
+(use-package ob-csharp
+  :init (slot/vc-install :fetcher "github" :repo "samwdp/ob-csharp")
+  :config
+  (org-babel-do-load-languages 'org-babel-load-languages '((csharp . t))))
 
 (use-package sql
   :ensure nil
@@ -1028,9 +978,6 @@ Returns nil if not in a project."
   :custom
   (typescript-indent-level 2)
   (typescript-ts-mode-indent-offset 2))
-
-(use-package web-mode
-  :mode "\\.razor?\\'")
 
 (use-package sass-mode
   :hook (sass-mode . lsp-deferred)
@@ -1069,8 +1016,6 @@ Returns nil if not in a project."
   :mode (("\\.c\\'" . c-ts-mode)
          ("\\.h\\'" . c-ts-mode)))
 
-(use-package lua-mode)
-
 (use-package rust-mode
   :hook (rust-ts-mode . lsp-deferred)
   :mode (("\\.rs\\'" . rust-ts-mode)))
@@ -1086,18 +1031,8 @@ Returns nil if not in a project."
 (use-package docker
   :defer t)
 
-(use-package ahk-mode
-  :hook (ahk-mode . rainbow-delimiters-mode))
-
 (use-package restclient
   :mode ("\\.http\\'" . restclient-mode))
-
-;; (use-package ob-restclient)
-
-(use-package ob-csharp
-  :init (slot/vc-install :fetcher "github" :repo "samwdp/ob-csharp")
-  :config
-  (org-babel-do-load-languages 'org-babel-load-languages '((csharp . t))))
 
 (use-package glsl-mode)
 
@@ -1313,21 +1248,6 @@ re-align the table if necessary. (Necessary because org-mode has a
   (when (eq major-mode 'org-mode)
     (+org-realign-table-maybe-h)))
 
-;; (use-package org-superstar
-;;   :hook ((org-mode . org-superstar-mode))
-;;   :init
-;;   (setq org-superstar-todo-bullet-alist
-;;         '(("TODO" "☐　")
-;;           ("NEXT" "✒　")
-;;           ("PROG" "✰　")
-;;           ("WAIT" "☕　")
-;;           ("FAIL" "✘　")
-;;           ("DONE" "✔　")))
-;;   (setq org-superstar-leading-bullet ?\s
-;;         org-superstar-leading-fallback ?\s
-;;         ;; org-superstar-remove-leading-stars t
-;;         org-hide-leading-stars nil))
-
 (use-package org-modern
   :hook((org-mode . org-modern-mode)
         (org-agenda-finilize . org-modern-agenda)))
@@ -1413,29 +1333,6 @@ re-align the table if necessary. (Necessary because org-mode has a
 (use-package adaptive-word-wrap-mode
   :init (slot/vc-install :fetcher "github" :repo "samwdp/adaptive-word-wrap-mode")
   :hook (after-init . global-adaptive-word-wrap-mode))
-
-;; (use-package which-func
-;;   :config
-;;   (setq mode-line-format (delete (assoc 'which-func-mode
-;;                                         mode-line-format) mode-line-format)
-;;         which-func-header-line-format '(which-func-mode ("" which-func-format)))
-;;   (define-advice which-func-ff-hook (after header-line activate)
-;;     (when which-func-mode
-;;       (setq mode-line-format (delete (assoc 'which-func-mode
-;;                                             mode-line-format) mode-line-format)
-;;             header-line-format which-func-header-line-format))))
-
-(use-package sideline
-  :init
-  (setq sideline-backends-right '(
-                                  (sideline-flycheck . up)
-                                  )
-        sideline-backends-left '((sideline-eldoc . up))
-        sideline-display-backend-name t))
-
-(use-package sideline-flycheck)
-(use-package sideline-eldoc
-  :init (slot/vc-install :fetcher "github" :repo "ginqi7/sideline-eldoc"))
 
 (use-package git-gutter
   :hook (prog-mode . git-gutter-mode))
