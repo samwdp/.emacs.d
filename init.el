@@ -258,8 +258,6 @@ named arguments:
   :config
   (evil-collection-init))
 
-(use-package evil-tutor)
-
 (use-package general
   :config
   (general-evil-setup)
@@ -455,7 +453,7 @@ named arguments:
   (corfu-cycle t)
   (corfu-auto-prefix 2)
   (corfu-popupinfo-delay 0.3)
-  (corfu-auto-delay 0.0)
+  (corfu-auto-delay 0.01)
   (corfu-quit-at-boundary 'separator)
   :init
   (global-corfu-mode)
@@ -820,7 +818,6 @@ Returns nil if not in a project."
                 ("C-," . 'lsp-execute-code-action))
     :hook (lsp-mode . +lsp-optimization-mode)
     :hook (lsp-mode . lsp-signature-mode)
-    :hook (lsp-mode . lsp-inlay-hints-mode)
     :hook (lsp-completion-mode . my/lsp-mode-setup-completion)
     :commands (lsp lsp-deferred)
     :custom
@@ -834,7 +831,7 @@ Returns nil if not in a project."
     (setq lsp-headerline-breadcrumb-icons-enable t
           lsp-headerline-breadcrumb-enable t
           lsp-headerline-breadcrumb-segments '(symbols)
-          lsp-idle-delay 0.0
+          lsp-idle-delay 0.01
           lsp-keep-workspace-alive nil
           lsp-modeline-diagnostics-enable nil
           lsp-modeline-code-actions-enable nil
@@ -886,7 +883,7 @@ Returns nil if not in a project."
           lsp-ui-doc-show-with-cursor t
           lsp-signature-auto-activate t
           lsp-signature-render-documentation t
-          lsp-ui-sideline-show-code-actions t
+          lsp-ui-sideline-show-code-actions nil
           lsp-ui-sideline-ignore-duplicate t
           lsp-ui-sideline-show-hover nil
           lsp-ui-sideline-show-diagnostics t
