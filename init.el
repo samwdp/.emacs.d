@@ -584,10 +584,12 @@ named arguments:
   :defer t
   :config
   (setq projectile-indexing-method 'hybrid)
+  (add-hook 'kill-emacs-hook 'projectile-discover-projects-in-search-path)
   (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
   (projectile-mode +1)
   :init
-  (setq projectile-enable-caching t)
+  (setq projectile-enable-caching (not noninteractive)
+        projectile-auto-discover nil)
   (when IS-WINDOWS
     (setq projectile-project-search-path '(("D:/work" . 3)
                                            ("D:/projects" . 3))))
