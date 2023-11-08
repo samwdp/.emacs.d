@@ -9,5 +9,6 @@
 /elpa/
 /eln-cache/
 /.cask/
+/backup/
 custom*
 async-bytecomp.log
