@@ -39,6 +39,19 @@
 (defconst USE-LSP t)
 (when IS-WINDOWS (setq package-gnupghome-dir (concat user-emacs-directory "elpa/gnupg/pubring.kbx")))
 
+(when IS-WINDOWS
+  (setq backup-directory-alist '(("." . "~/.emacs.d/backup"))))
+
+(when IS-LINUX
+  (setq backup-directory-alist '(("." . "~/.config/emacs/backup"))))
+
+(setq  backup-by-copying t    ; Don't delink hardlinks
+       version-control t      ; Use version numbers on backups
+       delete-old-versions t  ; Automatically delete excess backups
+       kept-new-versions 20   ; how many of the newest versions to keep
+       kept-old-versions 5    ; and how many of the old
+       )
+
 (unless package-archive-contents
   (package-refresh-contents))
 
@@ -722,8 +735,8 @@ Returns nil if not in a project."
                                          nil t)
                  (car workspaces)))
             (lsp-mode +1))
-       (add-transient-hook! 'lsp-after-initialize-hook
-          (setf (lsp--client-priority match) old-priority))))))
+        (add-transient-hook! 'lsp-after-initialize-hook
+                             (setf (lsp--client-priority match) old-priority))))))
 
 (defvar +lsp--default-read-process-output-max nil)
 (defvar +lsp--default-gcmh-high-cons-threshold nil)
