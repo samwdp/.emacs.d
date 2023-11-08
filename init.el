@@ -472,13 +472,6 @@ named arguments:
   (corfu-history-mode)
   (corfu-popupinfo-mode))
 
-(use-package corfu-terminal
-  :init (slot/vc-install :fetcher "codeberg" :extension "org" :repo "akib/emacs-corfu-terminal")
-  :config
-  (unless (display-graphic-p)
-    (corfu-terminal-mode +1))
-  )
-
 (use-package cape
   :init
   (add-to-list 'completion-at-point-functions #'cape-file)
