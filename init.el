@@ -362,7 +362,7 @@ named arguments:
     "p" '(:ignore t :wk "project")
     "pc" '(projectile-compile-project
            t :wk "project")
-    "pp" '(projectile-persp-switch-project :wk "switch project") ;; find some way to integrate consult with this
+    "pp" '(consult-projectile-switch-project :wk "switch project") ;; find some way to integrate consult with this automatically
     "pk" '(persp-kill :wk "project kill")
     "pd" '(dired :wk "dired")
     "ps" '(consult-ripgrep :wk "search in project")
