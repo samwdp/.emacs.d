@@ -1,3 +1,4 @@
+(toggle-frame-maximized)
 (setq gc-cons-thershold 100000000)
 (setq read-process-output-max (* 1024 1024)) ;; 1mb
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
