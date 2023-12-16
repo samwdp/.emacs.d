@@ -781,12 +781,14 @@ Returns nil if not in a project."
     (defun my/lsp-mode-setup-completion ()
       (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
             '(orderless)))
+    (advice-add #'lsp-completion-at-point :around #'cape-wrap-noninterruptible)
     (setq lsp-completion-provider nil)
     (setq lsp-keymap-prefix "C-c l")
     (setq lsp-headerline-breadcrumb-icons-enable t
           lsp-headerline-breadcrumb-enable t
           lsp-headerline-breadcrumb-segments '(symbols)
           lsp-idle-delay 0.01
+          lsp-lens-enable nil
           lsp-keep-workspace-alive nil
           lsp-modeline-diagnostics-enable nil
           lsp-modeline-code-actions-enable nil
