@@ -2,6 +2,7 @@
   :straight nil
   :commands (treesit-install-language-grammar nf/treesit-install-all-languages)
   :init
+  (setq treesit-auto-install t)
   (setq treesit-font-lock-level 4)
   (setq treesit-language-source-alist
         '((bash . ("https://github.com/tree-sitter/tree-sitter-bash"))
