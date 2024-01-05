@@ -1,3 +1,10 @@
+;;; constants
+(defconst NATIVECOMP (if (fboundp 'native-comp-available-p) (native-comp-available-p)))
+(defconst IS-MAC     (eq system-type 'darwin))
+(defconst IS-LINUX   (eq system-type 'gnu/linux))
+(defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
+(defconst USE-LSP t)
+
 (setq scroll-margin 8
       idle-update-delay 0.02
       grep-command "grep --color=auto -nHr --null -e "
@@ -40,12 +47,6 @@
 (global-visual-line-mode)
 (menu-bar-mode -1)            ; Disable the menu bar
 
-;;; constants
-(defconst NATIVECOMP (if (fboundp 'native-comp-available-p) (native-comp-available-p)))
-(defconst IS-MAC     (eq system-type 'darwin))
-(defconst IS-LINUX   (eq system-type 'gnu/linux))
-(defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
-(defconst USE-LSP t)
 
 (when NATIVECOMP
   (setq native-comp-async-report-warnings-errors nil)
@@ -64,3 +65,13 @@
 
 (package-initialize)
 (setq use-package-always-ensure t)
+
+(defvar project-dirs)
+(when IS-WINDOWS
+  (setq project-dirs '(("D:/work" . 3)
+                       ("D:/projects" . 3)))
+  )
+(when IS-LINUX
+  (setq project-dirs '(("~/work/" . 3)
+                       ("~/projects/" . 3)))
+  )
