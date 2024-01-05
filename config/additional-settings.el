@@ -15,11 +15,8 @@
        kept-old-versions 5    ; and how many of the old
        )
 
-(when (memq window-system '(mac ns x))
-  (exec-path-from-shell-initialize))
-(when (daemonp)
-  (exec-path-from-shell-initialize))
+;; (when (memq window-system '(mac ns x))
+;;   (exec-path-from-shell-initialize))
+;; (when (daemonp)
+;;   (exec-path-from-shell-initialize))
 
-(if (display-graphic-p)
-    (unicode-fonts-setup-h (selected-frame))
-  (add-hook 'after-make-frame-functions 'unicode-fonts-setup-h))

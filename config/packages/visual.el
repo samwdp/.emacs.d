@@ -1,5 +1,8 @@
 (use-package unicode-fonts)
 
+(if (display-graphic-p)
+    (unicode-fonts-setup-h (selected-frame))
+  (add-hook 'after-make-frame-functions 'unicode-fonts-setup-h))
 (use-package fancy-battery
   :hook (after-init . fancy-battery-mode))
 
