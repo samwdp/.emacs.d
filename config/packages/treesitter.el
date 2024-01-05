@@ -1,5 +1,5 @@
 (use-package treesit
-  :ensure nil
+  :straight nil
   :commands (treesit-install-language-grammar nf/treesit-install-all-languages)
   :init
   (setq treesit-font-lock-level 4)

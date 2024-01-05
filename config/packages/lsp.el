@@ -109,7 +109,7 @@
     (require 'dap-cpptools))
 
   (use-package dap-ui
-    :ensure nil
+    :straight nil
     :after dap-mode
     :hook (dap-mode . dap-ui-mode)
     :hook (dap-ui-mode . dap-ui-controls-mode))
@@ -117,11 +117,11 @@
   (use-package lsp-treemacs
     :after (treemacs lsp))
 
-  (use-package lsp-tailwindcss
-    :config
-    (add-to-list 'lsp-tailwindcss-major-modes 'xhtml-mode)
-    :init (slot/vc-install :fetcher "github" :repo "merrickluo/lsp-tailwindcss")
-    (setq lsp-tailwindcss-add-on-mode t))
+  ;; (use-package lsp-tailwindcss
+  ;;   :config
+  ;;   (add-to-list 'lsp-tailwindcss-major-modes 'xhtml-mode)
+  ;;   :init (slot/vc-install :fetcher "github" :repo "merrickluo/lsp-tailwindcss")
+  ;;   (setq lsp-tailwindcss-add-on-mode t))
 
   (defun corfu-lsp-setup ()
     (setq-local completion-styles '(orderless)

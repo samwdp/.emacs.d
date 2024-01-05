@@ -1,16 +1,12 @@
-(use-package unicode-fonts
-  :init (slot/vc-install :fetcher "github" :repo "rolandwalker/unicode-fonts"))
+(use-package unicode-fonts)
 
 (use-package fancy-battery
-  :ensure t
   :hook (after-init . fancy-battery-mode))
 
 (use-package doom-themes
-  :ensure t
   :init (load-theme 'gruvbox-sp t))
 
 (use-package doom-modeline
-  :ensure t
   :hook (doom-modeline-mode . size-indication-mode)
   :hook (doom-modeline-mode . column-number-mode)
   :config
@@ -119,7 +115,7 @@
           ("XXX" font-lock-constant-face bold))))
 
 (use-package adaptive-word-wrap-mode
-  :init (slot/vc-install :fetcher "github" :repo "samwdp/adaptive-word-wrap-mode")
+  :straight (adaptive-word-wrap-mode :type git :host github :repo "samwdp/adaptive-word-wrap-mode")
   :hook (after-init . global-adaptive-word-wrap-mode))
 
 (use-package format-all)

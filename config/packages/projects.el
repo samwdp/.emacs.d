@@ -20,6 +20,6 @@
   (persp-mode))
 
 (use-package consult-projectile
-  :init (slot/vc-install :fetcher "gitlab" :repo "OlMon/consult-projectile"))
+  :straight (consult-projectile :type git :host gitlab :repo "OlMon/consult-projectile"))
 
 (use-package persp-projectile)

@@ -80,25 +80,6 @@ This function is called by `org-babel-execute-src-block'."
   (org-babel-do-load-languages 'org-babel-load-languages '((ruby . t)
                                                            (plantuml . t)
                                                            (emacs-lisp . t))))
-(cl-defun slot/vc-install (&key (fetcher "github") (extension "com") repo name rev backend)
-  "Install a package from a remote if it's not already installed.
-This is a thin wrapper around `package-vc-install' in order to
-make non-interactive usage more ergonomic.  Takes the following
-named arguments:
-
-- FETCHER the remote where to get the package (e.g., \"gitlab\").
-  If omitted, this defaults to \"github\".
-
-- REPO should be the name of the repository (e.g.,
-  \"slotThe/arXiv-citation\".
-
-- NAME, REV, and BACKEND are as in `package-vc-install' (which
-  see)."
-  (let* ((url (format "https://www.%s.%s/%s" fetcher extension repo))
-         (iname (when name (intern name)))
-         (pac-name (or iname (intern (file-name-base repo)))))
-    (unless (package-installed-p pac-name)
-      (package-vc-install url iname rev backend))))
 
 
 (defun sp/defer-garbage-collection-h ()

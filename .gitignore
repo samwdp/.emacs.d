@@ -10,5 +10,6 @@
 /eln-cache/
 /.cask/
 /backup/
+/stright/
 custom*
 async-bytecomp.log

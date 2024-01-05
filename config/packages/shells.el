@@ -9,7 +9,7 @@
     ))
 
 (use-package eshell
-  :ensure nil
+  :straight nil
   :hook (eshell-mode . eat-eshell-mode)
   :hook (eshell-mode . eat-eshell-visual-command-mode))
 
