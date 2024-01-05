@@ -1,3 +1,12 @@
+(defvar project-dirs)
+(when IS-WINDOWS
+  (setq project-dirs '(("D:/work" . 3)
+                       ("D:/projects" . 3)))
+  )
+(when IS-LINUX
+  (setq project-dirs '(("~/work/" . 3)
+                       ("~/projects/" . 3)))
+  )
 (use-package projectile
   :defer t
   :config
@@ -8,13 +17,8 @@
   :init
   (setq projectile-enable-caching (not noninteractive)
         projectile-auto-discover nil)
-  (when IS-WINDOWS
-    (setq projectile-project-search-path '(("D:/work" . 3)
-                                           ("D:/projects" . 3))))
+    (setq projectile-project-search-path project-dirs))
 
-  (when IS-LINUX
-    (setq projectile-project-search-path '(("~/work/" . 3)
-                                           ("~/projects/" . 3)))))
 (use-package perspective
   :custom
   (persp-mode-prefix-key (kbd "C-c C-p"))
