@@ -82,9 +82,7 @@
 (defvar project-dirs)
 (when IS-WINDOWS
   (setq project-dirs '(("D:/work" . 3)
-                       ("D:/projects" . 3)))
-  )
+                       ("D:/projects" . 3))))
 (when IS-LINUX
   (setq project-dirs '(("~/work/" . 3)
-                       ("~/projects/" . 3)))
-  )
+                       ("~/projects/" . 3))))
