@@ -1,4 +1,7 @@
+(use-package dtrt-indent)
+(use-package smartparens)
 (use-package unicode-fonts)
+(use-package adaptive-wrap)
 
 (if (display-graphic-p)
     (unicode-fonts-setup-h (selected-frame))
@@ -38,6 +41,7 @@
 (use-package all-the-icons)
 
 (use-package all-the-icons-completion
+  :after (marginalia all-the-icons)
   :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
   :init
   (all-the-icons-completion-mode))

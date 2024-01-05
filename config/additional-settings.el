@@ -15,8 +15,10 @@
        kept-old-versions 5    ; and how many of the old
        )
 
-;; (when (memq window-system '(mac ns x))
-;;   (exec-path-from-shell-initialize))
-;; (when (daemonp)
-;;   (exec-path-from-shell-initialize))
-
+(use-package exec-path-from-shell
+  :init
+(when (memq window-system '(mac ns x))
+  (exec-path-from-shell-initialize))
+(when (daemonp)
+  (exec-path-from-shell-initialize))
+  )

@@ -5,7 +5,6 @@
   (marginalia-max-relative-age 0)
   (marginalia-align 'right)
   :init
-  (add-hook 'marginalia-mode-hook #'all-the-icons-completion-marginalia-setup)
   (marginalia-mode))
 
 (use-package prescient)
