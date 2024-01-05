@@ -15,9 +15,6 @@
        kept-old-versions 5    ; and how many of the old
        )
 
-(unless package-archive-contents
-  (package-refresh-contents))
-
 (when (memq window-system '(mac ns x))
   (exec-path-from-shell-initialize))
 (when (daemonp)

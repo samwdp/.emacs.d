@@ -1,6 +1,5 @@
 (when IS-LINUX
   (use-package vterm
-    :ensure t
     :config
     (define-key vterm-mode-map (kbd "C-l") 'windmove-right)
     (define-key vterm-mode-map (kbd "C-j") 'windmove-down)
