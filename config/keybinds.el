@@ -1,4 +1,3 @@
-
 (global-set-key (kbd "C-h") 'windmove-left)
 (global-set-key (kbd "C-j") 'windmove-down)
 (global-set-key (kbd "C-k") 'windmove-up)
@@ -112,6 +111,13 @@
     "pI" '(projectile-invalidate-cache :wk "invalidate cache")
     "pi" '(projectile-discover-projects-in-search-path :wk "invalidate cache")
     "pv" '(+treemacs/toggle :wk "project filetree")
+    )
+
+  (sp/leader-keys
+    ;; project keymaps
+    "t" '(:ignore t :wk "diagnosticts")
+    "tt" '(consult-lsp-diagnostics
+           t :wk "list diagnostics")
     )
 
   (sp/leader-keys
