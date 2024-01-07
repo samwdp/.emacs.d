@@ -105,12 +105,11 @@
            t :wk "project")
     "pp" '(consult-projectile-switch-project :wk "switch project") ;; find some way to integrate consult with this automatically
     "pk" '(persp-kill :wk "project kill")
-    "pd" '(dired :wk "dired")
+    "pv" '(dired :wk "dired")
     "ps" '(consult-ripgrep :wk "search in project")
     "pr" '(recompile :wk "recompile")
     "pI" '(projectile-invalidate-cache :wk "invalidate cache")
     "pi" '(projectile-discover-projects-in-search-path :wk "invalidate cache")
-    "pv" '(+treemacs/toggle :wk "project filetree")
     )
 
   (sp/leader-keys

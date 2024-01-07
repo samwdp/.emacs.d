@@ -45,6 +45,7 @@
     (define-key lsp-mode-map (kbd "<f7>") 'lsp-ui-doc-focus-frame)
 
     (add-to-list 'lsp-language-id-configuration '(odin-mode . "odin"))
+    (add-to-list 'lsp-language-id-configuration '(html-ts-mode . "html"))
     (add-to-list 'lsp-language-id-configuration '("\\.razor\\'" . "razor"))
 
     (lsp-register-client
@@ -52,16 +53,15 @@
                       :major-modes '(odin-mode)
                       :server-id 'ols
                       :multi-root t))
+
     (lsp-register-client
-     (make-lsp-client :new-connection (lsp-stdio-connection "rzls")
-                      :activation-fn (lsp-activate-on "razor")
-                      ;; :priority -1
-                      :server-id 'rzls
-                      ;; :add-on? t
+     (make-lsp-client :new-connection (lsp-stdio-connection "D:/projects/htmx-lsp/target/release/htmx-lsp.exe")
+                      :major-modes '(html-ts-mode)
+                      :server-id 'htmx-lsp
+                      :add-on? t
                       :multi-root t))
-
-
-    (lsp-enable-which-key-integration t))
+    ;; (setq lsp-enable-which-key-integration t)
+    )
 
   (use-package lsp-ui
     :hook (lsp-mode . lsp-ui-mode)
@@ -114,16 +114,11 @@
     :hook (dap-mode . dap-ui-mode)
     :hook (dap-ui-mode . dap-ui-controls-mode))
 
-  (use-package lsp-treemacs
-    :after (treemacs lsp))
+  (use-package lsp-tailwindcss
+    :straight (lsp-tailwindcss :type git :host github :repo "merrickluo/lsp-tailwindcss")
+    :config
+    (setq lsp-tailwindcss-add-on-mode t)
+    (add-to-list 'lsp-tailwindcss-major-modes 'html-ts-mode)
+    )
 
-  ;; (use-package lsp-tailwindcss
-  ;;   :config
-  ;;   (add-to-list 'lsp-tailwindcss-major-modes 'xhtml-mode)
-  ;;   :init (slot/vc-install :fetcher "github" :repo "merrickluo/lsp-tailwindcss")
-  ;;   (setq lsp-tailwindcss-add-on-mode t))
-
-  (defun corfu-lsp-setup ()
-    (setq-local completion-styles '(orderless)
-                completion-category-defaults nil))
   )
