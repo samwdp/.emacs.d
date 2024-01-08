@@ -6,6 +6,7 @@
 (if (display-graphic-p)
     (unicode-fonts-setup-h (selected-frame))
   (add-hook 'after-make-frame-functions 'unicode-fonts-setup-h))
+
 (use-package fancy-battery
   :hook (after-init . fancy-battery-mode))
 
@@ -76,8 +77,16 @@
 (use-package drag-stuff
   :defer t
   :config
-  (global-set-key (kbd "M-k") 'drag-stuff-up)
-  (global-set-key (kbd "M-j") 'drag-stuff-down)
+  (global-set-key (kbd "M-j") (lambda (arg) (interactive "p") (drag-stuff-down arg)
+                                (if (bound-and-true-p lsp-mode)
+                                    (lsp-format-buffer)
+                                  (format-all-buffer))))
+  (global-set-key (kbd "M-k") (lambda (arg) (interactive "p") (drag-stuff-up arg)
+                                (if (bound-and-true-p lsp-mode)
+                                    (lsp-format-buffer)
+                                  (format-all-buffer))))
+  (when (member 'evil-mode minor-mode-list)
+    (message "`evil-mode' is active!"))
   :init
   (drag-stuff-global-mode +1))
 
