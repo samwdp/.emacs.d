@@ -84,6 +84,12 @@
     )
 
   (sp/leader-keys
+    "h" '(:ignore t :wk "harpoon")
+    "hc" '(harpoon-clear :wk "harpoon toggle file")
+    "hf" '(harpoon-toggle-file :wk "harpoon toggle file")
+    "ht" '(harpoon-add-file :wk "harpoon toggle file")
+    )
+  (sp/leader-keys
     ;; insert keymaps
     "i" '(:ignore t :wk "insert")
     "is" '(consult-yasnippet t :wk "yasnippet")

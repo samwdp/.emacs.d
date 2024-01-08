@@ -5,8 +5,10 @@
 (defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
 (defconst USE-LSP t)
 
+(toggle-frame-maximized)
+(global-display-fill-column-indicator-mode)
 (setq scroll-margin 8
-      idle-update-delay 0.02
+      idle-update-delay 0.01
       grep-command "grep --color=auto -nHr --null -e "
       visible-bell t
       create-lockfiles nil
@@ -31,19 +33,18 @@
 (setq custom-theme-directory (concat user-emacs-directory "themes/"))
 
 ;;; variables
-(defvar sp/text-height 20)
+(defvar sp/text-height 30)
 (defvar sp/font-string "FiraCode Nerd Font")
+(defvar project-dirs)
 
-(global-display-fill-column-indicator-mode)
 ;;; emacs settings
-(toggle-frame-maximized)
 (blink-cursor-mode 0)
-(pixel-scroll-mode 1)
+(pixel-scroll-mode 0)
 (display-time-mode 1)
 (scroll-bar-mode -1)        ; Disable visible scrollbar
 (tool-bar-mode -1)          ; Disable the toolbar
 (tooltip-mode -1)           ; Disable tooltips
-(set-fringe-mode 10)        ; Give some breathing room
+(set-fringe-mode 8)        ; Give some breathing room
 (global-visual-line-mode)
 (menu-bar-mode -1)            ; Disable the menu bar
 
@@ -79,7 +80,6 @@
 (straight-use-package 'use-package)
 (setq straight-use-package-by-default t)
 
-(defvar project-dirs)
 (when IS-WINDOWS
   (setq project-dirs '(("D:/work" . 3)
                        ("D:/projects" . 3))))
