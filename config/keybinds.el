@@ -89,6 +89,7 @@
     "hf" '(harpoon-toggle-file :wk "harpoon toggle file")
     "ht" '(harpoon-add-file :wk "harpoon toggle file")
     )
+
   (sp/leader-keys
     ;; insert keymaps
     "i" '(:ignore t :wk "insert")
