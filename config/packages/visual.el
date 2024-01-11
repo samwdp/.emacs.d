@@ -40,8 +40,7 @@
   :init (which-key-mode))
 
 (use-package all-the-icons
-  :straight (all-the-icons :fetcher github :repo "domtronn/all-the-icons.el")
- )
+  :straight (all-the-icons :fetcher github :repo "domtronn/all-the-icons.el"))
 
 (use-package all-the-icons-completion
   :after (marginalia all-the-icons)
