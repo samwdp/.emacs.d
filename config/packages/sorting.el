@@ -10,6 +10,9 @@
 (use-package prescient)
 
 (use-package corfu
+  :bind (:map corfu-map
+              ("TAB" . nil)
+              ("<tab>" . nil))
   :custom
   (corfu-auto t)
   (corfu-cycle t)
