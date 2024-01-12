@@ -86,8 +86,6 @@
                                 (if (bound-and-true-p lsp-mode)
                                     (lsp-format-buffer)
                                   (format-all-buffer))))
-  (when (member 'evil-mode minor-mode-list)
-    (message "`evil-mode' is active!"))
   :init
   (drag-stuff-global-mode +1))
 

@@ -11,3 +11,10 @@
 (use-package yasnippet-snippets)
 
 (use-package competitive-programming-snippets)
+
+(use-package yasnippet-capf
+  :after cape
+  :straight (yasnippet-capf :fetcher github :repo "elken/yasnippet-capf")
+  :config
+  (add-to-list 'completion-at-point-functions #'yasnippet-capf)
+  )
