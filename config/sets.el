@@ -34,7 +34,7 @@
 
 ;;; variables
 (defvar sp/text-height 30)
-(defvar sp/font-string "Inconsolata Nerd Font")
+(defvar sp/font-string "Hack Nerd Font")
 (defvar project-dirs)
 
 ;;; emacs settings
