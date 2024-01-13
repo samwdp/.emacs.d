@@ -10,6 +10,7 @@
 (use-package prescient)
 
 (use-package corfu
+  :after no-littering
   :bind (:map corfu-map
               ("TAB" . nil)
               ("<tab>" . nil))

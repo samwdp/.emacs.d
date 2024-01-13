@@ -1,9 +1,16 @@
-;; languages
-
-
-
-
-
-
-
-
+(load (concat user-emacs-directory "config/packages/visual.el"))
+(load (concat user-emacs-directory "config/packages/evil.el"))
+(load (concat user-emacs-directory "config/packages/sorting.el"))
+(load (concat user-emacs-directory "config/packages/treesitter.el"))
+(load (concat user-emacs-directory "config/packages/cleaning.el"))
+(load (concat user-emacs-directory "config/packages/docs.el"))
+(load (concat user-emacs-directory "config/packages/flycheck.el"))
+(load (concat user-emacs-directory "config/packages/harpoon.el"))
+(load (concat user-emacs-directory "config/packages/languages.el"))
+(load (concat user-emacs-directory "config/packages/lsp.el"))
+(load (concat user-emacs-directory "config/packages/magit.el"))
+(load (concat user-emacs-directory "config/packages/org.el"))
+(load (concat user-emacs-directory "config/packages/pdf.el"))
+(load (concat user-emacs-directory "config/packages/projects.el"))
+(load (concat user-emacs-directory "config/packages/shells.el"))
+(load (concat user-emacs-directory "config/packages/yas.el"))

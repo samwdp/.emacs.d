@@ -86,3 +86,4 @@
 (when IS-LINUX
   (setq project-dirs '(("~/work/" . 3)
                        ("~/projects/" . 3))))
+

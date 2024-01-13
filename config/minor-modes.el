@@ -1,3 +1,7 @@
+(defvar +lsp--default-read-process-output-max nil)
+(defvar +lsp--default-gcmh-high-cons-threshold nil)
+(defvar +lsp--optimization-init-p nil)
+
 (define-minor-mode +lsp-optimization-mode
   "Deploys universal GC and IPC optimizations for `lsp-mode' and `eglot'."
   :global t
