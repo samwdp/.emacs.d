@@ -99,3 +99,7 @@
 (use-package consult-dir)
 
 (use-package consult-flycheck)
+
+(use-package savehist
+  :init
+  (savehist-mode))
