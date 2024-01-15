@@ -1,4 +1,5 @@
 (use-package dtrt-indent)
+(use-package transient)
 (use-package smartparens)
 (use-package unicode-fonts)
 (use-package adaptive-wrap)
@@ -6,9 +7,6 @@
 (if (display-graphic-p)
     (unicode-fonts-setup-h (selected-frame))
   (add-hook 'after-make-frame-functions 'unicode-fonts-setup-h))
-
-(use-package fancy-battery
-  :hook (after-init . fancy-battery-mode))
 
 (use-package doom-themes
   :init (load-theme 'gruvbox-sp t))
@@ -18,13 +16,18 @@
   :hook (doom-modeline-mode . column-number-mode)
   :config
   (setq doom-modeline-bar-width 3
+        doom-modeline-time nil
+        doom-modeline-time-icon nil
         doom-modeline-github nil
+        doom-modeline-major-mode-icon t
         doom-modeline-mu4e nil
         doom-modeline-persp-name t
+        doom-modeline-persp-icon t
         doom-modeline-buffer-encoding nil
-        doom-modeline-workspace-name nil
+        doom-modeline-percent-position nil
+        doom-modeline-position-line-format nil
+        doom-modeline-position-column-format nil
         doom-modeline-minor-modes nil
-        doom-modeline-major-mode-icon nil
         doom-modeline-vcs-max-length 50
         doom-modeline-buffer-file-name-style 'truncate-all
         ;; Only show file encoding if it's non-UTF-8 and different line endings

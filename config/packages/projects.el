@@ -7,8 +7,8 @@
   (projectile-mode +1)
   :init
   (setq projectile-enable-caching (not noninteractive)
-        projectile-auto-discover nil)
-    (setq projectile-project-search-path project-dirs))
+        projectile-auto-discover nil
+        projectile-project-search-path project-dirs))
 
 (use-package perspective
   :custom
@@ -16,7 +16,8 @@
   :config
   (add-hook 'persp-created-hook (lambda () (split-window-horizontally)))
   (setq persp-nil-name "main"
-        persp-modestring-short t)
+        persp-set-last-persp-for-new-frames t)
+
   (persp-mode))
 
 (use-package consult-projectile

@@ -7,7 +7,7 @@
 
 (toggle-frame-maximized)
 (global-display-fill-column-indicator-mode)
-(setq scroll-margin 8
+(setq 
       idle-update-delay 0.01
       grep-command "grep --color=auto -nHr --null -e "
       visible-bell t
@@ -47,6 +47,7 @@
 (set-fringe-mode 8)        ; Give some breathing room
 (global-visual-line-mode)
 (menu-bar-mode -1)            ; Disable the menu bar
+(display-battery-mode 1)
 
 
 (when NATIVECOMP

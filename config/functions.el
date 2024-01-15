@@ -340,3 +340,4 @@ re-align the table if necessary. (Necessary because org-mode has a
 (defun corfu-lsp-setup ()
   (setq-local completion-styles '(orderless)
               completion-category-defaults nil))
+
