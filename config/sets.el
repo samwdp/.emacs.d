@@ -33,7 +33,7 @@
 (setq custom-theme-directory (concat user-emacs-directory "themes/"))
 
 ;;; variables
-(defvar sp/text-height 30)
+(defvar sp/text-height 20)
 (defvar sp/font-string "Hack Nerd Font")
 (defvar project-dirs)
 
@@ -44,10 +44,10 @@
 (scroll-bar-mode -1)        ; Disable visible scrollbar
 (tool-bar-mode -1)          ; Disable the toolbar
 (tooltip-mode -1)           ; Disable tooltips
-(set-fringe-mode 8)        ; Give some breathing room
 (global-visual-line-mode)
 (menu-bar-mode -1)            ; Disable the menu bar
 (display-battery-mode 1)
+(fringe-mode '(4 . 0))
 
 
 (when NATIVECOMP

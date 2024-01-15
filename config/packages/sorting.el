@@ -61,14 +61,13 @@
   :after vertico
   :config
   (setq vertico-posframe-parameters
-        '((left-fringe . 5)
-          (right-fringe . 5)
+        '((left-fringe . 4)
+          (right-fringe . 0)
           (alpha-background . 1.0)))
   (setq vertico-posframe-border-width 2)
-  (setq vertico-posframe-poshandler #'posframe-poshandler-frame-bottom-center)
+  (setq vertico-posframe-poshandler #'posframe-poshandler-frame-center)
   (if (display-graphic-p)
-      (vertico-posframe-mode +1)
-    )
+      (vertico-posframe-mode +1))
   )
 
 (use-package embark
