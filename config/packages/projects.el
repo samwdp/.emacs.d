@@ -16,6 +16,7 @@
   :config
   (add-hook 'persp-created-hook (lambda () (split-window-horizontally)))
   (setq persp-nil-name "main"
+        persp-modestring-short t
         persp-set-last-persp-for-new-frames t)
 
   (persp-mode))
