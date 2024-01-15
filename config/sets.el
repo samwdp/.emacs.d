@@ -33,7 +33,7 @@
 (setq custom-theme-directory (concat user-emacs-directory "themes/"))
 
 ;;; variables
-(defvar sp/text-height 20)
+(defvar sp/text-height 150)
 (defvar sp/font-string "Hack Nerd Font")
 (defvar project-dirs)
 

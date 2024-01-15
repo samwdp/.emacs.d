@@ -3,8 +3,6 @@
 (global-set-key (kbd "C-k") 'windmove-up)
 (global-set-key (kbd "C-l") 'windmove-right)
 (global-set-key (kbd "C-SPC") 'completion-at-point)
-(global-set-key (kbd "C--") 'text-scale-decrease)
-(global-set-key (kbd "C-+") 'text-scale-increase)
 (global-set-key (kbd "C-M-n") 'treesit-end-of-defun)
 (global-set-key (kbd "C-M-p") 'treesit-beginning-of-defun)
 (global-set-key (kbd "C-M-j") 'treesit-forward-sexp)
@@ -35,7 +33,8 @@
   (sp/leader-keys
     ;; inbuilt applications
     "a" '(:ignore t :wk "application")
-    "ac" '(quick-calc :wk "application")
+    "ac" '(quick-calc :wk "quick calc")
+    "as" '(global-text-scale-adjust :wk "global text scale")
     )
 
   (sp/leader-keys
