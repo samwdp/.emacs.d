@@ -51,6 +51,17 @@
   :hook((org-mode . org-modern-mode)
         (org-agenda-finilize . org-modern-agenda)))
 
+(use-package org-appear
+  :straight (org-appear :type git :fetcher github :repo "awth13/org-appear")
+  :hook (org-mode . org-appear-mode)
+  :config
+  (setq org-appear-autolinks t
+        org-appear-autoemphasis t
+        org-appear-autoentities t
+        org-appear-autokeywords t
+        org-appear-autosubmarkers t))
+
+
 (use-package toc-org
   :hook (org-mode . toc-org-mode))
 

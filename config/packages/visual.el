@@ -143,17 +143,21 @@
 
 (use-package popper
   :straight t
+  :after projectile
   :bind (("C-`"   . popper-toggle)
          ("M-`"   . popper-cycle)
          ("C-M-l"   . popper-cycle)
          ("C-M-`" . popper-toggle-type))
   :init
+  (setq popper-group-function #'popper-group-by-projectile)
   (setq popper-reference-buffers
         '(
+          "^\\*eshell.*\\*$" eshell-mode ;eshell as a popup
+          "^\\*shell.*\\*$"  shell-mode  ;shell as a popup
+          "^\\*term.*\\*$"   term-mode   ;term as a popup
+          "^\\*vterm.*\\*$"  vterm-mode  ;vterm as a popup
           "\\*Messages\\*"
-          "\\*eshell\\*"
-          "\\*eat\\*"
-          "\\*vterm\\*"
+          "\\*Warnings\\*"
           "Output\\*$"
           "\\*Async Shell Command\\*"
           help-mode

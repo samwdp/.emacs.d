@@ -15,8 +15,7 @@
               ("C-k" . windmove-up)
               ("C-j" . windmove-down)
               ("C-M-j" . windmove-down))
-  :hook (eshell-mode . eat-eshell-mode)
-  :hook (eshell-mode . eat-eshell-visual-command-mode))
+  )
 
 (use-package eat
   :bind (:map eat-mode-map
@@ -24,3 +23,5 @@
               ("C-j" . windmove-down)
               ("C-k" . windmove-up)
               ("C-h" . windmove-left)))
+
+(use-package shell-switcher)
