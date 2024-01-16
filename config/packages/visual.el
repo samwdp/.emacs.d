@@ -140,3 +140,32 @@
   :hook (after-init . global-adaptive-word-wrap-mode))
 
 (use-package format-all)
+
+(use-package popper
+  :straight t
+  :bind (("C-`"   . popper-toggle)
+         ("M-`"   . popper-cycle)
+         ("C-M-l"   . popper-cycle)
+         ("C-M-`" . popper-toggle-type))
+  :init
+  (setq popper-reference-buffers
+        '(
+          "\\*Messages\\*"
+          "\\*eshell\\*"
+          "\\*eat\\*"
+          "\\*vterm\\*"
+          "Output\\*$"
+          "\\*Async Shell Command\\*"
+          help-mode
+          (lambda (buf) (with-current-buffer buf
+                          (and (derived-mode-p 'magit-mode)
+                               (< (count-lines (point-min) (point-max))
+                                  10))))
+          compilation-mode))
+  (popper-mode +1)
+  (popper-echo-mode +1))                ; For echo area hints
+
+
+(use-package golden-ratio
+  :init
+  (golden-ratio-mode +1))

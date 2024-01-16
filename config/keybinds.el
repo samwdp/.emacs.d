@@ -24,7 +24,7 @@
   (sp/leader-keys
     ;; single use keymaps
     "." '(find-file :wk "find files")
-    "SPC" '(consult-projectile-find-file :wk "find files")
+    "SPC" '(consult-projectile :wk "find files")
     "TAB" '(persp-switch :wk "switch project")
     "f" '(sp/format-buffer :wk "format buffer")
     "w" '(save-buffer :wk "save")
@@ -121,8 +121,8 @@
   (sp/leader-keys
     ;; project keymaps
     "t" '(:ignore t :wk "diagnosticts")
-    "tt" '(consult-lsp-diagnostics
-           t :wk "list diagnostics")
+    "tt" '(consult-lsp-diagnostics :wk "list diagnostics")
+    "tp" '(popper-toggle :wk "toggle popup")
     )
 
   (sp/leader-keys
