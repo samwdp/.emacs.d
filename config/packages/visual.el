@@ -143,11 +143,10 @@
 
 (use-package popup-mode
   :demand t
-  :hook (after-init . +popup-mode)
-
   :straight (popup-mode :host github :repo "aaronjensen/emacs-popup-mode")
-  :bind (("C-`" . +popup/toggle))
+  :hook (after-init . +popup-mode)
   :config
+  (setq popup-mode-all-rule t)
   (set-popup-rules! '(("^\\*Process List\\*$"
                        :side bottom :select t :slot -1 :vslot -1 :size +popup-shrink-to-fit)
                       ("^\\*Buffer List\\*$"

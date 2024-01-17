@@ -9,12 +9,18 @@
 
 (use-package eshell
   :straight nil
-  :bind (:map eshell-mode-map
+  :bind (
+         (:map eshell-prompt-mode-map
               ("C-M-k" . windmove-up)
-              ("C-M-l" . popper-cycle)
               ("C-k" . windmove-up)
               ("C-j" . windmove-down)
               ("C-M-j" . windmove-down))
+         (:map evil-collection-eshell-maps
+              ("C-M-k" . windmove-up)
+              ("C-k" . windmove-up)
+              ("C-j" . windmove-down)
+              ("C-M-j" . windmove-down))
+              )
   )
 
 (use-package eat

@@ -10,6 +10,10 @@
 (global-set-key [remap lookup-reference] #'xref-find-references)
 (global-set-key [remap sp/format-buffer] #'format-all-buffer)
 
+(use-package windmove
+  :config
+  (setq windmove-wrap-around t)
+  )
 (use-package general
   :config
   (general-evil-setup)
