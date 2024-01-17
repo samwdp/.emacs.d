@@ -141,33 +141,29 @@
 
 (use-package format-all)
 
-(use-package popper
-  :straight t
-  :after projectile
-  :bind (("C-`"   . popper-toggle)
-         ("M-`"   . popper-cycle)
-         ("C-M-l"   . popper-cycle)
-         ("C-M-`" . popper-toggle-type))
-  :init
-  (setq popper-group-function #'popper-group-by-projectile)
-  (setq popper-reference-buffers
-        '(
-          "^\\*eshell.*\\*$" eshell-mode ;eshell as a popup
-          "^\\*shell.*\\*$"  shell-mode  ;shell as a popup
-          "^\\*term.*\\*$"   term-mode   ;term as a popup
-          "^\\*vterm.*\\*$"  vterm-mode  ;vterm as a popup
-          "\\*Messages\\*"
-          "\\*Warnings\\*"
-          "Output\\*$"
-          "\\*Async Shell Command\\*"
-          help-mode
-          (lambda (buf) (with-current-buffer buf
-                          (and (derived-mode-p 'magit-mode)
-                               (< (count-lines (point-min) (point-max))
-                                  10))))
-          compilation-mode))
-  (popper-mode +1)
-  (popper-echo-mode +1))                ; For echo area hints
+(use-package popup-mode
+  :demand t
+  :hook (after-init . +popup-mode)
+
+  :straight (popup-mode :host github :repo "aaronjensen/emacs-popup-mode")
+  :bind (("C-`" . +popup/toggle))
+  :config
+  (set-popup-rules! '(("^\\*Process List\\*$"
+                       :side bottom :select t :slot -1 :vslot -1 :size +popup-shrink-to-fit)
+                      ("^\\*Buffer List\\*$"
+                       :side bottom :select t :slot -1 :vslot -1 :size +popup-shrink-to-fit)
+                      ("^\\(?:\\*magit\\|magit:\\| \\*transient\\*\\)" 
+                       :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
+                      ("^\\*Warnings\\*$"
+                       :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
+                      ("^\\*eshell\\*$"
+                       :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
+                      ("^\\*Help\\*$"
+                       :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
+                      ("Output\\*$"
+                       :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
+                      ("^\\*Messages\\*$"
+                       :side bottom :select t :slot -1 :vslot -1 :height 0.3 :ttl nil))))
 
 
 (use-package golden-ratio

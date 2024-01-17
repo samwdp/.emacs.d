@@ -122,7 +122,7 @@
     ;; project keymaps
     "t" '(:ignore t :wk "diagnosticts")
     "tt" '(consult-lsp-diagnostics :wk "list diagnostics")
-    "tp" '(popper-toggle :wk "toggle popup")
+    "tp" '(+popup/toggle :wk "toggle popup")
     )
 
   (sp/leader-keys
