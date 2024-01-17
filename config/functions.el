@@ -342,6 +342,35 @@ re-align the table if necessary. (Necessary because org-mode has a
               completion-category-defaults nil))
 
 
+(defmacro lambda! (arglist &rest body)
+  "Returns (cl-function (lambda ARGLIST BODY...))
+The closure is wrapped in `cl-function', meaning ARGLIST will accept anything
+`cl-defun' will. Implicitly adds `&allow-other-keys' if `&key' is present in
+ARGLIST."
+  (declare (indent defun) (doc-string 1) (pure t) (side-effect-free t))
+  `(cl-function
+    (lambda
+      ,(letf! (defun* allow-other-keys (args)
+                (mapcar
+                 (lambda (arg)
+                   (cond ((nlistp (cdr-safe arg)) arg)
+                         ((listp arg) (allow-other-keys arg))
+                         (arg)))
+                 (if (and (memq '&key args)
+                          (not (memq '&allow-other-keys args)))
+                     (if (memq '&aux args)
+                         (let (newargs arg)
+                           (while args
+                             (setq arg (pop args))
+                             (when (eq arg '&aux)
+                               (push '&allow-other-keys newargs))
+                             (push arg newargs))
+                           (nreverse newargs))
+                       (append args (list '&allow-other-keys)))
+                   args)))
+         (allow-other-keys arglist))
+      ,@body)))
+
 (defmacro letf! (bindings &rest body)
   "Temporarily rebind function, macros, and advice in BODY.
 
