@@ -74,3 +74,6 @@
 
 (use-package polymode
   :hook (org-brain-visualize-mode . org-brain-polymode))
+
+(use-package evil-org
+  :hook (org-mode . evil-org-mode))

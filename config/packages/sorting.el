@@ -18,7 +18,7 @@
   (corfu-auto t)
   (corfu-cycle t)
   (corfu-auto-prefix 2)
-  (corfu-popupinfo-delay 0.3)
+  (corfu-popupinfo-delay 0.0)
   (corfu-auto-delay 0.01)
   (corfu-quit-at-boundary 'separator)
   :init

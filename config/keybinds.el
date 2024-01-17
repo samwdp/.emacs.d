@@ -14,6 +14,7 @@
   :config
   (setq windmove-wrap-around t)
   )
+
 (use-package general
   :config
   (general-evil-setup)
