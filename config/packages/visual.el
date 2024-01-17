@@ -157,6 +157,8 @@
                        :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
                       ("^\\*eshell\\*$"
                        :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
+                      ("^\\*vterm\\*$"
+                       :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
                       ("^\\*Help\\*$"
                        :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
                       ("Output\\*$"
