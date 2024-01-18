@@ -1,12 +1,12 @@
 (use-package dtrt-indent)
 (use-package transient)
 (use-package smartparens)
-(use-package unicode-fonts)
+(use-package unicode-fonts
+  :init
+  (if (display-graphic-p)
+      (unicode-fonts-setup-h (selected-frame))
+    (add-hook 'after-make-frame-functions 'unicode-fonts-setup-h)))
 (use-package adaptive-wrap)
-
-(if (display-graphic-p)
-    (unicode-fonts-setup-h (selected-frame))
-  (add-hook 'after-make-frame-functions 'unicode-fonts-setup-h))
 
 (use-package doom-themes
   :init (load-theme 'gruvbox-sp t))
@@ -43,12 +43,13 @@
   :init (which-key-mode))
 
 (use-package all-the-icons
-  :straight (all-the-icons :fetcher github :repo "domtronn/all-the-icons.el"))
+  :straight (all-the-icons :fetcher github :repo "domtronn/all-the-icons.el")
+  :if (display-graphic-p))
 
 (use-package all-the-icons-completion
   :after (marginalia all-the-icons)
-  :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
   :init
+  (add-hook 'marginalia-mode-hook #'all-the-icons-completion-marginalia-setup)
   (all-the-icons-completion-mode))
 
 (use-package all-the-icons-dired
@@ -70,7 +71,7 @@
   (svg-lib-icons-dir (no-littering-expand-var-file-name "svg-lib/cache/")) ; Change cache dir
   :config
   (setq kind-icon-default-style
-        '(:padding 0 :stroke 0 :margin 0 :radius 0 :height 0.5 :scale 1.0 :background
+        '(:padding 0 :stroke 0 :margin 0 :radius 0 :height 0.6 :scale 1.0 :background
                    nil)) ;; hack to fix overflowing icons on corfu
 
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
@@ -151,7 +152,7 @@
                        :side bottom :select t :slot -1 :vslot -1 :size +popup-shrink-to-fit)
                       ("^\\*Buffer List\\*$"
                        :side bottom :select t :slot -1 :vslot -1 :size +popup-shrink-to-fit)
-                      ("^\\(?:\\*magit\\|magit:\\| \\*transient\\*\\)" 
+                      ("^\\(?:\\*magit\\|magit:\\| \\*transient\\*\\)"
                        :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
                       ("^\\*Warnings\\*$"
                        :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)

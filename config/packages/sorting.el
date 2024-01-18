@@ -59,6 +59,9 @@
 ;; when in a gui frame
 (use-package vertico-posframe
   :after vertico
+  :if (display-graphic-p)
+  :init
+  (vertico-posframe-mode)
   :config
   (setq vertico-posframe-parameters
         '((left-fringe . 4)
@@ -66,8 +69,8 @@
           (alpha-background . 1.0)))
   (setq vertico-posframe-border-width 2)
   (setq vertico-posframe-poshandler #'posframe-poshandler-frame-center)
-  (if (display-graphic-p)
-      (vertico-posframe-mode +1))
+  ;; (if (display-graphic-p)
+  ;;     (vertico-posframe-mode +1))
   )
 
 (use-package embark

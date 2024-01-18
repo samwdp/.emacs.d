@@ -1,20 +1,25 @@
 (use-package projectile
   :defer t
-  :config
-  (setq projectile-indexing-method 'hybrid)
-  (add-hook 'kill-emacs-hook 'projectile-discover-projects-in-search-path)
-  (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
-  (projectile-mode +1)
+  :bind (:map projectile-mode-map
+              ("C-x p" . projectile-command-map ))
   :init
+  (setq projectile-indexing-method 'hybrid)
   (setq projectile-enable-caching (not noninteractive)
         projectile-auto-discover nil
-        projectile-project-search-path project-dirs))
+        projectile-project-search-path project-dirs)
+
+  (add-hook 'kill-emacs-hook 'projectile-discover-projects-in-search-path)
+  (global-set-key [remap evil-jump-to-tag] #'projectile-find-tag)
+  (global-set-key [remap find-tag]         #'projectile-find-tag)
+  (letf! ((#'projectile--cleanup-known-projects #'ignore))
+    (projectile-mode +1))
+  )
 
 (use-package perspective
   :custom
   (persp-mode-prefix-key (kbd "C-c C-p"))
   :config
-  (setq persp-modestring-dividers '(" "))
+  (setq persp-modestring-dividers '(" "))
   (add-hook 'persp-created-hook (lambda () (split-window-horizontally)))
   (setq persp-nil-name "main"
         persp-modestring-short t
