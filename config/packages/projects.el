@@ -3,8 +3,8 @@
   :bind (:map projectile-mode-map
               ("C-x p" . projectile-command-map ))
   :init
-  (setq projectile-indexing-method 'hybrid)
   (setq projectile-enable-caching (not noninteractive)
+        projectile-indexing-method 'hybrid
         projectile-auto-discover nil
         projectile-project-search-path project-dirs)
 

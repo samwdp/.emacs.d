@@ -29,7 +29,7 @@
         doom-modeline-position-column-format nil
         doom-modeline-minor-modes nil
         doom-modeline-vcs-max-length 50
-        doom-modeline-buffer-file-name-style 'truncate-all
+        doom-modeline-buffer-file-name-style 'truncate-nil
         ;; Only show file encoding if it's non-UTF-8 and different line endings
         ;; than the current OSes preference
         doom-modeline-default-eol-type
