@@ -9,4 +9,4 @@
 (load-file (concat user-emacs-directory "config/packages.el"))
 (load-file (concat user-emacs-directory "config/minor-modes.el"))
 
-(setq gc-cons-thershold (* 2 1000 1000))
+;; (setq gc-cons-thershold (* 2 1000 1000))

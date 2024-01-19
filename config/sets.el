@@ -7,7 +7,7 @@
 
 (toggle-frame-maximized)
 (global-display-fill-column-indicator-mode)
-(setq 
+(setq display-time-load-average nil
       idle-update-delay 0.01
       grep-command "grep --color=auto -nHr --null -e "
       visible-bell t
@@ -87,4 +87,3 @@
 (when IS-LINUX
   (setq project-dirs '(("~/work/" . 3)
                        ("~/projects/" . 3))))
-
