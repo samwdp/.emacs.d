@@ -19,7 +19,7 @@
   :custom
   (persp-mode-prefix-key (kbd "C-c C-p"))
   :config
-  (setq persp-modestring-dividers '(" "))
+  (setq persp-modestring-dividers '(" "))
   (add-hook 'persp-created-hook (lambda () (split-window-horizontally)))
   (setq persp-nil-name "main"
         persp-modestring-short t

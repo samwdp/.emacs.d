@@ -1,3 +1,9 @@
+(use-package emacs-lisp-mode
+  :straight nil
+  :hook (emacs-lisp-mode . tree-sitter-mode)
+  :hook (emacs-lisp-mode . tree-sitter-hl-mode)
+  )
+
 (use-package csv-mode
   :straight nil
   :mode "\\.csv\\'"
