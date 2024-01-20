@@ -8,6 +8,14 @@
   (evil-global-set-key 'normal (kbd "g t") 'lookup-type-definition)
   (evil-global-set-key 'normal (kbd "g c c") 'comment-line)
   (evil-global-set-key 'visual (kbd "g c") 'comment-or-uncomment-region)
+  (evil-global-set-key 'insert (kbd "C-j") nil)
+  (evil-global-set-key 'insert (kbd "C-k") nil)
+  (evil-global-set-key 'insert (kbd "C-h") nil)
+  (evil-global-set-key 'insert (kbd "C-l") nil)
+  (evil-global-set-key 'normal (kbd "C-j") nil)
+  (evil-global-set-key 'normal (kbd "C-k") nil)
+  (evil-global-set-key 'normal (kbd "C-h") nil)
+  (evil-global-set-key 'normal (kbd "C-l") nil)
   :init      ;; tweak evil's configuration before loading it
   (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
   (setq evil-want-keybinding nil)

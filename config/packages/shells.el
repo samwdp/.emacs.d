@@ -10,18 +10,23 @@
 
 (use-package eshell
   :straight nil
-  :bind (
-         (:map eshell-prompt-mode-map
-              ("C-M-k" . windmove-up)
-              ("C-k" . windmove-up)
-              ("C-j" . windmove-down)
-              ("C-M-j" . windmove-down))
-         (:map evil-collection-eshell-maps
-              ("C-M-k" . windmove-up)
-              ("C-k" . windmove-up)
-              ("C-j" . windmove-down)
-              ("C-M-j" . windmove-down))
-              )
+  :hook (eshell-mode . (lambda ()
+                         (evil-collection-define-key 'normal 'eshell-mode-map (kbd "C-k") nil)
+                         (evil-collection-define-key 'normal 'eshell-mode-map (kbd "C-j") nil)
+                         ))
+  :config
+
+  (evil-collection-define-key 'normal 'eshell-mode-map (kbd "C-k") nil)
+  (evil-collection-define-key 'normal 'eshell-mode-map (kbd "C-j") nil)
+
+  (unbind-key (kbd "C-j") eshell-mode-map)
+  (unbind-key (kbd "C-k") eshell-mode-map)
+  (unbind-key (kbd "C-h") eshell-mode-map)
+  (unbind-key (kbd "C-l") eshell-mode-map)
+  (unbind-key (kbd "C-j") eshell-prompt-mode-map)
+  (unbind-key (kbd "C-k") eshell-prompt-mode-map)
+  (unbind-key (kbd "C-h") eshell-prompt-mode-map)
+  (unbind-key (kbd "C-l") eshell-prompt-mode-map)
   )
 
 (use-package eat

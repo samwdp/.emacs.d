@@ -1,8 +1,4 @@
 ;; -*- lexical-binding: t; -*-
-(global-set-key (kbd "C-h") 'windmove-left)
-(global-set-key (kbd "C-j") 'windmove-down)
-(global-set-key (kbd "C-k") 'windmove-up)
-(global-set-key (kbd "C-l") 'windmove-right)
 (global-set-key (kbd "C-SPC") 'completion-at-point)
 (global-set-key (kbd "C-M-n") 'treesit-end-of-defun)
 (global-set-key (kbd "C-M-p") 'treesit-beginning-of-defun)

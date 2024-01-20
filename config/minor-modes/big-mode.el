@@ -1,15 +1,13 @@
 ;; -*- lexical-binding: t; -*-
 
-(defvar big-font-height 300)
+(defvar big-font-scale-factor 1.5)
 (defvar big-font-original-font-height)
 (defvar big-font-original-font-face)
-(defvar big-font-text-string "")
-(defvar big-font-text-height)
 
 (defun big-font-set-default-frame-font ()
   "Set default frame font."
   (interactive)
-  (set-face-attribute 'default nil :height big-font-height))
+  (set-face-attribute 'default nil :height (floor (* big-font-scale-factor big-font-original-font-height))))
 
 (defun toggle-big-font ()
   "Toggle global font settings."
