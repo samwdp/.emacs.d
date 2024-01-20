@@ -23,6 +23,7 @@
       kept-new-versions 6
       kept-old-versions 2
       version-control t
+      scroll-margin 8
       mode-line-end-spaces nil
       set-language-environment "UTF-8")
 
