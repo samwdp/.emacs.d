@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; constants
 (defconst NATIVECOMP (if (fboundp 'native-comp-available-p) (native-comp-available-p)))
 (defconst IS-MAC     (eq system-type 'darwin))

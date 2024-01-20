@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (use-package dtrt-indent)
 (use-package transient)
 (use-package smartparens)

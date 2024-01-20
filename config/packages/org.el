@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (use-package org
   :hook ((org-mode . org-fancy-priorities-mode))
   :config

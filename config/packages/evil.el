@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (use-package evil
   :config
   (advice-add 'evil-yank :around 'sp/evil-yank-advice)

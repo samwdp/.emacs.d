@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (global-set-key (kbd "C-h") 'windmove-left)
 (global-set-key (kbd "C-j") 'windmove-down)
 (global-set-key (kbd "C-k") 'windmove-up)
@@ -126,6 +127,7 @@
   (sp/leader-keys
     ;; project keymaps
     "t" '(:ignore t :wk "diagnosticts")
+    "tb" '(toggle-big-font :wk "toggle large font")
     "tt" '(consult-lsp-diagnostics :wk "list diagnostics")
     "tp" '(+popup/toggle :wk "toggle popup")
     )

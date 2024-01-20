@@ -1,4 +1,4 @@
-
+;; -*- lexical-binding: t; -*-
 ;;; additional settings
 (when IS-WINDOWS (setq package-gnupghome-dir (concat user-emacs-directory "elpa/gnupg/pubring.kbx")))
 

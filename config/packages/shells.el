@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (when IS-LINUX
   (use-package vterm
     :bind (:map vterm-mode-map

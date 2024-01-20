@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 ;;; functions
 
 (defun no-xls (&optional filename)

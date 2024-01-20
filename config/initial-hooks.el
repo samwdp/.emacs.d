@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; inital hooks
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (add-hook 'minibuffer-setup-hook #'sp/defer-garbage-collection-h)

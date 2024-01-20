@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (use-package pdf-tools
   :hook (pdf-view-mode . (lambda () (beacon-mode -1)))
   :mode ("\\.pdf\\'" . pdf-view-mode)

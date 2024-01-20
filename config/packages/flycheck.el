@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (use-package flycheck
   :commands flycheck-list-errors flycheck-buffer
   :config

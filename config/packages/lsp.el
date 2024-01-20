@@ -1,12 +1,9 @@
-(defvar +lsp--default-read-process-output-max nil)
-(defvar +lsp--default-gcmh-high-cons-threshold nil)
-(defvar +lsp--optimization-init-p nil)
-
+;; -*- lexical-binding: t; -*-
 (when USE-LSP
   (use-package lsp-mode
     :bind (:map lsp-mode-map
                 ("C-," . 'lsp-execute-code-action))
-    :hook (lsp-mode . +lsp-optimization-mode)
+    :hook (lsp-mode . lsp-optimization-mode)
     :hook (lsp-mode . lsp-signature-mode)
     :hook (lsp-completion-mode . my/lsp-mode-setup-completion)
     :commands (lsp lsp-deferred)

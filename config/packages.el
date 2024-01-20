@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (load (concat user-emacs-directory "config/packages/visual.el"))
 (load (concat user-emacs-directory "config/packages/evil.el"))
 (load (concat user-emacs-directory "config/packages/sorting.el"))

@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (use-package treesit
   :straight nil
   :commands (treesit-install-language-grammar)

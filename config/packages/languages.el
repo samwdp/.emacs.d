@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (use-package emacs-lisp-mode
   :straight nil
   :hook (emacs-lisp-mode . tree-sitter-mode)
