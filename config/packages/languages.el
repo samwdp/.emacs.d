@@ -12,6 +12,7 @@
 
 (use-package html-ts-mode
   :straight nil
+  :mode ("\\.html\\'" . html-ts-mode)
   :hook (html-ts-mode . lsp-deferred))
 
 (use-package csharp-mode
@@ -47,6 +48,7 @@
 
 (use-package odin-mode
   :straight (odin-mode :type git :host github :repo "samwdp/odin-mode")
+  :hook (odin-mode . lsp-deferred)
   :mode ("\\.odin\\'" . odin-mode)
   )
 

@@ -14,6 +14,8 @@
       (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
             '(orderless)))
     (advice-add #'lsp-completion-at-point :around #'cape-wrap-noninterruptible)
+
+    (setq-default lsp-auto-guess-root t)
     (setq lsp-completion-provider nil)
     (setq lsp-keymap-prefix "C-c l")
     (setq lsp-headerline-breadcrumb-icons-enable t
@@ -48,15 +50,14 @@
     (lsp-register-client
      (make-lsp-client :new-connection (lsp-stdio-connection "c:/tools/ols/ols.exe")
                       :major-modes '(odin-mode)
-                      :server-id 'ols
-                      :multi-root t))
+                      ;; :multi-root t
+                      :server-id 'ols))
 
     (lsp-register-client
      (make-lsp-client :new-connection (lsp-stdio-connection "D:/projects/htmx-lsp/target/release/htmx-lsp.exe")
                       :major-modes '(html-ts-mode)
                       :server-id 'htmx-lsp
-                      :add-on? t
-                      :multi-root t))
+                      :add-on? t))
     ;; (setq lsp-enable-which-key-integration t)
     )
 
