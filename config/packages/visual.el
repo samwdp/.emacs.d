@@ -172,3 +172,9 @@
 (use-package golden-ratio
   :init
   (golden-ratio-mode +1))
+
+(use-package dired-git-info
+  :init
+  (setq dgi-auto-hide-details-p nil)
+  :config
+  (add-hook 'dired-after-readin-hook 'dired-git-info-auto-enable))

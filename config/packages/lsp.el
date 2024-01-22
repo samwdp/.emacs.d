@@ -57,6 +57,7 @@
      (make-lsp-client :new-connection (lsp-stdio-connection "D:/projects/htmx-lsp/target/release/htmx-lsp.exe")
                       :major-modes '(html-ts-mode)
                       :server-id 'htmx-lsp
+                      :priority -2 
                       :add-on? t))
     ;; (setq lsp-enable-which-key-integration t)
     )
@@ -114,9 +115,9 @@
 
   (use-package lsp-tailwindcss
     :straight (lsp-tailwindcss :type git :host github :repo "merrickluo/lsp-tailwindcss")
-    :config
+    :init
+    (defvar lap-tailwindcss-major-modes '(rjsx-mode web-mode html-ts-mode css-mode typescript-mode typescript-tsx-mode tsx-ts-mode))
     (setq lsp-tailwindcss-add-on-mode t)
-    (add-to-list 'lsp-tailwindcss-major-modes 'html-ts-mode)
     )
 
   )
