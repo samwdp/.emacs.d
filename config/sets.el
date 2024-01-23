@@ -6,7 +6,6 @@
 (defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
 (defconst USE-LSP t)
 
-(toggle-frame-maximized)
 (global-display-fill-column-indicator-mode)
 (setq display-time-load-average nil
       idle-update-delay 0.01
