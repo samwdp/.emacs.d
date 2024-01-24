@@ -153,13 +153,19 @@
                        :side bottom :select t :slot -1 :vslot -1 :size +popup-shrink-to-fit)
                       ("^\\*Buffer List\\*$"
                        :side bottom :select t :slot -1 :vslot -1 :size +popup-shrink-to-fit)
+                      ("^\\*command-log\\*$"
+                       :side bottom :select t :slot -1 :vslot -1 :size +popup-shrink-to-fit)
                       ("^\\(?:\\*magit\\|magit:\\| \\*transient\\*\\)"
                        :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
+                      ("^\\(?:\\*eshell\\|eshell:\\| \\*transient\\*\\)"
+                       :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
+                      ("^\\(?:\\*term\\|term:\\| \\*transient\\*\\)"
+                       :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
+                      ("^\\(?:\\*vterm\\|vterm:\\| \\*transient\\*\\)"
+                       :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
+                      ("^\\(?:\\*shell\\|shell:\\| \\*transient\\*\\)"
+                       :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
                       ("^\\*Warnings\\*$"
-                       :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
-                      ("^\\*eshell\\*$"
-                       :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
-                      ("^\\*vterm\\*$"
                        :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
                       ("^\\*Help\\*$"
                        :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
@@ -178,3 +184,5 @@
   (setq dgi-auto-hide-details-p nil)
   :config
   (add-hook 'dired-after-readin-hook 'dired-git-info-auto-enable))
+
+(use-package command-log-mode)

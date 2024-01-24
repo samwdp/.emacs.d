@@ -1,5 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 
+;; ripped from doom emacs all code
+
 (defvar lsp--default-read-process-output-max nil)
 (defvar lsp--default-gcmh-high-cons-threshold nil)
 (defvar lsp--optimization-init-p nil)

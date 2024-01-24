@@ -100,10 +100,10 @@
   (sp/leader-keys
     ;; open applications
     "o" '(:ignore t :wk "open")
-    "oe" '(eshell :wk "eshell")
+    "oe" '(projectile-run-eshell :wk "eshell")
     "ot"  (if IS-LINUX
-              '(vterm :wk "vterm")
-            '(eshell :wk "eshell"))
+              '(projectile-run-vterm :wk "vterm")
+            '(projectile-run-eshell :wk "eshell"))
     )
 
   (sp/leader-keys

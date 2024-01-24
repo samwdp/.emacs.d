@@ -1,5 +1,11 @@
 * Configuration for my emacs setup.
+ There are a lot of packages and ideas here that have been ripped from the doom emacs project. These being:
+  - lsp-optimization-mode
+  - popup
+  - big-font-mode
+  - any function that has a *!* at the end or has a *+* at the start of the funciton name
+
 
 ** Windows client stuff
-The folder windows-client-stuff has a shortcut and a powershell file that will aid in starting the daemon on windows.
-Place the startemacs.link file in the startup folder, and place the emacsdaemon.ps1 file somewhere on your system. Edit the shortcut file to load the file from the location it has been placed using the full path. Then edit the ```eamacsdaemon.ps1``` file to point to where you have installed emacs.
+ The folder windows-client-stuff has a shortcut and a powershell file that will aid in starting the daemon on windows.
+ Place the startemacs.link file in the startup folder, and place the emacsdaemon.ps1 file somewhere on your system. Edit the shortcut file to load the file from the location it has been placed using the full path. Then edit the ~eamacsdaemon.ps1~ file to point to where you have installed emacs.
