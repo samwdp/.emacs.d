@@ -1,0 +1,6 @@
+alias up eshell-up $1
+alias pk eshell-up-peek $1
+alias q exit
+alias d dired $1
+alias l ls $*
+alias gs magit-status

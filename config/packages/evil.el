@@ -1,6 +1,11 @@
 ;; -*- lexical-binding: t; -*-
 (use-package evil
   :config
+  (defun sp/evil-yank-advice (orig-fn beg end &rest args)
+    (require 'pulsar)
+    (pulsar--pulse nil nil beg end)
+    (apply orig-fn beg end args))
+
   (advice-add 'evil-yank :around 'sp/evil-yank-advice)
   (evil-global-set-key 'normal (kbd "g d") 'lookup-definition)
   (evil-global-set-key 'normal (kbd "g i") 'lookup-implementation)

@@ -155,10 +155,6 @@ This function is called by `org-babel-execute-src-block'."
 	  (eshell 99)
 	  (rename-buffer (concat "*eshell*<" match ">")))))
 
-(defun sp/evil-yank-advice (orig-fn beg end &rest args)
-  (pulse-momentary-highlight-region beg end)
-  (apply orig-fn beg end args))
-
 (defun +treemacs/toggle ()
   "Initialize or toggle treemacs.
 Ensures that only the current project is present and all other projects have
