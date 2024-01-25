@@ -155,19 +155,6 @@ This function is called by `org-babel-execute-src-block'."
 	  (eshell 99)
 	  (rename-buffer (concat "*eshell*<" match ">")))))
 
-(defun +treemacs/toggle ()
-  "Initialize or toggle treemacs.
-Ensures that only the current project is present and all other projects have
-been removed.
-Use `treemacs' command for old functionality."
-  (interactive)
-  (require 'treemacs)
-  (pcase (treemacs-current-visibility)
-    (`visible (delete-window (treemacs-get-local-window)))
-    (_ (if (sp/project-p)
-           (treemacs-add-and-display-current-project)
-         (treemacs)))))
-
 (defun sp/project-p (&optional dir)
   "Return t if DIR (defaults to `default-directory') is a valid project."
   (and (sp/project-root dir)

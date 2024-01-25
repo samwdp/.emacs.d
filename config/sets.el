@@ -24,6 +24,8 @@
       version-control t
       scroll-margin 8
       mode-line-end-spaces nil
+      blink-paren-function nil
+      blink-matching-paren nil
       set-language-environment "UTF-8")
 
 (setq-default indent-tabs-mode nil

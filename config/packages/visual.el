@@ -1,4 +1,5 @@
 ;; -*- lexical-binding: t; -*-
+
 (use-package dtrt-indent)
 (use-package transient)
 (use-package smartparens)
@@ -171,7 +172,7 @@
                        :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
                       ("Output\\*$"
                        :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
-                      ("^\\*Messages\\*$"
+                      ("^\\(?:\\*Messages\\|Messages:\\| \\*transient\\*\\)"
                        :side bottom :select t :slot -1 :vslot -1 :height 0.3 :ttl nil))))
 
 
