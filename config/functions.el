@@ -135,26 +135,6 @@ This function is called by `org-babel-execute-src-block'."
       (unicode-fonts-setup))))
 
 
-(defun spawn-shell (name)
-  (interactive "MName of new shell: ")
-  (pop-to-buffer (get-buffer-create (generate-new-buffer-name name)))
-  (term (current-buffer)))
-
-(defun eshell-with-name ()
-  (interactive)
-  (let* ((eshell-buffer-names (mapcar (lambda (buf)
-					                    (buffer-name buf))
-					                  (buffer-list)))
-	     (match (completing-read "eshell buffers: "
-				                 eshell-buffer-names
-                                 (lambda (buf)
-				                   (string-match-p "*eshell*" buf))))
-	     (eshell-buffer-exists (member match eshell-buffer-names)))
-    (if eshell-buffer-exists
-	    (switch-to-buffer match)
-	  (eshell 99)
-	  (rename-buffer (concat "*eshell*<" match ">")))))
-
 (defun sp/project-p (&optional dir)
   "Return t if DIR (defaults to `default-directory') is a valid project."
   (and (sp/project-root dir)

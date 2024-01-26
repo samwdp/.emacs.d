@@ -18,5 +18,6 @@
 (define-key sp/keys-keymap (kbd "C-h") 'windmove-left)
 (define-key sp/keys-keymap (kbd "C-k") 'windmove-up)
 (define-key sp/keys-keymap (kbd "C-l") 'windmove-right)
+(define-key sp/keys-keymap (kbd "C-p") 'consult-projectile)
 
 (provide 'sp/keys-mode)

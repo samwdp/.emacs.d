@@ -13,10 +13,12 @@
   (evil-global-set-key 'normal (kbd "g t") 'lookup-type-definition)
   (evil-global-set-key 'normal (kbd "g c c") 'comment-line)
   (evil-global-set-key 'visual (kbd "g c") 'comment-or-uncomment-region)
+  (evil-global-set-key 'insert (kbd "C-p") nil)
   (evil-global-set-key 'insert (kbd "C-j") nil)
   (evil-global-set-key 'insert (kbd "C-k") nil)
   (evil-global-set-key 'insert (kbd "C-h") nil)
   (evil-global-set-key 'insert (kbd "C-l") nil)
+  (evil-global-set-key 'normal (kbd "C-p") nil)
   (evil-global-set-key 'normal (kbd "C-j") nil)
   (evil-global-set-key 'normal (kbd "C-k") nil)
   (evil-global-set-key 'normal (kbd "C-h") nil)
@@ -33,3 +35,7 @@
   :custom (evil-collection-setup-minibuffer t)
   :config
   (evil-collection-init))
+
+(use-package evil-surround
+  :init
+  (global-evil-surround-mode))

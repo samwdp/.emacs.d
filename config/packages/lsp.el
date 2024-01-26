@@ -65,10 +65,6 @@
   (use-package lsp-ui
     :hook (lsp-mode . lsp-ui-mode)
     :config
-    (defun toggle-doc ()
-      (interactive)
-      (cursor)
-      )
     (setq lsp-ui-doc-enable nil
           lsp-ui-doc-position 'at-point
           lsp-ui-doc-show-with-cursor t

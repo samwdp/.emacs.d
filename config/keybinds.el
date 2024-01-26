@@ -3,6 +3,7 @@
 (global-set-key (kbd "C-M-n") 'treesit-end-of-defun)
 (global-set-key (kbd "C-M-p") 'treesit-beginning-of-defun)
 (global-set-key (kbd "C-M-j") 'treesit-forward-sexp)
+(global-set-key (kbd "C-p") 'consult-projectile)
 (global-set-key [remap lookup-definition] #'xref-find-definitions)
 (global-set-key [remap lookup-reference] #'xref-find-references)
 (global-set-key [remap sp/format-buffer] #'format-all-buffer)
