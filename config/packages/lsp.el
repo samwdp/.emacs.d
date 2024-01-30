@@ -64,6 +64,8 @@
 
   (use-package lsp-ui
     :hook (lsp-mode . lsp-ui-mode)
+    :init
+    (evil-define-key 'normal lsp-mode-map (kbd "K") 'lsp-ui-doc-glance)
     :config
     (setq lsp-ui-doc-enable nil
           lsp-ui-doc-position 'at-point
@@ -78,7 +80,6 @@
     (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
     (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references)
 
-    (evil-define-key 'normal lsp-mode-map (kbd "K") 'lsp-ui-doc-glance)
     (define-key lsp-ui-peek-mode-map (kbd "j") #'lsp-ui-peek--select-next)
     (define-key lsp-ui-peek-mode-map (kbd "k") #'lsp-ui-peek--select-prev)
     (define-key lsp-ui-peek-mode-map (kbd "M-j") #'lsp-ui-peek--select-next-file)

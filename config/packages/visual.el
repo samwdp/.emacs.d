@@ -46,7 +46,7 @@
 
 (use-package all-the-icons
   :straight (all-the-icons :fetcher github :repo "domtronn/all-the-icons.el")
-  :if (display-graphic-p))
+ )
 
 (use-package all-the-icons-completion
   :after (marginalia all-the-icons)
@@ -165,6 +165,8 @@
                       ("^\\(?:\\*vterm\\|vterm:\\| \\*transient\\*\\)"
                        :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
                       ("^\\(?:\\*shell\\|shell:\\| \\*transient\\*\\)"
+                       :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
+                      ("^\\(?:\\*org-brain\\|org-brain:\\| \\*transient\\*\\)"
                        :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)
                       ("^\\*Warnings\\*$"
                        :side bottom :select nil :slot -1 :vslot -1 :height 0.4 :ttl nil)

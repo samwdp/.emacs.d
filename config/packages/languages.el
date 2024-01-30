@@ -18,6 +18,7 @@
 (use-package csharp-mode
   :straight nil
   :hook (csharp-ts-mode . lsp-deferred)
+  :hook (csharp-ts-mode . lsp-inlay-hints-mode)
   :mode (("\\.cs\\'" . csharp-ts-mode)))
 
 (use-package ob-csharp
@@ -126,3 +127,8 @@
   :mode ("\\.http\\'" . restclient-mode))
 
 (use-package glsl-mode)
+
+(use-package lua-mode
+  :hook (lua-mode . lsp-deferred)
+  :hook (lua-mode . tree-sitter-hl-mode)
+  )

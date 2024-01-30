@@ -27,7 +27,7 @@
   (sp/leader-keys
     ;; single use keymaps
     "." '(find-file :wk "find files")
-    "SPC" '(consult-projectile :wk "find files")
+    ;; "SPC" '(consult-projectile :wk "find files")
     "TAB" '(persp-switch :wk "switch project")
     "f" '(sp/format-buffer :wk "format buffer")
     "w" '(save-buffer :wk "save")
@@ -105,6 +105,10 @@
     "ot"  (if IS-LINUX
               '(projectile-run-vterm :wk "vterm")
             '(projectile-run-eshell :wk "eshell"))
+    "ob" '(:ignor t :wk "org-brain")
+    "obt" '(org-brain-visualize :wk "visualise")
+    "obf" '(org-brain-goto :wk "find")
+    "obi" '(org-brain-add-entry :wk "insert entry")
     )
 
   (sp/leader-keys

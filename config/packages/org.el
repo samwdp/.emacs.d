@@ -8,6 +8,7 @@
   ;; '((plantuml . t)))
   ;; (org-babel-do-load-languages 'org-babel-load-languages '((plantuml . t)
   ;;                                                          (emacs-lisp . t)))
+  (setq org-directory "C:/Users/samwd.GUNGNIR/Dropbox/org/loose")
   (setq org-plantuml-jar-path "c:/tools/plantuml/plantuml.jar")
   (setq org-return-follows-link nil)
   (setq org-startup-with-inline-images t)
@@ -62,7 +63,6 @@
         org-appear-autokeywords t
         org-appear-autosubmarkers t))
 
-
 (use-package toc-org
   :hook (org-mode . toc-org-mode))
 
@@ -70,8 +70,11 @@
   :hook ((org-mode org-agenda-mode) . org-fancy-priorities-mode))
 
 (use-package org-brain
-  :config
-  (setq org-brain-path "~/brain"))
+  :init
+  (setq org-brain-path "C:/Users/samwd.GUNGNIR/Dropbox/brain")
+  (with-eval-after-load 'evil
+    (evil-set-initial-state 'org-brain-visualize-mode 'emacs))
+  )
 
 (use-package polymode
   :hook (org-brain-visualize-mode . org-brain-polymode))
