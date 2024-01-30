@@ -98,6 +98,9 @@
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 
+(use-package rainbow-mode
+  :hook (prog-mode . rainbow-mode))
+
 (use-package git-gutter
   :hook (prog-mode . git-gutter-mode))
 
