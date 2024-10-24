@@ -23,6 +23,7 @@
   (evil-global-set-key 'normal (kbd "C-k") nil)
   (evil-global-set-key 'normal (kbd "C-h") nil)
   (evil-global-set-key 'normal (kbd "C-l") nil)
+  (evil-global-set-key 'normal "-" 'dired-jump)
   :init      ;; tweak evil's configuration before loading it
   (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
   (setq evil-want-keybinding nil)

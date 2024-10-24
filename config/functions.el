@@ -105,7 +105,6 @@ This function is called by `org-babel-execute-src-block'."
 
 
 (defun sp/new-frame ()
-  (toggle-frame-maximized)
   (set-face-attribute 'default nil :font (font-spec :family sp/font-string) :height sp/text-height)
   (set-face-attribute 'fixed-pitch nil :font (font-spec :family sp/font-string) :height sp/text-height)
   (set-frame-parameter (selected-frame) 'alpha-background 1.0 ))
