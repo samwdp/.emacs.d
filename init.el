@@ -677,6 +677,9 @@ If nil, call `project-recompile'."
     "sd" '(consult-lsp-diagnostics :wk "[S]earch [D]iagnostics")
     "sg" '(consult-ripgrep :wk "[S]earch [G]rep")
     "ss" '(consult-lsp-symbols :wk "[S]earch [G]rep")
+    ;; toggles
+    "t" '(:ignore t :wk "[T]oggle")
+    "tb" '(toggle-big-font :wk "[T]oggle [B]ig Font Mode")
     )
   (general-define-key
    "C-f" '(project-switch-project :wk "switch project")
@@ -1614,3 +1617,7 @@ If no such perspective exists, a new one is created and the buffer is added to i
           "COMMIT_EDITMSG"                       ;; exact match
           git-commit-ts-mode
           compilation-mode)))
+
+(use-package big-font-mode
+  :load-path "./modules/big-font-mode"
+  )
