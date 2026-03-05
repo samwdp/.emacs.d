@@ -135,7 +135,6 @@
   (scroll-bar-mode -1)
   (tool-bar-mode -1)
   (menu-bar-mode -1)
-  (savehist-mode +1)
   (save-place-mode 1)
   (set-fringe-mode 8)
   (display-battery-mode 1)
@@ -437,6 +436,11 @@ If nil, call `project-recompile'."
   (vertico-cycle t) ;; Enable cycling for `vertico-next/previous'
   :init
   (vertico-mode))
+
+(use-package savehist
+  :ensure nil
+  :init
+  (savehist-mode))
 
 (with-eval-after-load 'vertico
   (define-key vertico-map (kbd "C-q") 'embark-export)
@@ -1132,13 +1136,14 @@ If no such perspective exists, a new one is created and the buffer is added to i
 
 (use-package flycheck
   :ensure t
-  :hook (lsp-mode . flycheck-mode)
   :bind (:map flycheck-mode-map
               ("C-n" . flycheck-next-error)
               ("C-p" . flycheck-previous-error))
   :custom
   (flycheck-display-errors-delay .3)
   (flycheck-checker-error-threshold 2000)
+  :config
+  (add-hook 'elpaca-after-init-hook #'global-flycheck-mode)
   )
 
 (use-package consult-flycheck
@@ -1414,7 +1419,8 @@ If no such perspective exists, a new one is created and the buffer is added to i
   :after evil
   :config
   (when IS-WINDOWS
-    (setq org-directory "c:/Users/sam/Documents/org")
+    (setq org-directory "c:/Users/sam/Documents/org/")
+    ;; (setq org-agenda-files "C:/Users/sam/Documents/org/agenda.org")
     )
   (evil-define-key 'normal org-mode-map (kbd "C-j") 'windmove-down)
   (evil-define-key 'normal org-mode-map (kbd "C-k") 'windmove-up)
@@ -1445,7 +1451,6 @@ If no such perspective exists, a new one is created and the buffer is added to i
         org-appear-autokeywords t
         org-appear-autosubmarkers t))
 
-
 (use-package org-fancy-priorities
   :ensure t
   :hook ((org-mode org-agenda-mode) . org-fancy-priorities-mode))
@@ -1457,8 +1462,6 @@ If no such perspective exists, a new one is created and the buffer is added to i
 
 (use-package org-roam
   :ensure t
-  :custom
-  (org-roam-directory (file-truename "C:/Users/sam/Documents/org/roam/"))
   :bind (("C-c n l" . org-roam-buffer-toggle)
          ("C-c n f" . org-roam-node-find)
          ("C-c n g" . org-roam-graph)
@@ -1467,6 +1470,9 @@ If no such perspective exists, a new one is created and the buffer is added to i
          ;; Dailies
          ("C-c n j" . org-roam-dailies-capture-today))
   :config
+  (when IS-WINDOWS
+    (setq org-roam-directory (file-truename "C:/Users/sam/Documents/org/roam/notes/"))
+    )
   ;; If you're using a vertical completion framework, you might want a more informative completion interface
   (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
   (org-roam-db-autosync-mode)
